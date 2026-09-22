@@ -51,6 +51,16 @@ entries when choosing the 5 papers for the presentation.
 | 18 | Nelson et al., *Exploiting Machine Learning to Subvert Your Spam Filter* (RONI) | USENIX LEET 2008 | Impact-based defense; blind to low-impact distributed poison (baseline B3) |
 | 20 | Nguyen et al., *Poisoning Attacks on Federated Learning-based IoT IDS* | DISS workshop @ NDSS 2020 | Cross-client defenses fail against slow attackers **even with peers**, which motivates Layer 2 |
 
+## D2. Added in the second research round
+
+| # | Paper | Venue | Takeaway |
+|---|---|---|---|
+| 26 | Rubinstein et al., *ANTIDOTE: Understanding and Defending against Poisoning of Anomaly Detectors* | ACM IMC 2009 | Boiling-frog poisoning + robust PCA defense on one model (server, batch). **Corrects our earlier peer-free novelty claim** |
+| 27 | Kloft and Laskov, *Security Analysis of Online Centroid Anomaly Detection* | JMLR 2012 | Attacker displacement bounded by their traffic share, which is why low-traffic IoT devices are exposed |
+| 28 | Koumar et al., *CESNET-TimeSeries24* | Scientific Data 2025 | 40 weeks of real ISP traffic; honest drift is directional (52% drop at semester end) |
+| 29 | Bose et al., *Keeping up with dynamic attackers: certifying robustness to adaptive online data poisoning* | AISTATS 2025 | Certified bounds for adaptive online poisoning (mean estimation, classification) |
+| 30 | *When Adversarial Perturbations meet Concept Drift: An Exploratory Analysis on ML-NIDS* | ACM AISec 2024 | How adversarial shift and benign drift interact in NIDS |
+
 ## E. Datasets
 
 | # | Paper | Venue |

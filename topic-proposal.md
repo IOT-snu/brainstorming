@@ -2,7 +2,9 @@
 
 **Group G-04: Rishit Kamboj, Farhan Naik** · CSD457 Internet of Things · Monsoon 2026
 
-**Method name:** TimeGuard, a two-layer, peer-free gate on a microcontroller detector's own adaptation.
+**Method:** Threat-Orthogonal Adaptation (TOA). **Update 23 Sep:** a second research round replaced the earlier
+"TimeGuard" design, which failed in simulation. See `research-findings.md` for the reasons, the new method,
+and simulation results. Sections below that mention TimeGuard are kept for history.
 
 > **One line:** An on-device IoT intrusion detector adapts to benign drift. TimeGuard checks every proposed
 > update against the device's own past updates and a bounded drift budget, so a slow poisoning attacker
