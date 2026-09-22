@@ -49,7 +49,7 @@ entries when choosing the 5 papers for the presentation.
 | 21 | Blanchard et al., *Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent (Krum)* | NeurIPS 2017 | Basis of TimeKrum; needs n peers, we use our own history instead |
 | 19 | Yin et al., *Byzantine-Robust Distributed Learning: Towards Optimal Statistical Rates* | ICML 2018 | Coordinate-wise median / trimmed mean (ablation variant) |
 | 18 | Nelson et al., *Exploiting Machine Learning to Subvert Your Spam Filter* (RONI) | USENIX LEET 2008 | Impact-based defense; blind to low-impact distributed poison (baseline B3) |
-| 20 | Zhang et al., *Poisoning Attacks on Federated Learning-based IoT IDS* | DISS workshop @ NDSS 2020 | Cross-client defenses fail against slow attackers **even with peers**, which motivates Layer 2 |
+| 20 | Nguyen et al., *Poisoning Attacks on Federated Learning-based IoT IDS* | DISS workshop @ NDSS 2020 | Cross-client defenses fail against slow attackers **even with peers**, which motivates Layer 2 |
 
 ## E. Datasets
 
