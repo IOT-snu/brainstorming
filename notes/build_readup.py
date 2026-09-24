@@ -77,7 +77,7 @@ S += [Spacer(1, 3.5 * cm), P("CSD457 INTERNET OF THINGS  ·  GROUP G-04", "eye")
              ["7", "Why are small IoT devices especially at risk?"],
              ["8", "Why don't existing defenses solve it?"],
              ["9", "Our idea: Threat-Orthogonal Adaptation"],
-             ["10", "How we tested it, and what we found"],
+             ["10", "How we tested it, and what we found (10B: without a list of attacks)"],
              ["11", "What we will do next"],
              ["12", "The five papers, a glossary, and where everything lives"]], [2.2 * cm, W - 2.2 * cm]),
       PageBreak()]
@@ -249,6 +249,26 @@ S += [Spacer(1, 4), table([["Result on real doorbell traffic", "What it means"],
           "no false-alarm cost. Next we must handle new devices properly and move to the ESP32."), PageBreak()]
 
 # 11
+S += [P("CHAPTER 10B", "eye"), P("Can it work without a list of attacks?", "h1"),
+      P("The version above needs a <b>signature</b> for each attack it protects: one reference point, such as the "
+        "average of Mirai scan traffic. A fair question is whether that is just hard-coding. So we built a version "
+        "that needs no signatures at all. It relies on a footprint that poison cannot avoid:"),
+      ]
+S += B(["<b>Learn from the dense middle only.</b> Poison has to sit near the boundary to have any pull without "
+        "raising alarms. If the detector learns only from the dense core of traffic, that poison is ignored.",
+        "<b>Accept a shift only if the whole cloud moves.</b> Honest change moves all of the traffic, including the "
+        "outer ring. Poison moves only one part. A shift of the centre that the outer ring does not back up is scaled down.",
+        "<b>Widen the boundary only if the outer ring really gets busier.</b> A smart attacker who hides poison inside "
+        "the core tries to inflate the spread instead; this check blocks that."])
+S += [table([["Test", "Signature-free result"],
+             ["Real doorbell traffic, normal attacker, 10 to 50% share", "100% detection of Mirai scan, ack and syn; about 1% false alarms"],
+             ["Real doorbell traffic, smart attacker who knows the defense and hides poison in the core", "100% detection; 0.2 to 0.3% false alarms"],
+             ["Synthetic: strong honest drift and the attack at the same time", "Still poisoned (2 to 46% detection). Open problem"]],
+            [W * 0.55, W * 0.45]),
+      KEY("The defense can work without a list of attacks, and it beat both attackers on real IoT traffic. The hard "
+          "case left is an attacker hiding inside genuine, large drift. Our plan: signature-free by default, "
+          "signatures as an extra safety floor for the most important attacks."), PageBreak()]
+
 S += [P("CHAPTER 11", "eye"), P("What we will do next", "h1")]
 S.append(table([["When", "Work"],
                 ["Weeks 1 to 3", "Per-device detectors on N-BaIoT; more devices and attacks; attacker share taken from real device traffic rates."],
@@ -257,8 +277,8 @@ S.append(table([["When", "Work"],
                 ["Weeks 8 to 9", "Parameter sweeps, the IEEE-format report, code and a live demo."]],
                [3.6 * cm, W - 3.6 * cm]))
 S += [P("Open questions we will be honest about", "h2")]
-S += B(["<b>Unknown attacks:</b> TOA protects attacks it has a signature direction for. We will try directions learned "
-        "from the detector's own alarms.",
+S += B(["<b>Attacks hidden inside strong drift:</b> the signature-free version is still poisoned when heavy honest "
+        "drift and the attack happen together (Chapter 10B). This is the main open research question.",
         "<b>Honest drift toward an attack:</b> TOA then slows learning in that direction; in simulation false alarms "
         "peaked near 7% and recovered.",
         "<b>Realism of the attacker:</b> our poison mixes real normal and real attack packets; a live attacker on real "
