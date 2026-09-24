@@ -1,0 +1,38 @@
+REAL N-BaIoT doorbell. core radius 3.35, alarm radius 9.28 (in spreads), support beta 2.06
+final recall on target / mean false alarms over last 30% of cycles, 5 seeds
+scan  boundary p=0.1  naive 0.06/0.002 | core_only 1.00/0.170 | auto 1.00/0.009
+scan  boundary p=0.2  naive 0.00/0.001 | core_only 1.00/0.170 | auto 1.00/0.009
+scan  boundary p=0.3  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.009
+scan  boundary p=0.4  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.009
+scan  boundary p=0.5  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.009
+scan  core     p=0.1  naive 1.00/0.026 | core_only 1.00/0.024 | auto 1.00/0.007
+scan  core     p=0.2  naive 1.00/0.024 | core_only 0.99/0.002 | auto 1.00/0.003
+scan  core     p=0.3  naive 1.00/0.011 | core_only 0.00/0.000 | auto 1.00/0.003
+scan  core     p=0.4  naive 1.00/0.009 | core_only 0.00/0.000 | auto 1.00/0.003
+scan  core     p=0.5  naive 0.00/0.002 | core_only 0.00/0.000 | auto 1.00/0.002
+ack   boundary p=0.1  naive 1.00/0.002 | core_only 1.00/0.170 | auto 1.00/0.009
+ack   boundary p=0.2  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.010
+ack   boundary p=0.3  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.013
+ack   boundary p=0.4  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.014
+ack   boundary p=0.5  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.015
+ack   core     p=0.1  naive 1.00/0.026 | core_only 1.00/0.024 | auto 1.00/0.007
+ack   core     p=0.2  naive 1.00/0.024 | core_only 1.00/0.002 | auto 1.00/0.003
+ack   core     p=0.3  naive 1.00/0.009 | core_only 0.00/0.000 | auto 1.00/0.002
+ack   core     p=0.4  naive 1.00/0.009 | core_only 0.00/0.000 | auto 1.00/0.002
+ack   core     p=0.5  naive 1.00/0.008 | core_only 0.00/0.000 | auto 1.00/0.002
+syn   boundary p=0.1  naive 0.99/0.002 | core_only 1.00/0.170 | auto 1.00/0.009
+syn   boundary p=0.2  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.009
+syn   boundary p=0.3  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.009
+syn   boundary p=0.4  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.009
+syn   boundary p=0.5  naive 0.00/0.000 | core_only 1.00/0.170 | auto 1.00/0.009
+syn   core     p=0.1  naive 1.00/0.025 | core_only 1.00/0.023 | auto 1.00/0.007
+syn   core     p=0.2  naive 1.00/0.022 | core_only 1.00/0.002 | auto 1.00/0.003
+syn   core     p=0.3  naive 1.00/0.009 | core_only 0.00/0.000 | auto 1.00/0.002
+syn   core     p=0.4  naive 1.00/0.009 | core_only 0.00/0.000 | auto 1.00/0.002
+syn   core     p=0.5  naive 1.00/0.008 | core_only 0.00/0.000 | auto 1.00/0.002
+
+SYNTHETIC with benign drift, attacker 40%: final recall / false alarms last 50 cycles
+drift away   attacker boundary static 1.00/0.838 | naive 0.00/0.000 | core_only 1.00/0.011 | auto 0.46/0.000
+drift away   attacker core     static 1.00/0.838 | naive 0.06/0.000 | core_only 0.00/0.400 | auto 0.02/0.002
+drift toward attacker boundary static 1.00/0.838 | naive 0.00/0.003 | core_only 1.00/0.011 | auto 1.00/0.011
+drift toward attacker core     static 1.00/0.838 | naive 0.00/0.004 | core_only 0.00/0.402 | auto 0.06/0.008
