@@ -215,7 +215,7 @@ S.append(table([["Policy", "Attack still detected", "False alarms", "What happen
                 ["TOA (ours)", "100%", "0.3%", "Keeps learning honest drift; the attacker cannot move it toward the attack."]],
                [3.6 * cm, 3.1 * cm, 2.2 * cm, W - 8.9 * cm]))
 S += [P("Honest limits to say out loud", "h2")]
-S += B(["It is synthetic. Real N-BaIoT and CESNET results are the mid-review goal.",
+S += B(["The chart is synthetic, but a real check on N-BaIoT doorbell traffic agrees: naive learning poisoned at 10% share, ours 100% detection with 0.8% false alarms (experiments/nbaiot_check.py).",
         "TOA needs a signature for the attacks it protects. Zero-day attacks are an open question.",
         "If honest drift moves toward an attack, TOA slows learning in that direction; false alarms peaked near 7% "
         "in our worst-case test, then recovered.",
@@ -259,7 +259,7 @@ QA = [
     ("Why would an attacker control 40% of traffic?", "Kloft and Laskov [2] show poisoning only works with a large share. Small IoT devices like smart plugs send very little traffic [4], so an attacker easily matches it. At 10 to 20% even naive learning survived in our simulation, which agrees with [2]."),
     ("What about attacks with no known signature?", "Honest limit: TOA protects attacks it has a direction for. We plan to test directions learned from the detector's own alarms; zero-day protection stays open."),
     ("What if normal traffic drifts toward an attack?", "Then TOA slows learning in that direction. In our worst-case test false alarms peaked near 7% and recovered, far better than freezing defenses."),
-    ("Is the simulation real data?", "No, it is synthetic, used to test the idea cheaply. Real N-BaIoT and CESNET results are our mid-review goal."),
+    ("Is the simulation real data?", "The chart is synthetic. We also ran a real check on N-BaIoT: real doorbell traffic and real Mirai attacks, with a modelled poisoner. Naive learning was poisoned at just 10% attacker share; ours kept 100% detection with 0.8% false alarms across three Mirai attacks. Full real-data comparison comes by mid-review."),
     ("Why an ESP32?", "It is cheap, common in IoT, and small enough that memory and energy really matter. That is exactly where continuous, safe learning is hardest and where no existing defense runs."),
     ("What is the guarantee?", "TOA only lets the gap between normal and a known attack shrink by a fixed budget per cycle, so the attack stays detected for at least a computable number of cycles, whatever the attacker does."),
     ("What does it cost on the ESP32?", "One dot product and one distance per known attack per update. Measuring the real memory, latency and energy is part of RQ3."),

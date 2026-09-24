@@ -1,0 +1,14 @@
+N-BaIoT Danmini doorbell: 49548 benign packets, calibration 9909, 79 cycles of 250
+second device drift: no (within-device drift only); target attack: mirai scan
+clean recall on each Mirai attack: scan=1.00, ack=1.00, syn=1.00, udp=1.00, udpplain=1.00
+initial margin to target = 13.59 (in units of spread)
+
+Attacker share sweep (mean of 5 seeds): final recall on target / mean FPR over last 30% of cycles
+p=0.0  static 1.00/0.009 | naive 1.00/0.026 | consis 1.00/0.027 | budget 1.00/0.009 | toa 1.00/0.026
+p=0.1  static 1.00/0.009 | naive 0.05/0.002 | consis 1.00/0.026 | budget 1.00/0.009 | toa 1.00/0.008
+p=0.2  static 1.00/0.009 | naive 0.00/0.001 | consis 1.00/0.026 | budget 1.00/0.009 | toa 1.00/0.009
+p=0.3  static 1.00/0.009 | naive 0.00/0.000 | consis 1.00/0.026 | budget 1.00/0.009 | toa 1.00/0.008
+p=0.4  static 1.00/0.009 | naive 0.00/0.000 | consis 1.00/0.026 | budget 1.00/0.009 | toa 1.00/0.008
+p=0.5  static 1.00/0.009 | naive 0.00/0.000 | consis 1.00/0.026 | budget 1.00/0.009 | toa 1.00/0.008
+
+wrote /Users/rishitkamboj/Collegeactual/Study/SEM5/iot/research project/brainstorming/experiments/nbaiot_results.png
