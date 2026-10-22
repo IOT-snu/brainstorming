@@ -175,7 +175,7 @@ S += [P("CHAPTER 7", "eye"), P("Why are small IoT devices especially at risk?", 
       P("On a big network the attacker is a drop in the ocean. But a smart doorbell or plug sends very little traffic "
         "of its own, so an attacker can easily be a large share of what that device's detector sees."),
       P("Our real-data check (Chapter 10) makes this concrete: on real traffic from a smart doorbell, the naive "
-        "self-learning detector was poisoned when the attacker was just <b>10%</b> of the traffic."),
+        "self-learning detector was poisoned when the attacker was just <b>10 to 20%</b> of the traffic (10% for the scan attack, 20% for ack and syn)."),
       KEY("The quieter the device, the easier it is to poison. IoT devices are quiet.")]
 
 # 8
@@ -235,7 +235,7 @@ S += [Spacer(1, 4), table([["Detector", "Attack still detected", "False alarms"]
         "packet, placed just inside the boundary.")]
 S.append(img("nbaiot_results.png", W, EXP))
 S += [Spacer(1, 4), table([["Result on real doorbell traffic", "What it means"],
-                          ["Naive learning was poisoned with the attacker at only 10% of traffic (Mirai scan detection fell to about 5%).", "Real IoT traffic is tightly clustered, so it is even easier to poison than our simulation suggested."],
+                          ["Naive learning was poisoned with the attacker at only 10 to 20% of traffic (Mirai scan detection fell to about 5% at 10%; ack and syn survived 10% and fell at 20%).", "Real IoT traffic is tightly clustered, so it is even easier to poison than our simulation suggested."],
                           ["TOA kept 100% detection at every attacker share from 10% to 50%, for three different Mirai attacks (scan, ack, syn).", "The defense holds on real traffic, not just synthetic."],
                           ["TOA's false alarms stayed about 0.8%, the same as a detector that never learns.", "The protection costs essentially nothing in false alarms."]],
                          [W * 0.55, W * 0.45]),
@@ -263,7 +263,7 @@ S += B(["<b>Learn from the dense middle only.</b> Poison has to sit near the bou
 S += [table([["Test", "Signature-free result"],
              ["Real doorbell traffic, normal attacker, 10 to 50% share", "100% detection of Mirai scan, ack and syn; about 1% false alarms"],
              ["Real doorbell traffic, smart attacker who knows the defense and hides poison in the core", "100% detection; 0.2 to 0.3% false alarms"],
-             ["Synthetic: strong honest drift and the attack at the same time", "Still poisoned (2 to 46% detection). Open problem"]],
+             ["Synthetic: strong honest drift and the attack at the same time", "Still poisoned in three of four settings (2 to 46% detection). Open problem"]],
             [W * 0.55, W * 0.45]),
       KEY("The defense can work without a list of attacks, and it beat both attackers on real IoT traffic. The hard "
           "case left is an attacker hiding inside genuine, large drift. Our plan: signature-free by default, "
