@@ -1,0 +1,362 @@
+[
+ {
+  "year": 2026,
+  "title": "Feature-Context Consistency: Unsupervised Adversarial Detection with Drift Stability on Attributed Graphs (CB-RBM)",
+  "venue": "arXiv 2610.16694 (journal-ref field says NeurIPS 2026)",
+  "status": "preprint, venue to verify",
+  "read": "full text",
+  "role": "Freezes a drift-invariant score instead of adapting; its frozen baseline shows the false-alarm blow-up under drift that we measured",
+  "url": "https://arxiv.org/abs/2610.16694",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "The Price of Self-Calibration: Exact Evidence Budgets and Manufactured Blind Sets in Adaptive Monitoring",
+  "venue": "arXiv 2609.23254",
+  "status": "preprint",
+  "read": "seen in search, not read",
+  "role": "Closest to our freeze-attack framing (non-adversarial trade-off between safety and recalibration). Must read before claiming the freeze attack",
+  "url": "https://arxiv.org/abs/2609.23254",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Navigating the Latent Manifold: Proactive Concept Drift Adaptation for Resilient NIDS (DriftXpert)",
+  "venue": "arXiv 2609.08623",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Outlier-ratio gate for adaptation: a published gate we tested in the freeze study",
+  "url": "https://arxiv.org/abs/2609.08623",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "CAPTURE: Disentangling Preference Drift from Memory Poisoning in Personalized LLM Agents",
+  "venue": "arXiv 2609.02265",
+  "status": "preprint",
+  "read": "seen in search, not read",
+  "role": "States a single-statistic dilemma (accept injected claims or reject genuine revisions) that our safety-plus-liveness goal extends",
+  "url": "https://arxiv.org/abs/2609.02265",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Candidate Comparability Before Promotion: Conditional Validation in Adaptive Network Intrusion Detection",
+  "venue": "Fernandez-Barrios et al., arXiv 2609.04388",
+  "status": "preprint",
+  "read": "abstract",
+  "role": "Server-side study of when an adaptive NIDS should accept a retrained model; no poisoning. A hold-back-until-evidence design to compare against",
+  "url": "https://arxiv.org/abs/2609.04388",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Empirical Analysis of Evasion and Poisoning Against Malware Data Drift Detection",
+  "venue": "arXiv 2608.03642",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Recent evidence that drift detectors themselves can be attacked",
+  "url": "https://arxiv.org/abs/2608.03642",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Self-Poisoning in Adaptive Out-of-Distribution Detection: A Sharp-Threshold Theory and Certified Label-Free Calibration (WARDEN, CDC)",
+  "venue": "arXiv 2607.21673",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Theory of self-poisoning; proves a single label-free stream cannot separate honest drift from contamination. The ceiling we must escape",
+  "url": "https://arxiv.org/abs/2607.21673",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Theory of Continual Learning Against Data Poisoning Attacks",
+  "venue": "arXiv 2606.29841 (ICML 2026 template, venue to verify)",
+  "status": "preprint",
+  "read": "full text",
+  "role": "No regularised learner converges under frequent shifted poison; source of the T2T rollback gate; nearest to TOA's direction damping",
+  "url": "https://arxiv.org/abs/2606.29841",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Rapid Poison: Practical Poisoning Attacks Against the Rapid Response Framework",
+  "venue": "ICML 2026 (arXiv 2606.16242)",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Poisoning of an adaptation pipeline, including induced false positives; shows signatures themselves can be shaped by an attacker",
+  "url": "https://arxiv.org/abs/2606.16242",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "What changes after deployment? A survey on On-device Learning in TinyML",
+  "venue": "arXiv 2605.31226",
+  "status": "preprint",
+  "read": "full text",
+  "role": "About 70 microcontroller learning works and no security mechanism: the standing gap we fill",
+  "url": "https://arxiv.org/abs/2605.31226",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "When Normality Shifts: Risk-Aware Test-Time Adaptation for Unsupervised Tabular Anomaly Detection (RTTAD)",
+  "venue": "arXiv 2605.10242",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Confident-normal-only adaptation with a stop rule; unguarded adaptation is worse than none, matching our naive result",
+  "url": "https://arxiv.org/abs/2605.10242",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "The Boiling Frog Threshold: Criticality and Blindness in World Model-Based Anomaly Detection Under Gradual Drift",
+  "venue": "arXiv 2603.08455",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Gradual-drift blindness in anomaly detection; related threat model",
+  "url": "https://arxiv.org/abs/2603.08455",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "ACORN-IDS: Adaptive Continual Novelty Detection for Intrusion Detection Systems",
+  "venue": "arXiv 2602.07291",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Closest recent continual IDS to our setting (PCA scorer, normal-only stream); no adversarial analysis",
+  "url": "https://arxiv.org/abs/2602.07291",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Online robust covariance matrix estimation and outlier detection",
+  "venue": "arXiv 2601.03957",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Bounded per-point influence but unbounded influence for mean shift; no forgetting. Shows why plain robust statistics are not enough",
+  "url": "https://arxiv.org/abs/2601.03957",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Contrastive Adversarial Agents for Intentional Drift Induction in Network Intrusion Detection Systems",
+  "venue": "AAAI Summer Symposium Series (SuSS) 2026",
+  "status": "peer-reviewed (symposium)",
+  "read": "full text",
+  "role": "Attacker induces drift to steer a retrained NIDS; supports our adaptive-attacker model; no defence",
+  "url": "https://ojs.aaai.org/index.php/AAAI-SS/",
+  "core": false
+ },
+ {
+  "year": 2026,
+  "title": "Strategic Games and Zero Shot Attacks on Heavy-Hitter Network Flow Monitoring",
+  "venue": "NDSS 2026",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Learned attackers timed to a monitor's refresh windows; basis for our pulsing-attacker test",
+  "url": "https://www.ndss-symposium.org/",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "Provably Safe Model Updates (LID)",
+  "venue": "arXiv 2512.01899 (SaTML 2026 per paper notes, to verify)",
+  "status": "preprint, venue to verify",
+  "read": "full text",
+  "role": "Certified box around a model's parameters; stops updating when the box empties (another stop-style design)",
+  "url": "https://arxiv.org/abs/2512.01899",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "Adversarial Habituation Attack: A Psychological Extension and Re-framing of Boiling Frog Attack",
+  "venue": "ACM CCS 2025 (poster)",
+  "status": "peer-reviewed (poster)",
+  "read": "abstract only",
+  "role": "Newest top-venue naming of boiling-frog and alert fatigue; read the full text before claiming the freeze framing",
+  "url": "https://dl.acm.org/doi/10.1145/3719027.3760741",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "Shift Detection and Adaptation for Network Intrusion Detection (NetSight)",
+  "venue": "arXiv 2508.15100",
+  "status": "preprint",
+  "read": "full text",
+  "role": "Self-labelling drift-adaptive NIDS with permutation-test gates",
+  "url": "https://arxiv.org/abs/2508.15100",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "CITADEL: Continual Anomaly Detection for Enhanced Learning in IoT Intrusion Detection",
+  "venue": "arXiv 2508.19450",
+  "status": "preprint",
+  "read": "seen in search, not read",
+  "role": "Recent continual IoT IDS; check whether it defends its own adaptation",
+  "url": "https://arxiv.org/abs/2508.19450",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "CND-IDS: Continual Novelty Detection for Intrusion Detection Systems",
+  "venue": "DAC 2025 (arXiv 2502.14094)",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Continual IDS that refits on a held-out clean subset",
+  "url": "https://arxiv.org/abs/2502.14094",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "On the Adversarial Risk of Test Time Adaptation: An Investigation into Realistic Test-Time Data Poisoning",
+  "venue": "ICLR 2025 (arXiv 2410.04682)",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Realistic grey-box poisoning of adaptation and the entropy-filter defence; our threat-model precedent",
+  "url": "https://arxiv.org/abs/2410.04682",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "Provably Reliable Conformal Prediction Sets in the Presence of Data Poisoning",
+  "venue": "ICLR 2025 spotlight (arXiv 2410.09878)",
+  "status": "peer-reviewed",
+  "read": "abstract and method",
+  "role": "Two-sided reliability (coverage and size) that models our detection-plus-false-alarm contract",
+  "url": "https://arxiv.org/abs/2410.09878",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "Adversarial Attacks for Drift Detection",
+  "venue": "ESANN 2025 (arXiv 2411.16591)",
+  "status": "peer-reviewed",
+  "read": "abstract and method",
+  "role": "Streams provably invisible to window-based drift monitors",
+  "url": "https://arxiv.org/abs/2411.16591",
+  "core": false
+ },
+ {
+  "year": 2025,
+  "title": "CESNET-TimeSeries24: Time Series Dataset for Network Traffic Anomaly Detection and Forecasting",
+  "venue": "Koumar et al., Scientific Data 12 (2025)",
+  "status": "peer-reviewed",
+  "read": "dataset paper",
+  "role": "Core: 40 weeks of real traffic drift",
+  "url": "https://www.nature.com/articles/s41597-025-04603-x",
+  "core": true
+ },
+ {
+  "year": 2025,
+  "title": "Network Intrusion Datasets: A Survey, Limitations, and Recommendations",
+  "venue": "Computers & Security 156 (2025), arXiv 2502.06688",
+  "status": "peer-reviewed",
+  "read": "abstract and key sections",
+  "role": "Notes there is no documented public NID dataset with concept drift: why we inject drift and add CESNET",
+  "url": "https://arxiv.org/abs/2502.06688",
+  "core": false
+ },
+ {
+  "year": 2024,
+  "title": "Data Poisoning Attack against Neural Network-Based On-Device Learning Anomaly Detector by Physical Attacks on Sensors",
+  "venue": "MDPI Sensors 24(19):6416 (2024)",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "100% poisoning success on an on-device learner; proposes no defence",
+  "url": "https://doi.org/10.3390/s24196416",
+  "core": false
+ },
+ {
+  "year": 2024,
+  "title": "AOC-IDS: Autonomous Online Framework with Contrastive Learning for Intrusion Detection",
+  "venue": "IEEE INFOCOM 2024 (arXiv 2402.01807)",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Online IDS with a frozen trusted anchor",
+  "url": "https://arxiv.org/abs/2402.01807",
+  "core": false
+ },
+ {
+  "year": 2023,
+  "title": "Anomaly Detection in the Open World: Normality Shift Detection, Explanation, and Adaptation (OWAD)",
+  "venue": "NDSS 2023",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Per-device shift detection with a permutation-test gate; public demo; a published gate to test",
+  "url": "https://www.ndss-symposium.org/ndss-paper/anomaly-detection-in-the-open-world-normality-shift-detection-explanation-and-adaptation/",
+  "core": false
+ },
+ {
+  "year": 2022,
+  "title": "Adversarial concept drift detection under poisoning attacks for robust data stream mining",
+  "venue": "Korycki and Krawczyk, Machine Learning (Springer) 2022",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Prose precedent for attacks that impair the adaptation process",
+  "url": "https://arxiv.org/abs/2009.09497",
+  "core": false
+ },
+ {
+  "year": 2018,
+  "title": "CIoTA: Collaborative IoT Anomaly Detection via Blockchain",
+  "venue": "Golomb, Mirsky, Elovici. NDSS DISS 2018; JPDC 2020",
+  "status": "peer-reviewed",
+  "read": "found in prior-art check",
+  "role": "Closest prior art for peers as witnesses: same-firmware devices must agree before learning",
+  "url": "https://arxiv.org/abs/1803.03807",
+  "core": false
+ },
+ {
+  "year": 2018,
+  "title": "N-BaIoT: Network-Based Detection of IoT Botnet Attacks Using Deep Autoencoders",
+  "venue": "Meidan et al., IEEE Pervasive Computing 2018",
+  "status": "peer-reviewed",
+  "read": "dataset paper",
+  "role": "Core: real IoT traffic and Mirai/BASHLITE attacks; our data",
+  "url": "https://arxiv.org/abs/1805.03409",
+  "core": true
+ },
+ {
+  "year": 2018,
+  "title": "Kitsune: An Ensemble of Autoencoders for Online Network Intrusion Detection",
+  "venue": "Mirsky et al., NDSS 2018",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Core: our feature extraction and the online IDS idea",
+  "url": "https://arxiv.org/abs/1802.09089",
+  "core": true
+ },
+ {
+  "year": 2017,
+  "title": "Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent (Krum)",
+  "venue": "Blanchard et al., NeurIPS 2017",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Robust filtering that needs many peers; why peer-free is hard",
+  "url": "https://papers.nips.cc/paper/6617-machine-learning-with-adversaries-byzantine-tolerant-gradient-descent",
+  "core": false
+ },
+ {
+  "year": 2012,
+  "title": "Security Analysis of Online Centroid Anomaly Detection",
+  "venue": "Kloft and Laskov, JMLR 13 (2012)",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Core: attacker share bounds poisoning; source of the alarm-rate switch-off idea",
+  "url": "https://jmlr.csail.mit.edu/papers/volume13/kloft12b/kloft12b.pdf",
+  "core": true
+ },
+ {
+  "year": 2009,
+  "title": "ANTIDOTE: Understanding and Defending against Poisoning of Anomaly Detectors",
+  "venue": "Rubinstein et al., ACM IMC 2009",
+  "status": "peer-reviewed",
+  "read": "full text",
+  "role": "Core: the boiling-frog attack on network detectors and a robust-PCA defence",
+  "url": "https://people.eecs.berkeley.edu/~tygar/papers/SML/IMC.2009.pdf",
+  "core": true
+ }
+]
