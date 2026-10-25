@@ -1,0 +1,49 @@
+\section{Introduction}
+
+Intrusion detection is moving onto IoT devices themselves: a detector that runs on the device sees its
+traffic first, needs no upstream collector, and keeps working when the network is cut off. Such a
+detector has to keep learning, because normal traffic does not stand still. Gateways change, tunnels add
+bytes, cloud services change how often they poll, firmware updates change what a device sends. A
+detector frozen at deployment drowns in false alarms within weeks.
+
+Learning on the device has a well-known weak point. The detector labels its own traffic: whatever it
+does not alarm on becomes the new normal. An attacker who controls part of that traffic can move the
+boundary a little at a time until an attack looks normal, the boiling-frog attack~\cite{antidote,kloft}.
+The obvious defence, stop learning when traffic looks suspicious, creates a second weakness that we
+call the \emph{freeze attack}: an attacker trips the stop condition with loud traffic and leaves, honest
+drift continues, and the frozen detector raises false alarms for good. Recent theory shows the dilemma
+runs deeper: from a single label-free stream, honest drift and slow contamination can be made
+indistinguishable~\cite{warden,capture}.
+
+\textbf{Our observation} is that IoT devices rarely live alone. A doorbell, a thermostat and a camera on
+the same network experience the same gateway, the same tunnel, the same polling changes: most honest
+drift is \emph{common-mode}. A poisoning campaign, in contrast, reaches only the devices the attacker
+can exploit, and devices from different vendors do not share exploits. The fleet is a second witness
+that a single device does not have.
+
+\textbf{Fleet-Orthogonal Adaptation (FOA)} turns that observation into an update rule
+(Figure~\ref{fig:system}). Every device keeps its own detector and, each cycle, broadcasts its proposed
+update as a 92-byte authenticated ESP-NOW frame. On each device the part of its proposal that a robust
+consensus of vulnerability-diverse peers backs is applied in full; the device-specific remainder,
+where a single-device campaign lives, passes through a cumulative budget that grows forever. Nothing is
+discarded and learning never stops, so there is no state for a freeze attack to reach.
+
+\textbf{Contributions.}
+\begin{itemize}
+\item \textbf{FOA}, a never-freezing, label-free update rule that splits each on-device update into a
+  peer-backed common part and a budgeted residual, with agreement measured robustly so that an attacker
+  holding less than half a device's traffic can neither cancel nor fake it (Section~\ref{sec:design}).
+\item \textbf{Guarantees}: the attacker's extra movement is bounded by $B_0+Bt$ alarm radii, giving a
+  minimum time to compromise; $f<K/2$ key-holding Byzantine peers add only a bounded bias per cycle; no
+  input stops learning; and a proof that device-only drift and poisoning cannot be separated by any
+  rule, so FOA's single rate $B$ is the honest place to put the trade-off (Section~\ref{sec:theory}).
+\item \textbf{Evaluation on all nine N-BaIoT devices} with real Mirai and BASHLITE traffic, physically
+  modelled drift, eight baselines and held-out seeds. Under strong shared drift FOA keeps fleet false
+  alarms at \FOAFleetFPR\ (single-device adaptation \AutoFleetFPR, gated defences \GateFleetFPR), and
+  cuts attack-attributable compromise from \AutoComp\ to \FOAComp\ (Section~\ref{sec:eval}).
+\item \textbf{The freeze attack} on stop-learning gates: decoys leave FOA's trajectory bit-for-bit
+  unchanged while they lock an alarm-rate switch-off at \KLFrozenFPR\ false alarms.
+\item \textbf{Real drift} on 40 weeks of CESNET traffic~\cite{cesnet}, and \textbf{an ESP32
+  implementation} that matches the reference on every recorded cycle, rejects all tampered frames and
+  adds about 22\,KB of flash.
+\end{itemize}

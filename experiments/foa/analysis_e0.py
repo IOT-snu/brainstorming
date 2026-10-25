@@ -21,7 +21,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def main():
     sp = space()
     out = dict(explained=sp.explained, devices={})
-    print(f"shared basis keeps {sp.explained * 100:.1f}% of within-device variance (10 of 115 dims)")
+    print(f"shared basis keeps {sp.explained * 100:.1f}% of within-device variance (16 whitened components of 115 features)")
     for s in data.available():
         st = Stream(s, sp, cycles=CYCLES, seed=0)
         det = Detector(st.cal)

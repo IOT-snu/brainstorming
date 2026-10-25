@@ -1,0 +1,28 @@
+E5: 8/160 tasks, 8s
+E5: 16/160 tasks, 13s
+E5: 24/160 tasks, 21s
+E5: 32/160 tasks, 26s
+E5: 40/160 tasks, 33s
+E5: 48/160 tasks, 39s
+E5: 56/160 tasks, 44s
+E5: 64/160 tasks, 49s
+E5: 72/160 tasks, 54s
+E5: 80/160 tasks, 60s
+E5: 88/160 tasks, 67s
+E5: 96/160 tasks, 73s
+E5: 104/160 tasks, 80s
+E5: 112/160 tasks, 86s
+E5: 120/160 tasks, 91s
+E5: 128/160 tasks, 97s
+E5: 136/160 tasks, 103s
+E5: 144/160 tasks, 109s
+E5: 152/160 tasks, 116s
+E5: 160/160 tasks, 121s
+E5: 160 tasks, 960 runs in 121s
+Traceback (most recent call last):
+  File "/Users/rishitkamboj/Collegeactual/Study/SEM5/iot/research project/brainstorming/experiments/foa/experiments.py", line 378, in <module>
+    main()
+  File "/Users/rishitkamboj/Collegeactual/Study/SEM5/iot/research project/brainstorming/experiments/foa/experiments.py", line 354, in main
+    run_cesnet(min(a.seeds, 5), a.jobs)
+    ^^^^^^^^^^
+NameError: name 'run_cesnet' is not defined

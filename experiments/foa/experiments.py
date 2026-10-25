@@ -423,6 +423,10 @@ def run_cesnet_task(task):
 
 
 def run_cesnet(seeds, jobs):
+    # The shared space needs an SVD; do it before forking (LAPACK in a forked child can hang on macOS).
+    import cesnet
+    global _CSPACE
+    _CSPACE = cesnet.CesnetSpace(CESNET_IPS)
     tasks = []
     for s in range(SEED0, SEED0 + seeds):
         tasks.append(dict(exp="E11", seed=s, policies=["static", "naive", "auto", "frozen", "kl", "or", "foa"], tags=dict(victim=-1)))

@@ -1,0 +1,10 @@
+shared basis keeps 93.2% of within-device variance (10 of 115 dims)
+danmini  n= 49548 tau=9.92 clean FPR= 1.5%  min recall=100.0%  closest attack gafgyt_udp at 16.5 spreads | strong drift moves 22.4 spreads, static FPR 100% | idio 18.5 spreads, FPR 100%
+ecobee   n= 13113 tau=7.85 clean FPR= 0.4%  min recall=  0.0%  closest attack gafgyt_udp at 7.5 spreads | strong drift moves 9.4 spreads, static FPR 100% | idio 7.7 spreads, FPR 84%
+ennio    n= 39100 tau=7.82 clean FPR= 2.5%  min recall=100.0%  closest attack gafgyt_udp at 10.4 spreads | strong drift moves 14.5 spreads, static FPR 100% | idio 12.1 spreads, FPR 100%
+philips  n=175240 tau=14.83 clean FPR= 0.1%  min recall=  0.0%  closest attack gafgyt_udp at 9.9 spreads | strong drift moves 11.9 spreads, static FPR 1% | idio 9.9 spreads, FPR 1%
+prov737  n= 62154 tau=9.75 clean FPR= 0.9%  min recall=  0.0%  closest attack gafgyt_udp at 8.6 spreads | strong drift moves 12.0 spreads, static FPR 100% | idio 10.0 spreads, FPR 76%
+prov838  n= 98514 tau=8.35 clean FPR= 0.5%  min recall=  0.0%  closest attack gafgyt_udp at 7.8 spreads | strong drift moves 10.0 spreads, static FPR 100% | idio 8.3 spreads, FPR 66%
+samsung  n= 52150 tau=9.85 clean FPR= 4.6%  min recall=100.0%  closest attack gafgyt_udp at 11.9 spreads | strong drift moves 13.8 spreads, static FPR 100% | idio 11.3 spreads, FPR 100%
+sh1002   n= 46585 tau=11.47 clean FPR= 0.2%  min recall=  0.0%  closest attack gafgyt_udp at 8.1 spreads | strong drift moves 9.1 spreads, static FPR 5% | idio 7.5 spreads, FPR 4%
+sh1003   n= 19528 tau=11.39 clean FPR= 1.6%  min recall=100.0%  closest attack gafgyt_udp at 11.4 spreads | strong drift moves 12.4 spreads, static FPR 99% | idio 10.2 spreads, FPR 6%

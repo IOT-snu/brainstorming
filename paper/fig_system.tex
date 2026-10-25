@@ -1,0 +1,59 @@
+% Overview of Fleet-Orthogonal Adaptation (TikZ). Included by body.tex.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\footnotesize,
+  dev/.style={draw=black!45, rounded corners=3pt, fill=white, minimum width=2.55cm, minimum height=1.05cm, align=center, line width=0.5pt},
+  box/.style={draw=black!35, rounded corners=2pt, fill=white, align=center, inner sep=3pt, line width=0.45pt},
+  hero/.style={draw=foablue, rounded corners=2pt, fill=foablue!8, align=center, inner sep=3pt, line width=0.7pt},
+  warn/.style={draw=atkred, rounded corners=2pt, fill=atkred!7, align=center, inner sep=3pt, line width=0.6pt},
+  arr/.style={-{Stealth[length=4pt]}, line width=0.55pt, draw=black!60},
+  gos/.style={{Stealth[length=3.5pt]}-{Stealth[length=3.5pt]}, line width=0.55pt, draw=foablue, dashed},
+]
+\definecolor{foablue}{HTML}{2A78D6}
+\definecolor{atkred}{HTML}{E34948}
+\definecolor{drift}{HTML}{1BAF7A}
+
+% shared network and drift
+\node[box, minimum width=14.6cm, minimum height=0.55cm, fill=black!3] (net) at (-0.5,2.35) {shared network: gateway, tunnel, route, cloud polling \quad
+  \textcolor{drift!80!black}{\textbf{common-mode honest drift reaches every device}}};
+
+% devices
+\node[dev] (d1) at (-6.0,1.0) {\textbf{doorbell} (vendor A)\\ detector $\mu_1,s_1$};
+\node[dev] (d2) at (-2.6,1.0) {\textbf{thermostat} (vendor B)\\ detector $\mu_2,s_2$};
+\node[dev] (d3) at (0.8,1.0) {\textbf{baby monitor} (vendor C)\\ detector $\mu_3,s_3$};
+\node[dev, draw=atkred, line width=0.8pt] (dv) at (4.6,1.0) {\textbf{camera} (vendor D)\\ detector $\mu_i,s_i$};
+\foreach \d in {d1,d2,d3,dv} \draw[arr, draw=drift!80!black] (net.south -| \d.north) -- (\d.north);
+\node[warn, font=\sffamily\scriptsize] (atk) at (8.15,1.0) {attacker: share $p$\\of the camera's traffic};
+\draw[arr, draw=atkred] (atk.west) -- (dv.east);
+
+% gossip bus
+\draw[foablue, dashed, line width=0.6pt] (-7.3,-0.2) -- (5.9,-0.2);
+\foreach \d in {d1,d2,d3,dv} \draw[gos] (\d.south) -- (\d.south |- 0,-0.2);
+\node[font=\sffamily\scriptsize, text=foablue, fill=white, inner sep=1.5pt] at (-0.9,-0.2) {each device broadcasts one 92-byte HMAC-signed proposal per cycle over ESP-NOW};
+
+% FOA pipeline on the attacked device
+\node[font=\sffamily\scriptsize\bfseries, text=black!55, anchor=west] at (-7.4,-0.75) {on the camera, every cycle};
+\node[box] (prop) at (-5.9,-1.45) {own proposal $d_i$\\[-1pt]{\scriptsize core-only, ring-backed}};
+\node[box] (gm) at (-5.9,-2.75) {verified peer proposals $\{d_j\}$\\[-1pt]{\scriptsize vulnerability-diverse $P(i)$}};
+\node[hero] (cons) at (-2.35,-2.75) {$\bar m$: smoothed\\geometric median};
+\node[hero] (common) at (1.15,-1.45) {\textbf{common part} $a=w\,\lambda\,\bar m$\\[-1pt]{\scriptsize backed by peers: applied in full}};
+\node[warn] (res) at (1.15,-2.75) {\textbf{residual} $r=d_i-a$\\[-1pt]{\scriptsize device-only: rationed}};
+\node[box] (bud) at (5.0,-2.75) {budget $\lVert R(t)\rVert\le(B_0+Bt)\,\rho_i$\\[-1pt]{\scriptsize never closes, never discards}};
+\node[box, fill=black!3] (upd) at (5.0,-1.45) {$\mu_i \leftarrow \mu_i + a + r_{\text{applied}}$};
+
+\draw[arr] (prop.east) -- node[above, font=\sffamily\scriptsize]{agreement $\lambda\in[0,1]$} (common.west);
+\draw[arr] (gm.east) -- (cons.west);
+\draw[arr] (cons.north east) -- node[above left, font=\sffamily\scriptsize, pos=0.55]{significance $w$} (common.south west);
+\draw[arr] (common.south) -- (res.north);
+\draw[arr] (common.east) -- (upd.west);
+\draw[arr] (res.east) -- (bud.west);
+\draw[arr] (bud.north) -- (upd.south);
+\end{tikzpicture}
+\caption{Fleet-Orthogonal Adaptation. Every device runs its own detector and broadcasts its proposed
+update each cycle. On each device, the part of its proposal that a robust consensus of
+vulnerability-diverse peers backs is applied in full; the device-specific remainder, which is where a
+single-device poisoning campaign lives, passes through a cumulative budget that grows forever, so
+learning never stops and the attacker's extra movement is bounded.}
+\label{fig:system}
+\end{figure*}

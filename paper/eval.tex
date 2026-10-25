@@ -1,0 +1,73 @@
+\section{Evaluation}\label{sec:eval}
+
+We ask five questions. Does FOA follow honest drift (liveness)? Does it stop poisoning, in particular
+poisoning hidden inside drift (safety)? Does vulnerability diversity matter against a monoculture
+botnet? Is it immune to the freeze attack and to attacks on its gossip? And what does it cost?
+
+\input{setup.tex}
+
+\textbf{Protocol hygiene.} Design choices (the robust agreement, the spread budget, the drift strength
+and the victim rule) were made on development seeds 0 and 1; every number below uses held-out seeds
+2 to 11. A device is a victim only if its target attack sits at least 1.3 alarm radii from its own
+benign traffic under the calibrated static detector (median score over $\tau$). Philips (1.04) and
+SimpleHome XCS7-1002 (1.16) fail this test; no centroid detector protects an attack that close for
+long, and they remain in the fleet as peers. Finally, honest drift by itself can carry benign traffic
+into an attack region: on one camera, even an attacker-free run loses its scan detection under strong
+drift. Every attacked run is therefore paired with the same run without the attacker, and a victim
+counts as compromised only when it loses detection that its attacker-free twin keeps.
+
+\subsection{Liveness: following honest drift}
+Table~\ref{tab:liveness} and Figure~\ref{fig:liveness} show false alarms with no attacker. Under strong
+shared drift a static detector reaches \StrongStaticFPR. Every gate that pauses learning on a suspicious
+statistic pays for it: the alarm-rate switch-off and the frozen reserve end at \GateFleetFPR. FOA ends at
+\FOAFleetFPR, below even single-device adaptation (\AutoFleetFPR), because the fleet consensus is a less
+noisy estimate of the shared drift than any one device's batch. Only naive learning, which accepts
+everything and is trivially poisoned, is lower (\NaiveFleetFPR). The price shows under device-only
+drift: FOA admits a device's own change only at rate $B$, so that device ends at \FOAIdioFPR\ false alarms
+against \AutoIdioFPR\ for single-device adaptation. This is Proposition~\ref{prop:frontier} made
+visible, and Section~\ref{sec:frontier} shows how $B$ moves it.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_liveness.pdf}
+\caption{False alarms with no attacker (10 held-out seeds). Shared drift (a, b) is followed by FOA through
+the consensus; device-only drift (c) is admitted only at the residual rate $B$, the cost predicted by
+Proposition~\ref{prop:frontier}.}
+\label{fig:liveness}
+\end{figure*}
+
+\subsection{Safety: poisoning hidden inside drift}
+With no drift (Table~\ref{tab:e2}), the signature-free local rule already resists most attackers
+(\NoDriftAutoComp\ compromised against \NoDriftNaiveComp\ for naive learning), and FOA keeps that
+(\NoDriftFOAComp). Drift is what breaks single-device defences: during a strong shared drift the
+detector must move, and a poisoner moves with it. Table~\ref{tab:e3} and Figure~\ref{fig:headline}
+show the result over \NRunsEThree\ runs. Against the classic boundary attacker FOA is compromised in
+\FOABoundaryComp\ of runs at every share, against \AutoBoundaryComp\ for single-device adaptation (up to
+\AutoBoundaryCompHigh\ at share 0.4). Over all three attacker types FOA is compromised in \FOAComp\ of
+runs, single-device adaptation in \AutoComp, the alarm-rate switch-off in \KLComp\ and the frozen reserve
+in \FrozenComp. Only TOA does better (\TOAComp), because it is handed the true attack signature, and it
+pays for it with false alarms. FOA is the only rule in the lower-left corner of
+Figure~\ref{fig:headline}b: few compromises \emph{and} few false alarms.
+
+FOA is not unbreakable. A core-hiding attacker at share 0.4 compromises \FOACoreHigh\ of victims and a
+mimicry attacker \FOAMimicHigh, almost all on the two Provision cameras, whose scan traffic is the
+closest to benign among our victims. When FOA is compromised it takes longer: a median of \FOAMedTTC\
+cycles after poisoning starts, against \AutoMedTTC\ for single-device adaptation. The bound of
+Corollary~\ref{cor:ttc} was checked in every cycle of every attacked FOA run here and was violated
+\BoundViolations\ times.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_headline.pdf}
+\caption{Poisoning hidden inside strong shared drift (7 victims, 10 held-out seeds, compromise counted
+against an attacker-free twin). (a) Boundary attacker: FOA is never compromised. The outlier-ratio gate
+never fires here and coincides with single-device adaptation. (b) Overall compromise against false
+alarms after drift: FOA alone is low on both. (c) Mean detection of the target attack over time.}
+\label{fig:headline}
+\end{figure*}
+
+\input{tables.tex}
+
+\input{eval_more.tex}
+
+\input{cost.tex}

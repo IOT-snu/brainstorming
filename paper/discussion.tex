@@ -1,0 +1,38 @@
+\section{Discussion and Limitations}\label{sec:discussion}
+
+\textbf{What is real and what is modelled.} The benign and attack traffic are real N-BaIoT
+captures~\cite{nbaiot}, and the C implementation is real and compiled for the ESP32. Three things are
+ours and synthetic: the concurrency of the fleet (the nine devices were captured separately), the honest
+drift (physically modelled transforms of the Kitsune statistics, not a recorded network change), and the
+poisoner (crafted feature vectors, not packets). A public intrusion dataset with documented concept
+drift did not exist when the 2025 survey of intrusion datasets was written~\cite{nidsurvey}, which is
+why the drift is injected; the testbed's real common-mode drift is the next step.
+
+\textbf{The frontier cannot be escaped, only placed.} Proposition~\ref{prop:frontier} is a limit on
+every rule, not a weakness of FOA: a device's own drift and an attack on that device look the same to
+everyone else. FOA's contribution is to move all drift the peers can vouch for out of that dilemma and
+to make the remaining trade-off one explicit number, $B$. A deployment that expects frequent device-only
+changes (firmware updates) can raise $B$ for a bounded window when the update is signed and announced, as
+licensed-update schemes do; we leave that to future work.
+
+\textbf{When the fleet is the attacker.} If one exploit compromises a majority of a device's peer group,
+or a gateway rewrites everyone's traffic, consensus carries the attack. Vulnerability-diverse peers make
+the first harder, not impossible: N-BaIoT itself shows that one credential-guessing botnet (BASHLITE)
+infected all nine devices~\cite{nbaiot}. FOA then degrades to its residual budget and common-channel
+budget, which still bound the rate of movement (Theorem~\ref{thm:byz}), but not to safety.
+
+\textbf{Limits we measured.} Three results are against FOA and we report them as such. Three
+Byzantine peers out of seven, still a minority, compromised the victim during strong drift, because a
+consistent bias passes through our generous common budget. A device with a large drift of its own on
+top of the shared one is lost by FOA (and by every budgeted variant), while single-device adaptation
+keeps it. Core-hiding and mimicry attackers at share 0.4 still compromised about a third of victims,
+mostly the two cameras whose scan traffic is closest to benign.
+
+\textbf{Spread is the attacker's lever.} In the compromised runs we traced, the successful attacks
+inflated the spread rather than dragging the centre, the radius attack Kloft and Laskov warned
+about~\cite{kloft}. FOA's spread budget is what holds it, and it is the parameter we would tune first.
+
+\textbf{Hardware.} The boards had not arrived when this paper was written. The firmware is complete and
+checked against the reference; latency, energy and radio loss on real ESP32s, and the fleet basis fitted
+on the testbed's own traffic, are reported as host measurements and estimates here and will be replaced
+by measurements.

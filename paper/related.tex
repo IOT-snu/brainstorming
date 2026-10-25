@@ -1,0 +1,42 @@
+\section{Related Work}\label{sec:related}
+
+\textbf{Poisoning self-updating detectors.} Rubinstein et al.\ showed that a network anomaly detector
+that retrains on its own traffic can be walked toward an attack by slowly increasing chaff, the
+boiling-frog attack, and defended it with robust PCA on a server~\cite{antidote}. Kloft and Laskov
+analysed exactly our detector, the online centroid, and showed that the attacker's share of the training
+traffic bounds how far it can be moved; they also proposed switching learning off when the alarm rate
+rises~\cite{kloft}. Poisoning of test-time adaptation~\cite{su2025tta}, of on-device learning on
+microcontroller-class hardware~\cite{sensors2024}, and of rapid-response adaptation
+pipelines~\cite{rapidpoison} shows the problem is current. A 2026 survey of about seventy on-device
+learning works for TinyML found no security mechanism among them~\cite{tinymlsurvey}. FOA targets this
+gap with a per-device detector that adapts on the device.
+
+\textbf{Adaptive intrusion detection and its gates.} Kitsune made online, per-packet anomaly
+detection practical but stops learning after training~\cite{kitsune}. Later adaptive detectors decide
+\emph{when} to learn: OWAD detects normality shift and adapts after a test~\cite{owad}; DriftXpert
+gates adaptation on an outlier ratio~\cite{driftxpert}; RTTAD updates only from confidently normal
+points and stops otherwise~\cite{rttad}; a continual-learning analysis of poisoning proposes rolling back
+when the score spikes~\cite{clpoison}; ACORN-IDS and CND-IDS continue learning from normal-only
+streams~\cite{acorn,cndids}. Each has a condition under which it stops learning. Our freeze experiments
+show that an attacker who can make such a condition true with loud traffic can turn honest drift into a
+lasting flood of false alarms. Korycki and Krawczyk discussed attacks that impair adaptation in data
+streams~\cite{korycki}; we found no prior evaluation of this freeze effect on the gating rules of
+adaptive intrusion detectors.
+
+\textbf{Limits of a single stream.} Recent theory (all 2026 preprints) shows that one label-free score
+stream cannot separate honest drift from slow contamination (WARDEN~\cite{warden}), that regularised
+continual learners cannot converge under frequent shifted poison~\cite{clpoison}, and that a single
+statistic forces a choice between accepting injected changes and rejecting genuine ones
+(CAPTURE~\cite{capture}). A further preprint frames self-calibration as an evidence budget with blind
+sets~\cite{selfcal}; we have read only its abstract. FOA does not contradict these results; it changes
+the observation model by adding peers, and Proposition~\ref{prop:frontier} states what remains impossible.
+
+\textbf{Collaborative detection and robust aggregation.} The closest prior work is
+CIoTA~\cite{ciota}: devices of the same model train models collaboratively and accept an update only
+when the group agrees, discarding the rest. FOA differs in three ways: peers are chosen to be
+vulnerability-\emph{diverse}, so a monoculture botnet cannot manufacture consensus; the remainder is
+\emph{rationed} through a budget rather than discarded, which keeps a device able to follow its own
+changes; and the guarantee is a bound on movement and time to compromise, not agreement. Byzantine-robust
+aggregation (Krum~\cite{krum}, the geometric median~\cite{lopuhaa,minsker}) protects a shared model in
+federated learning; FOA uses the geometric median only to estimate the common component of per-device
+updates, and keeps every device's own detector.

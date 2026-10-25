@@ -1,0 +1,115 @@
+\section{Analysis}\label{sec:theory}
+
+We state what FOA guarantees, what it does not, and why the remaining trade-off is unavoidable.
+Throughout, device $i$ has calibrated centre $\mu^0$, spread $s^0$, threshold $\tau$ and alarm radius
+$\rho=\tau s^0$; $t$ counts cycles since the device joined; $L(t)=B_0+Bt$ and $L_s(t)=B_0^s+B^s t$.
+FOA keeps four accumulators: the applied common movement $C(t)\in\R^D$ and $C_s(t)\in\R$, and the
+applied residual movement $R(t)$ and $R_s(t)$.
+
+\subsection{Containment}
+\begin{theorem}[Residual containment]\label{thm:contain}
+For any sequence of batches and peer frames, at every cycle
+\begin{gather}
+\mu(t)=\mu^0+C(t)+R(t),\qquad \log\frac{s(t)}{s^0}=C_s(t)+R_s(t),\\
+\norm{R(t)}\le L(t)\,\rho,\qquad |R_s(t)|\le L_s(t),
+\end{gather}
+and each common increment is $a_t=\kappa_t\,w_t\lambda_t\bar m_t$ with $\kappa_t\in[0,1]$ (the common
+budget's shrink factor), where $\bar m_t$ and $w_t$ are functions of the verified peer frames only and
+$\lambda_t\in[0,1]$.
+\end{theorem}
+\begin{proof}
+The device changes $\mu$ only by $a_t+r_t$, with $a_t$ added to $C$ and $r_t$ to $R$; by induction from
+$\mu(0)=\mu^0$, $C(0)=R(0)=0$ the decomposition holds, and the same for the log-spread. The residual
+step sets $R(t)$ to the projection of $R(t-1)+(d_t-a_t)$ onto the ball of radius $L(t)\rho$, so the
+bound holds after every step; likewise $R_s$ is clipped to $[-L_s(t),L_s(t)]$. Before the common budget,
+$a_t=w_t\lambda_t\bar m_t$; projecting $C+a_t$ onto a ball centred at the origin that contains $C$
+returns $C+\kappa_t a_t$ for some $\kappa_t\in[0,1]$. $\bar m_t$ is an average of geometric medians of
+peer proposals and $w_t$ a function of their dispersion, so neither reads the device's own traffic.
+$\lambda_t$ is clipped to $[0,1]$.
+\end{proof}
+
+The theorem says what the victim's own traffic can and cannot do. Its own traffic enters only through
+$\lambda_t$, which can only \emph{scale down} a peer-determined vector, and through the residual, which
+is bounded by $L(t)\rho$. It cannot add any direction the peers did not vote for. Because $\lambda_t$
+uses the median projection of the device's core points, an attacker with less than half the batch can
+neither drive it to zero (to stop the device following the fleet) nor to one (to drag the device along a
+consensus its own traffic does not show).
+
+\begin{corollary}[Minimum time to compromise]\label{cor:ttc}
+Let $d_{50}(t)$ be the median distance, in calibration spreads, of the target attack traffic from the
+consensus-backed centre $\mu^0+C(t)$. If at cycle $t$ fewer than half of that traffic is flagged, then
+\begin{equation}
+d_{50}(t)\;\le\;\tau\, e^{C_s(t)+L_s(t)}+\tau L(t).\label{eq:reach}
+\end{equation}
+With no common movement ($C=0$, $C_s=0$), compromise is impossible before the first $t$ at which
+$d_{50}\le\tau(e^{B_0^s+B^s t}+B_0+Bt)$; for a target at $M$ alarm radii and small budgets this is about
+$t^\ast\approx (M-1-B_0-B_0^s)/(B+B^s)$ cycles.
+\end{corollary}
+\begin{proof}
+If more than half the attack points $x$ satisfy $\norm{x-\mu(t)}\le\tau s(t)$, then for those
+$\norm{x-\mu^0-C(t)}\le \tau s(t)+\norm{R(t)}$, so the median is at most that. Divide by $s^0$ and apply
+Theorem~\ref{thm:contain}. The approximation uses $e^{y}\approx1+y$.
+\end{proof}
+We checked the bound in every cycle of all 3{,}630 attacked runs of FOA and its budgeted variants and of 120
+synthetic runs: it was never violated. The only violations came from the ablation that removes the
+residual budget, to which the corollary does not apply (Section~\ref{sec:ablation}), which shows the
+bound is not vacuous.
+
+\subsection{Byzantine peers}
+\begin{lemma}[Minsker~\cite{minsker}, Lemma 2.1]\label{lem:gm}
+Let $0<\alpha<1/2$ and $C_\alpha=(1-\alpha)\sqrt{1/(1-2\alpha)}$. If more than $(1-\alpha)K$ of $K$ points
+lie within distance $r$ of $z$, their geometric median lies within $C_\alpha r$ of $z$.
+\end{lemma}
+
+\begin{theorem}[Bounded Byzantine influence]\label{thm:byz}
+Suppose $f<K/2$ of the $K$ peers hold valid keys and send arbitrary frames, and in cycle $t$ the honest
+peers' proposals lie within $r_t$ of their own geometric median $m_t^H$. Then
+$\norm{m_t-m_t^H}\le C_{f/K}\,r_t$, so the adversarial part of each common increment is at most
+$w_t\lambda_t$ times an average of such terms, and the total adversarial common movement is at most
+$\min\big(\sum_u C_{f/K} r_u,\;(B_0^c+B^c t)\rho\big)$.
+\end{theorem}
+\begin{proof}
+Apply Lemma~\ref{lem:gm} with $z=m_t^H$: $K-f>(1-f/K)K$ points lie within $r_t$ of it. The exponential
+average is a convex combination, $w_t\lambda_t\le1$, and the common budget caps $\norm{C(t)}$.
+\end{proof}
+This is a bound on \emph{rate}, not immunity: a minority of compromised peers can still push a
+consistent bias of order $C_\alpha r$ per cycle until the common budget stops it, and a majority
+($f\ge K/2$) can move the consensus anywhere. Keyless attackers have no effect: frames with a bad tag,
+an unknown sender or a stale cycle are dropped before aggregation.
+
+\subsection{The frontier}
+\begin{proposition}[Device-only drift and poisoning are indistinguishable]\label{prop:frontier}
+Let any update rule see the device's own traffic and its peers' traffic. Consider world~A, in which the
+device's benign traffic drifts by a vector $v$ per cycle and its peers do not, and world~B, in which the
+device's benign traffic is stationary and an attacker controlling the device's traffic injects
+traffic distributed exactly as world~A's drifted traffic. The observations are identically
+distributed in both worlds. Hence a rule that keeps false alarms bounded in world~A for every $v$ with
+$\norm{v}\le\nu$ moves the detector by up to $\nu$ per cycle in world~B.
+\end{proposition}
+\begin{proof}
+The peers' traffic is identical in A and B and the device's traffic has the same law, so any rule
+produces the same distribution of detector trajectories. Tracking A means following the drift.
+\end{proof}
+The proposition is the multi-stream counterpart of single-stream impossibility results~\cite{warden}:
+peers remove \emph{common} drift from the dilemma but cannot remove \emph{device-only} drift. FOA makes
+the remaining trade-off a single explicit rate: device-only movement, honest or not, is admitted at
+rate $B$ (plus $B^s$ in log-spread). Larger $B$ buys faster tracking of a device's own changes and
+proportionally less time to compromise (Corollary~\ref{cor:ttc}); we measure both ends in
+Section~\ref{sec:eval}.
+
+\subsection{No freeze state}
+\begin{proposition}[Freeze immunity]\label{prop:freeze}
+(i) Traffic that the detector alarms on does not enter FOA's update, so injecting such traffic
+(decoys) leaves the device's trajectory unchanged. (ii) No input sequence stops FOA from learning: the
+residual admits movement of $B\rho$ per cycle forever.
+\end{proposition}
+\begin{proof}
+(i) The local proposal uses only accepted points (score $\le\tau$), and the common part depends only on
+peer frames and the median of accepted core points; alarmed points enter neither. (ii) $L(t)$ grows
+without bound and nothing in Algorithm~\ref{alg:foa} sets an update to zero based on the device's
+alarm rate or any other suspicion statistic.
+\end{proof}
+Gated defences have exactly the state that Proposition~\ref{prop:freeze} rules out: a condition on a
+traffic statistic under which they stop learning. An attacker who can make that condition true by
+sending loud traffic can freeze them, and honest drift then turns the freeze into a lasting flood of
+false alarms (Section~\ref{sec:eval}).

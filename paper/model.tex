@@ -1,0 +1,51 @@
+\section{System and Threat Model}\label{sec:model}
+
+\subsection{Devices and detectors}
+A fleet of IoT devices sits behind a shared network (a home, a campus wing, a factory cell). Each
+device $i$ runs its own detector on its own traffic. Every packet is summarised by Kitsune's damped
+incremental statistics~\cite{kitsune} (packet sizes, rates and inter-packet gaps at five time scales),
+sign-log transformed, standardised with fleet-wide constants and projected onto a fleet-shared, whitened
+basis of dimension $D=16$. The shared basis is what lets devices compare updates, and sixteen numbers
+fit easily in one ESP-NOW frame. The detector is the online centroid detector studied by Kloft and Laskov~\cite{kloft}:
+\begin{equation}
+  \mathrm{score}_i(x) = \norm{x-\mu_i}/s_i, \qquad \text{alarm if } \mathrm{score}_i(x) > \tau_i,
+\end{equation}
+with centre $\mu_i$, spread $s_i$ and threshold $\tau_i$ set at the 99th percentile of clean
+calibration scores. We write $\mu_i^0, s_i^0$ for the calibrated values and $\rho_i=\tau_i s_i^0$ for
+the calibrated alarm radius, the natural unit of how far a detector can be moved.
+
+\subsection{Self-labelled adaptation}
+Learning runs in cycles. In cycle $t$, device $i$ observes a batch $X_i(t)$, treats the points it does
+not alarm on as normal, and proposes an update $(d_i(t), e_i(t))$: a centre shift and a change of
+log-spread. We use our signature-free rule as the local proposal: it learns only from the dense core of
+accepted traffic (inside the clean 80th-percentile radius), scales a centre move by how much the outer
+ring of the cloud moves with it, and allows spread growth only in proportion to outer-ring support.
+Without a fleet rule, a device applies its proposal in full (\emph{single-device} adaptation). This is
+the setting in which boiling-frog poisoning works~\cite{antidote,kloft}: poison that the detector accepts
+moves the boundary, which lets the next poison sit further out.
+
+\subsection{Honest drift}
+Normal traffic changes. We separate two kinds. \emph{Common-mode drift} reaches many devices at once
+because they share the network: a gateway or tunnel adds bytes to every packet, a route change alters
+jitter, a cloud service changes its polling rate. \emph{Device-only drift} reaches one device: its own
+firmware update or a change in how it is used. A detector that cannot follow drift drowns in false
+alarms; one that follows everything can be poisoned.
+
+\subsection{Threat model}\label{sec:threat}
+The attacker wants an attack class (for example a Mirai scan) to stop being detected on a victim
+device, or wants a defence to stop learning so honest drift turns into a flood of false alarms.
+\begin{itemize}
+\item \textbf{Traffic share.} The attacker injects traffic that makes up a share $p$ of the victim's
+  learning batch (Kloft and Laskov's attacker share~\cite{kloft}), up to $p=0.4$. It crafts feature
+  vectors freely but has no code execution on the detector and no keys.
+\item \textbf{Knowledge.} White-box on the algorithm and on the victim's live state ($\mu, s$, the
+  consensus), which is worst case for us.
+\item \textbf{Monoculture botnet.} One exploit can compromise every device that shares a firmware and
+  poison all of them in a coordinated way.
+\item \textbf{Byzantine peers.} Up to $f$ fleet members are fully compromised: the attacker holds their
+  keys and sends any frame it likes.
+\item \textbf{Network attacker.} Without keys it can forge, replay or drop frames.
+\end{itemize}
+We call a victim \emph{compromised} when fewer than half of held-out real attack packets of the target
+class raise an alarm. Out of scope: a compromised gateway that rewrites every device's traffic, and a
+botnet that controls a majority of every peer group (we show where FOA breaks in that case).

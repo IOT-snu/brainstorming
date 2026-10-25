@@ -1,0 +1,41 @@
+\subsection{Cost on an ESP32}\label{sec:cost}
+
+FOA's on-device part is about 500 lines of portable C99 with no heap: the detector, the signature-free
+proposal with the median agreement projection, ten Weiszfeld iterations, the FOA step, the 92-byte frame
+and HMAC-SHA256. Table~\ref{tab:cost} summarises what we could verify before the boards arrived.
+
+\textbf{Equivalence.} On 480 recorded cycles from three synthetic fleets (one with 85\% frame loss, so
+130 cycles had fewer than two peers), the C proposal matches the Python reference to a worst relative
+error of $5.4\times10^{-4}$ (float32 against float64) and the C FOA step to $6\times10^{-5}$, with zero
+mismatches. Frames packed in C are byte-identical to Python's; all 23{,}040 single-bit flips, wrong keys
+and stale cycle numbers are rejected; HMAC-SHA256 passes RFC 4231 test case 2.
+
+\textbf{Footprint.} Compiled for the ESP32 (Arduino-ESP32 core 3.3.12) the node firmware uses
+915{,}504 bytes of flash and 69{,}216 bytes of static RAM; the same Wi-Fi, UDP and ESP-NOW code without
+FOA uses 893{,}284 and 48{,}928. FOA therefore costs about 22\,KB of flash and 20\,KB of static RAM, of
+which 13\,KB is the batch of 200 sixteen-dimensional samples; calibration borrows about 80\,KB of heap once and
+frees it. The detector and FOA state are 452 bytes.
+
+\textbf{Time and energy (estimates).} On the laptop one proposal over 200 points takes 5\,$\mu$s, one FOA
+step with 8 peers 0.7\,$\mu$s and one frame signature 1.2\,$\mu$s. The step is about $3{\times}10^4$
+floating-point operations plus a few hundred square roots; at 240\,MHz and a conservative ten cycles per
+operation this is about 2\,ms per learning cycle, against a cycle length of 10\,s. One 92-byte ESP-NOW
+broadcast per cycle is about 1\,ms of airtime. These are estimates; the firmware logs the measured time
+of every stage and the INA219 monitor gives energy per cycle on the testbed.
+
+\begin{table}[t]
+\centering
+\caption{FOA on the ESP32: verified before hardware, and estimated}
+\label{tab:cost}
+\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+C vs Python, 480 cycles & 0 mismatches \\
+Tampered frames accepted & 0 of 23{,}104 \\
+Added flash / static RAM & 22\,KB / 20\,KB \\
+State per device & 452 B \\
+Gossip per device per cycle & one 92 B frame \\
+Compute per cycle (est.) & $\approx$2\,ms at 240\,MHz \\
+\bottomrule
+\end{tabular}
+\end{table}

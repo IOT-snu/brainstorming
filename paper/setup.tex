@@ -1,0 +1,51 @@
+\subsection{Setup}\label{sec:setup}
+
+\textbf{Traffic.} We use all nine devices of N-BaIoT~\cite{nbaiot}: two doorbells (Danmini, Ennio), a
+thermostat (Ecobee), a baby monitor (Philips), four security cameras (Provision PT-737E and PT-838,
+SimpleHome XCS7-1002 and -1003) and a webcam (Samsung), each with its real benign capture and its real
+Mirai and BASHLITE attack traffic (Ennio and Samsung have BASHLITE only). Each row is the 115 Kitsune
+statistics of one packet~\cite{kitsune}. The first 20\% of each benign capture calibrates the device's
+detector; the rest streams in capture order, alternate rows for learning and for measuring false alarms.
+Each attack type is split into a pool the poisoner draws from and a disjoint held-out set on which
+detection is measured. The shared 16-dimensional whitened basis keeps \ExplainedVar\ of the within-device variance.
+
+\textbf{Fleet.} The main fleet has the nine devices, one each; peers are all devices of other vendors.
+For the monoculture experiment a twelve-device fleet has three instances each of four models; instances
+differ in calibration subsample, position in the capture and random seed.
+
+\textbf{Honest drift.} We apply drift to the raw Kitsune statistics with physical meaning: packet rate
+$\times g$ (counts scale by $g$, inter-packet gaps by $1/g$), $b$ bytes of per-packet overhead in both
+directions (a tunnel or a new record layer), and network jitter $\times h$. Attack traffic gets the
+overhead and jitter (same network path) but not the benign rate change. Kitsune's log-scaled
+statistics barely move under small changes (packet rate $\times 8$ raises a static detector's false
+alarms only to 22\%), so drift strength was fixed by its effect on the static detector alone, never by
+how any adaptive rule behaves. \emph{Strong} common drift ($g=64$, $b=240$, $h=11.4$, ramped over cycles 40
+to 160) takes the static detector to \StrongStaticFPR\ false alarms; \emph{moderate} ($g=16$, $b=160$,
+$h=5$) to about a third. Device-only drift ($g=32$, $b=200$, $h=7.6$, cycles 60 to 120) models one
+device's own large change. These are stress tests of a large shared change; Section~\ref{sec:cesnet}
+uses real drift.
+
+\textbf{Attacker.} The poisoner targets the victim's scan traffic (Mirai scan, or BASHLITE scan on the
+two devices without Mirai), the attack class closest to benign traffic, from cycle 40 on, with share
+$p\in\{0.1,0.2,0.3,0.4\}$ of the victim's learning batch. Modes: \emph{boundary} (real benign points
+pulled toward real attack points until just inside the alarm radius), \emph{core} (just inside the core
+radius), \emph{mimicry} (re-centred copies of benign traffic shifted toward the attack, which looks like
+drift to the device), \emph{multi-direction}, \emph{consensus-aligned} and \emph{pulsing}.
+
+\textbf{Baselines.} All rules share the same detector and the same local proposal, so differences come
+from how the proposal is applied. \emph{Static} never adapts. \emph{Naive} applies a mean-and-radius
+proposal over all accepted traffic. \emph{Single-device} applies our signature-free proposal in full.
+\emph{Clipping} caps each update's norm (robust-aggregation-style clipping with no memory).
+\emph{Frozen reserve} learns only from points a frozen copy of the calibrated detector accepts
+(WARDEN-style screening~\cite{warden}). \emph{Alarm-rate switch-off} skips updates while the batch alarm
+rate exceeds five times the clean rate (Kloft and Laskov~\cite{kloft}). \emph{Outlier-ratio gate} skips
+updates while the alarm rate exceeds three times its own moving average (DriftXpert style~\cite{driftxpert}).
+\emph{TOA} is our earlier rule that rations movement toward an \emph{oracle} attack signature.
+\emph{Same-model consensus} applies the element-wise median of same-model devices' proposals and discards
+the rest (CIoTA style~\cite{ciota}). The gates are our re-implementations of the gating idea in each
+paper, not the full published systems.
+
+\textbf{Metrics.} A victim is \emph{compromised} when fewer than half of held-out target attack packets
+are flagged; time to compromise (TTC) is the first such cycle. False-alarm rate (FPR) is measured on
+held-out benign traffic each cycle, on the victim and on the rest of the fleet. All results are over 10
+seeds (95\% confidence intervals where shown); a run is 240 cycles of 200 learning points per device.

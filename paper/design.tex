@@ -1,0 +1,80 @@
+\section{Fleet-Orthogonal Adaptation}\label{sec:design}
+
+\subsection{Idea}
+A single device cannot tell honest drift from slow contamination; with one label-free score stream the
+two can be made identical~\cite{warden}. A fleet adds a second, independent stream: the device's peers.
+Common-mode drift shows up in most peers' proposals, while a campaign that rides one exploit reaches only
+the peers that share it. FOA therefore splits every proposal into the part the peers back, which is
+applied in full, and the remainder, which is device-specific and is admitted only through a cumulative
+budget. Nothing is ever discarded and nothing ever switches learning off, so there is no state for a
+freeze attack to trip.
+
+\subsection{Peer groups}
+Each device listens to a peer group $P(i)$ of $K$ devices chosen to be \emph{vulnerability-diverse}:
+other vendors and firmware lines than its own. Diversity is the point. Same-model peers, as in
+CIoTA~\cite{ciota}, share the very exploit a monoculture botnet uses, so a botnet can manufacture their
+consensus; diverse peers share the network but not the exploit.
+
+\subsection{The update}
+Algorithm~\ref{alg:foa} gives the rule. Each cycle, device $i$ computes its proposal $(d_i,e_i)$, signs
+it and broadcasts it, and collects its peers' verified proposals $\{(d_j,e_j)\}_{j\in P(i)}$.
+\begin{enumerate}
+\item \textbf{Consensus.} $m_t$ is the geometric median of the peers' centre shifts (ten Weiszfeld
+  iterations from the coordinate-wise median), and $\bar m_t$ its exponential moving average (weight
+  $\alpha=0.2$). The geometric median has breakdown point $1/2$: fewer than half the peers, however
+  extreme, move it only boundedly~\cite{lopuhaa,minsker}.
+\item \textbf{Significance.} Peers' proposals are noisy even without drift. The weight $w_t\in[0,1]$ is
+  a ramp on $\norm{\bar m_t}$ divided by the noise level of $\bar m_t$, estimated from the median distance
+  of peer proposals to $m_t$; it is $0$ below two noise levels and $1$ above four. It depends on peer
+  frames only.
+\item \textbf{Agreement.} $\lambda_t\in[0,1]$ is how much of the smoothed consensus the device's own
+  traffic supports. It is measured robustly: $g_t=\eta\,\mathrm{median}_x\langle x-\mu,\hat m\rangle$ over the
+  device's core points, where $\hat m$ is the consensus direction, smoothed to $\bar g_t$, and
+  $\lambda_t=\mathrm{clip}(\bar g_t/\norm{\bar m_t},0,1)$. A device that does not see the fleet's drift
+  does not take it; an attacker holding less than half the batch can neither cancel nor fake it (an earlier
+  mean-based version could be cancelled, Section~\ref{sec:ablation}); and $\lambda_t$ is the \emph{only}
+  quantity the victim's own traffic controls.
+\item \textbf{Common part.} $a_t = w_t\lambda_t\bar m_t$, applied in full but kept within a generous
+  common budget $\norm{C(t)}\le (B_0^c+B^c t)\rho_i$, where $C$ is the accumulated common movement.
+\item \textbf{Residual.} $r_t = d_i(t)-a_t$ is everything the peers do not back. It is admitted through
+  the residual budget: the accumulated residual $R$ is projected onto the ball
+  $\norm{R(t)}\le (B_0+Bt)\rho_i$.
+\end{enumerate}
+The spread is handled the same way in log units, with a median over peers, its own agreement and a
+residual budget $|R_s(t)|\le B_0^s+B^s t$. Defaults are $B_0=0.1$, $B=0.005$ alarm radii per cycle,
+$B_0^s=0.1$, $B^s=0.001$, $B_0^c=0.75$, $B^c=0.06$. The spread budget is deliberately tight: on honest
+traffic the device-specific spread residual stays near zero, while inflating the spread is the cheapest
+way for an attacker to make an attack fit inside the alarm radius.
+
+\begin{algorithm}[t]
+\caption{FOA step on device $i$ in cycle $t$}\label{alg:foa}
+\begin{algorithmic}[1]
+\State $(d,e,g)\gets$ \Call{Propose}{$X_i(t),\hat m$} \Comment{signature-free local rule}
+\State broadcast $\langle i,t,d,e\rangle$ with HMAC tag \Comment{92 bytes}
+\State $\mathcal{F}\gets$ verified, fresh frames from $P(i)$
+\If{$|\mathcal{F}|\ge 2$}
+  \State $m\gets\gm(\{d_j\})$; \ $\bar m\gets(1-\alpha)\bar m+\alpha m$
+  \State $\sigma\gets\mathrm{median}_j\norm{d_j-m}/\sqrt{|\mathcal F|}$; \ $\bar\sigma\gets(1-\alpha)\bar\sigma+\alpha\sigma$
+  \State $w\gets\mathrm{ramp}_{[2,4]}\big(\norm{\bar m}/(\bar\sigma\sqrt{\alpha/(2-\alpha)})\big)$
+  \State $\bar g\gets(1-\alpha)\bar g+\alpha g$; \ $\lambda\gets\mathrm{clip}(\bar g/\norm{\bar m},0,1)$ \Comment{robust agreement}
+  \State $a\gets \Pi_{(B_0^c+B^c t)\rho}(C+w\lambda\bar m)-C$ \Comment{common budget}
+\Else\ $a\gets 0$
+\EndIf
+\State $r\gets \Pi_{(B_0+Bt)\rho}(R+d-a)-R$ \Comment{residual budget}
+\State $C\gets C+a$; \ $R\gets R+r$; \ $\mu_i\gets\mu_i+a+r$
+\State spread: same steps on $e$ in log units
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Authenticated gossip}
+A proposal travels as one ESP-NOW broadcast of 92 bytes: version, sender, number of learning points,
+cycle number, sixteen float32 centre shifts, one float32 log-spread change, and an HMAC-SHA256 tag truncated
+to 128 bits~\cite{hmac} under the sender's provisioned key. Receivers drop frames with an unknown sender,
+a bad tag or a stale cycle number, which removes forged and replayed proposals. ESP-NOW's own encryption
+does not cover broadcast, so the tag is ours.
+
+\subsection{Joining the fleet}
+A new device that calibrates on its own first window can be poisoned before it ever learns, if the
+attacker is already present. FOA's join rule starts a new device from the geometric median of
+same-model peers' detector state when such peers exist, and then runs it under the residual budget from
+zero, so join-time poisoning is bounded by the same $B_0+Bt$.

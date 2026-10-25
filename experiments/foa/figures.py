@@ -35,7 +35,7 @@ def fig_theory():
     fig, ax = plt.subplots(1, 3, figsize=(W2, 2.15))
     Bs = sorted({r["B"] for r in S["S1"]})
     T = 500
-    for drift, key, lab, mk in ((False, "foa", "no drift", "o"), (True, "auto", "with honest drift", "s")):
+    for drift, key, lab, mk in ((False, "foa", "no drift", "o"), (True, "foa_same", "with honest drift", "s")):
         med, lo = [], []
         for B in Bs:
             t = [r["ttc"] if r["ttc"] is not None else np.inf for r in S["S1"] if r["B"] == B and r["drift"] == drift]
@@ -49,7 +49,7 @@ def fig_theory():
     ax[0].plot(Bs, tb, color=INK, lw=1.0, label="Theorem 1 lower bound")
     ax[0].set_xscale("log"); ax[0].set_ylim(0, T + 60)
     ax[0].set_xlabel("residual budget slope B (spreads per cycle)"); ax[0].set_ylabel("cycles until detection < 50%")
-    ax[0].set_title("a. Time to compromise vs budget"); ax[0].legend(loc="upper right", fontsize=6)
+    ax[0].set_title("a. Time to compromise vs budget"); ax[0].legend(loc="lower left", fontsize=5.5)
     ax[0].text(Bs[0], T + 45, "never within 500 cycles", fontsize=6, color=MUTED, va="bottom")
 
     vs = sorted({r["v"] for r in S["S2"]})
@@ -279,13 +279,19 @@ def fig_cesnet():
         tr = mean_trace(rows_of("E11", victim=-1, policy=p), "fpr_fleet")
         if tr is not None:
             k = 7
-            sm = np.convolve(np.nan_to_num(tr), np.ones(k) / k, mode="same")
-            style.line(ax[0], np.arange(len(tr)), 100 * sm, p)
+            sm = np.convolve(np.nan_to_num(tr), np.ones(k) / k, mode="valid")
+            style.line(ax[0], np.arange(len(sm)) + k // 2, 100 * sm, p)
     ax[0].set_xlabel("day (after 28 days of calibration)"); ax[0].set_ylabel("fleet false alarms (%, 7-day mean)")
     ax[0].set_title("a. Real drift, no attacker"); ax[0].legend(fontsize=5.5, ncol=2)
     pols = ["naive", "auto", "kl", "frozen", "foa"]
-    bars(ax[1], [0.2, 0.4], pols, lambda q, p: rate_ci([r["compromised_attr"] for r, _ in rows_of("E11", p=q, policy=p)]),
-         [COLOR[p] for p in pols], [NAME[p] for p in pols])
+    val = lambda q, p: rate_ci([r["compromised_attr"] for r, _ in rows_of("E11", p=q, policy=p)])
+    bars(ax[1], [0.2, 0.4], pols, val, [COLOR[p] for p in pols], [NAME[p] for p in pols])
+    for i, q in enumerate([0.2, 0.4]):
+        for j, p in enumerate(pols):
+            if val(q, p)[0] < 1:
+                ax[1].text(i + (j - (len(pols) - 1) / 2) * 0.8 / len(pols), 2, "0", ha="center", va="bottom", fontsize=6,
+                           color=COLOR[p], fontweight="bold")
+    ax[1].legend(fontsize=5.5, loc="upper right")
     ax[1].set_xticklabels(["20%", "40%"]); ax[1].set_xlabel("attacker share"); ax[1].set_ylabel("victims compromised (%)")
     ax[1].set_title("b. Boiling frog on real drift"); ax[1].set_ylim(0, 105)
     fig.tight_layout(w_pad=1.2)

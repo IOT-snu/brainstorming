@@ -1,0 +1,48 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amsthm}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage{graphicx,booktabs,multirow,xcolor}
+\usepackage{algorithm,algpseudocode}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cite}
+\usepackage{microtype}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\gm}{\operatorname{GM}}
+\input{numbers.tex}
+
+\begin{document}
+
+\title{Fleet-Orthogonal Adaptation: Poison-Resilient\\On-Device Intrusion Detection for Drifting IoT}
+
+\author{\IEEEauthorblockN{Rishit Kamboj and Farhan Naik}
+\IEEEauthorblockA{Department of Computer Science and Engineering, Shiv Nadar University\\
+CSD457 Internet of Things, Group G-04}}
+
+\maketitle
+
+\begin{abstract}
+\input{abstract.tex}
+\end{abstract}
+
+\begin{IEEEkeywords}
+IoT security, intrusion detection, data poisoning, concept drift, on-device learning, robust aggregation, ESP32
+\end{IEEEkeywords}
+
+\input{body.tex}
+
+\bibliographystyle{IEEEtran}
+\input{bib.tex}
+
+\end{document}

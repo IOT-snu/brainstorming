@@ -1,0 +1,19 @@
+An intrusion detector that runs on an IoT device must keep learning, because normal traffic drifts. But
+a detector that labels its own traffic can be walked toward an attack by a slow poisoner, and a defence
+that stops learning when traffic looks suspicious can be frozen by an attacker who trips it and leaves.
+From a single device's stream, honest drift and slow poisoning cannot be told apart. We observe that IoT
+devices rarely live alone: most honest drift is shared by a device's neighbours, while a poisoning
+campaign reaches only the devices its exploit reaches. Fleet-Orthogonal Adaptation (FOA) gives each
+device a robust consensus of vulnerability-diverse peers, exchanged as 92-byte authenticated ESP-NOW
+frames: the part of a device's update its peers back is applied in full, and the device-specific rest
+passes through a budget that never closes. We prove that an attacker on one device gains at most
+$B_0+Bt$ alarm radii of movement, that key-holding Byzantine peers add a bounded bias per cycle, that
+FOA has no freeze state, and that device-only drift and poisoning are indistinguishable for any rule.
+On all nine N-BaIoT devices with real Mirai and BASHLITE traffic, under strong shared drift, FOA keeps
+fleet false alarms at \FOAFleetFPR\ (single-device adaptation \AutoFleetFPR, gated defences
+\GateFleetFPR) while cutting attack-attributable compromise from \AutoComp\ to \FOAComp; it is never
+compromised by the classic boundary poisoner, resists a monoculture botnet that defeats same-model
+consensus, and is unaffected by a freeze attack that locks an alarm-rate switch-off at
+\KLFrozenFPR\ false alarms. On 40 weeks of real CESNET traffic it is never compromised. A C
+implementation matches the reference on every recorded cycle and adds about 22\,KB of flash to an ESP32
+build.

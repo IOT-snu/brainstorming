@@ -1,0 +1,17 @@
+\section{Conclusion}
+A detector that learns on the device needs a second witness, and an IoT fleet provides one. FOA lets
+each device take freely whatever drift its vulnerability-diverse peers also see, and rations only what
+is specific to it. It never stops learning, so it cannot be frozen; it bounds what an attacker on one
+device can do and how fast; and it costs one 92-byte frame per cycle and about 22\,KB of flash on an
+ESP32. On real IoT traffic with strong shared drift it was the only rule we tested that kept both
+poisoning and false alarms low. What it cannot do, and what no rule can, is tell a device's own honest
+change from an attack on that device; FOA turns that limit into a single, explicit rate. The next step
+is the four-node ESP32 testbed, where the drift, the radio and the energy are real.
+
+\section*{Artifacts}
+Code, data scripts, experiment logs and firmware are in the project repository: the simulator and all
+experiments (\texttt{experiments/foa}), the ESP32 firmware and its equivalence tests
+(\texttt{firmware}), and this paper's number generator (\texttt{paper/make\_numbers.py}).
+
+\section*{Acknowledgment}
+We thank Dr.~Karnish Nasrin Ahmed Tapadar for guidance in CSD457.
