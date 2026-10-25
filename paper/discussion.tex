@@ -21,9 +21,10 @@ the first harder, not impossible: N-BaIoT itself shows that one credential-guess
 infected all nine devices~\cite{nbaiot}. FOA then degrades to its residual budget and common-channel
 budget, which still bound the rate of movement (Theorem~\ref{thm:byz}), but not to safety.
 
-\textbf{Limits we measured.} Three results are against FOA and we report them as such. Three
-Byzantine peers out of seven, still a minority, compromised the victim during strong drift, because a
-consistent bias passes through our generous common budget. A device with a large drift of its own on
+\textbf{Limits we measured.} Three results are against FOA and we report them as such. Byzantine
+peers cannot compromise a device on their own, but together with a traffic poisoner they help it: with
+three of seven peers controlled, about half of the victims fell during strong drift, all of them victims
+whose attack traffic sits close to their benign traffic. A device with a large drift of its own on
 top of the shared one is lost by FOA (and by every budgeted variant), while single-device adaptation
 keeps it. Core-hiding and mimicry attackers at share 0.4 still compromised about a third of victims,
 mostly the two cameras whose scan traffic is closest to benign.

@@ -66,10 +66,25 @@ What we did, in order, including what did not work. Dates are 2026.
 - Bound of Corollary 1: 0 violations in 3,630 attacked runs of FOA and its budgeted variants and in the
   synthetic runs.
 
+## 25 Oct (later): the Byzantine question
+
+- E6 showed three of seven Byzantine peers compromising the victim during drift. Traces showed the real
+  mechanism: the poisoner alone nearly beats that victim (detection 92% and falling at the end), and the
+  Byzantine frames add a little spread growth through the common spread channel, which tips it.
+- Tried on development seeds: (a) a doubly robust common channel (direction from the device's own
+  median shift, significance from its own noise; peers only set the step size), (b) a common spread
+  budget as tight as the residual one. Neither changed the outcome; FOA is kept unchanged. Variants stay in
+  the code (`foa_own`, `foa_tcs`, `foa_own_tcs`).
+- New experiment E6b (held-out seeds, five victims): Byzantine peers alone never compromised anyone (0% up
+  to four peers). With a traffic poisoner: 0%, 2%, 40%, 56%, 60% for 0 to 4 Byzantine peers, against 80%
+  for single-device adaptation. Victims with large margins never fell.
+- Paired controls now treat Byzantine nodes as honest in the attacker-free twin (they used to send zero
+  vectors there).
+
 ## Known gaps
 
 - Fleet concurrency, drift (on N-BaIoT) and the poisoner are synthetic; hardware numbers are estimates.
 - A device with large own drift on top of shared drift is lost by FOA.
-- Byzantine minorities can win during drift; a tighter or drift-aware common budget is future work.
+- Byzantine minorities help a traffic poisoner beat borderline victims during drift; open problem.
 - The independent multi-agent code review planned for 24 Oct did not run (usage limit); the C core is
   verified against Python, and the Python is covered by unit tests, but a second reviewer is still owed.

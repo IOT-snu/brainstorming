@@ -39,13 +39,15 @@ class FoaState:
     ms_ema: float = 0.0
     ps_ema: float = 0.0
     pa_ema: float = 0.0
+    g_ema: np.ndarray = None
+    gn_ema: float = 0.0
     sig_ema: float = 0.0
     sigs_ema: float = 0.0
     log: dict = field(default_factory=dict)
 
     def __post_init__(self):
         z = lambda: np.zeros(self.D)
-        self.C, self.R, self.m_ema, self.p_ema = z(), z(), z(), z()
+        self.C, self.R, self.m_ema, self.p_ema, self.g_ema = z(), z(), z(), z(), z()
 
 
 def _weight(z, z0, z1):
@@ -58,7 +60,7 @@ def consensus_direction(st):
     return st.m_ema / n if n > 0 else None
 
 
-def foa_step(st, pol, rho, tj, dmu, dls, peer_dmu, peer_dls, own_along=0.0):
+def foa_step(st, pol, rho, tj, dmu, dls, peer_dmu, peer_dls, own_along=0.0, own_dmed=None, own_noise=0.0):
     """Returns (applied centre shift, applied log-spread change) and updates st in place.
     rho: calibrated alarm radius tau*s0; tj: cycles since the device joined; peer_*: verified peer proposals;
     own_along: eta * median projection of the device's core points on consensus_direction(st) (taken
@@ -97,7 +99,24 @@ def foa_step(st, pol, rho, tj, dmu, dls, peer_dmu, peer_dls, own_along=0.0):
         lam_s = 0.0
         if st.ms_ema != 0:
             lam_s = float(np.clip(st.ps_ema / st.ms_ema, 0.0, 1.0)) if pol.lam_gate else 1.0
-        a, a_s = w * lam * st.m_ema, ws * lam_s * st.ms_ema
+        if pol.common_dir == "own" and own_dmed is not None:
+            # Doubly robust common channel: the direction is the device's own robust (median) shift,
+            # which a minority of its traffic cannot steer; the peers only decide how far along it to
+            # go, up to the device's own robust magnitude. Byzantine peers can scale, not steer.
+            st.g_ema = (1 - al) * st.g_ema + al * np.asarray(own_dmed)
+            st.gn_ema = (1 - al) * st.gn_ema + al * own_noise
+            ng = float(np.linalg.norm(st.g_ema))
+            if pol.signif:     # significance of the device's OWN robust shift: no peer can move it
+                w = _weight(ng / max(st.gn_ema * shrink, 1e-12), pol.z0, pol.z1)
+            if ng > 0:
+                u = st.g_ema / ng
+                lam = float(np.clip(st.m_ema @ u / ng, 0.0, 1.0))
+                a = w * lam * ng * u
+            else:
+                a = np.zeros(D)
+            a_s = ws * lam_s * st.ms_ema
+        else:
+            a, a_s = w * lam * st.m_ema, ws * lam_s * st.ms_ema
         if pol.common_budget:
             a = project_ball(st.C + a, (pol.B0c + pol.Bc * tj) * rho) - st.C
             lim = pol.B0cs + pol.Bcs * tj

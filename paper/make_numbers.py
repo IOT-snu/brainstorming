@@ -173,6 +173,13 @@ E9 = load("E9")
 if E9:
     M["JoinComp"] = pct(mean(sel(E9, p=lambda x: x and x > 0), "compromised_attr"), 0)
 
+E6b = load("E6b")
+if E6b:
+    for f in range(5):
+        M[f"ByzT{'ZOTHF'[f]}"] = pct(mean(sel(E6b, policy="foa", traffic=True, f=f), "compromised_attr"), 0)
+    M["ByzAloneMax"] = pct(max(mean(sel(E6b, policy="foa", traffic=False, f=f), "compromised_attr") for f in range(1, 5)), 0)
+    M["ByzAuto"] = pct(mean(sel(E6b, policy="auto", traffic=True), "compromised_attr"), 0)
+
 E11 = load("E11")
 if E11:
     g = lambda p: mean(sel(E11, victim=-1, policy=p), "fpr_fleet_all")

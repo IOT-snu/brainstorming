@@ -34,7 +34,8 @@ discarded and learning never stops, so there is no state for a freeze attack to 
   peer-backed common part and a budgeted residual, with agreement measured robustly so that an attacker
   holding less than half a device's traffic can neither cancel nor fake it (Section~\ref{sec:design}).
 \item \textbf{Guarantees}: the attacker's extra movement is bounded by $B_0+Bt$ alarm radii, giving a
-  minimum time to compromise; $f<K/2$ key-holding Byzantine peers add only a bounded bias per cycle; no
+  minimum time to compromise; $f<K/2$ key-holding Byzantine peers add only a bounded bias per cycle (and
+alone never compromised a device in our runs); no
   input stops learning; and a proof that device-only drift and poisoning cannot be separated by any
   rule, so FOA's single rate $B$ is the honest place to put the trade-off (Section~\ref{sec:theory}).
 \item \textbf{Evaluation on all nine N-BaIoT devices} with real Mirai and BASHLITE traffic, physically

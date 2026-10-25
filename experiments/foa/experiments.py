@@ -54,6 +54,9 @@ BSWEEP = (0.00125, 0.0025, 0.005, 0.01, 0.02, 0.04)      # alarm radii per cycle
 for b in BSWEEP:
     VARIANTS[f"foa_B{b}"] = variant("foa", f"foa_B{b}", B=b, Bs=0.2 * b)
 VARIANTS["foa_meanlam"] = variant("foa", "foa_meanlam", robust_lam=False)
+VARIANTS["foa_own"] = variant("foa", "foa_own", common_dir="own")
+VARIANTS["foa_tcs"] = variant("foa", "foa_tcs", B0cs=0.1, Bcs=0.001)
+VARIANTS["foa_own_tcs"] = variant("foa", "foa_own_tcs", common_dir="own", B0cs=0.1, Bcs=0.001)
 VARIANTS["foa_joint"] = variant("foa", "foa_joint", joint=True)
 VARIANTS["foa_widespread"] = variant("foa", "foa_widespread", B0s=0.2, Bs=0.002)
 
@@ -108,7 +111,9 @@ def control_recall(task, members, streams, world, pname, eval_target):
     if key not in _CONTROL:
         if len(_CONTROL) > 400:
             _CONTROL.clear()
-        sim = FleetSim(members, streams, world, policy(pname), cycles=CYCLES, seed=task["seed"],
+        from dataclasses import replace as _r
+        honest = [_r(m, byzantine=False) for m in members]       # in the twin, every node is honest
+        sim = FleetSim(honest, streams, world, policy(pname), cycles=CYCLES, seed=task["seed"],
                        loss=task.get("loss", 0.0), join_mode=task.get("join_mode", "self"))
         _CONTROL[key] = sim.run(eval_target=eval_target)["rec"]
     return _CONTROL[key]
@@ -294,6 +299,18 @@ def grid(exp, seeds, quick=False):
             for loss in (0.0, 0.1, 0.3, 0.5, 0.7, 0.9):
                 T.append(dict(exp=exp, fleet="F9", seed=s, drift="strong", loss=loss, attackers=[att(8, "boundary", 0.3)],
                               policies=["foa"], tags=dict(kind="loss", loss=loss)))
+    elif exp == "E6b":  # Byzantine peers alone vs together with a traffic poisoner, every qualifying victim
+        for s in S:
+            for v in (0, 1, 2, 5, 8):
+                vend = INFO[data.SHORT[v]]["vendor"]
+                peers = [j for j in range(9) if j != v and INFO[data.SHORT[j]]["vendor"] != vend]
+                for f in (0, 1, 2, 3, 4):
+                    nodes = peers[:f]
+                    for traffic in (False, True):
+                        T.append(dict(exp=exp, fleet="F9", seed=s, drift="strong", byz_nodes=nodes,
+                                      byz=dict(victim=v) if f else None,
+                                      attackers=[att(v, "boundary", 0.3)] if traffic else [],
+                                      policies=["auto", "foa"], tags=dict(victim=v, f=f, K=len(peers), traffic=traffic)))
     elif exp == "E7":   # theory: budget sweep (safety) and liveness (idiosyncratic drift)
         Bs = [f"foa_B{b}" for b in BSWEEP]
         for s in S:

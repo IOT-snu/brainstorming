@@ -30,6 +30,8 @@ class Proposal:
     alarm: float           # alarm fraction of the batch
     mscore: float          # mean score of the batch
     along: float = 0.0     # eta * median projection of core points on a given direction (FOA agreement)
+    dmed: np.ndarray = None  # eta * (coordinate-wise median of core points - mu): robust own shift
+    dmed_noise: float = 0.0  # standard error of ||dmed|| under no shift (from the core's own MAD)
 
 
 class Detector:
@@ -90,6 +92,10 @@ class Detector:
         if len(core) < 5:
             return zero
         along = float(self.eta * np.median((core - self.mu) @ u)) if u is not None else 0.0
+        med = np.median(core, axis=0)
+        dmed = self.eta * (med - self.mu)
+        mad = 1.4826 * np.median(np.abs(core - med), axis=0)
+        dmed_noise = float(self.eta * 1.2533 * np.sqrt(np.sum(mad ** 2) / len(core)))
         d_core = core.mean(0) - self.mu
         step = self.eta * d_core
         nd = np.linalg.norm(d_core)
@@ -103,7 +109,7 @@ class Detector:
         if s_step > 0:
             frac = len(shell) / len(acc)
             s_step *= float(np.clip((frac - self.f0) / (0.25 * self.f0) + 1.0, 0.0, 1.0))
-        return Proposal(step, float(np.log((self.s + s_step) / self.s)), len(acc), len(core), alarm, ms, along)
+        return Proposal(step, float(np.log((self.s + s_step) / self.s)), len(acc), len(core), alarm, ms, along, dmed, dmed_noise)
 
     def apply(self, dmu, dls):
         self.mu = self.mu + dmu

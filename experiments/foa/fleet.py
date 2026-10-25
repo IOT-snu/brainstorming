@@ -59,6 +59,7 @@ class Policy:
     residual: str = "budget"
     robust_lam: bool = True     # agreement from the median projection of own core points
     joint: bool = False         # one budget for centre and spread residuals (ablation)
+    common_dir: str = "consensus"   # "own": doubly robust common channel (direction from own median shift)
     B0: float = 0.1             # residual budget, in alarm radii (tau * s0)
     B: float = 0.005
     B0s: float = 0.1            # residual log-spread budget (spread was the attackers' lever; see paper)
@@ -183,7 +184,7 @@ class FleetSim:
             rec = dict(t=t, tj=t - self.members[i].join, mu=det.mu.copy(), s=det.s, prop=prop, batch=self._last_batch,
                        peers=[(f[1].copy(), f[2]) for f in inbox], st_in={k: copy.deepcopy(v) for k, v in vars(st).items() if k != "log"})
         dmu, dls = foa_step(st, self.pol, det.tau * det.s0, t - self.members[i].join, prop.dmu, prop.dls,
-                            [f[1] for f in inbox], [f[2] for f in inbox], prop.along)
+                            [f[1] for f in inbox], [f[2] for f in inbox], prop.along, prop.dmed, prop.dmed_noise)
         if i == self.trace_device:
             rec.update(out_dmu=dmu.copy(), out_dls=dls, st_out={k: copy.deepcopy(v) for k, v in vars(st).items() if k != "log"})
             self.trace.append(rec)

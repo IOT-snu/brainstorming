@@ -45,13 +45,19 @@ by decoy share.}
 \end{figure*}
 
 \subsection{Attacks on the gossip}
-\textbf{Byzantine peers.} With strong drift, FOA is not compromised with one or two of the victim's
-seven peers fully controlled by the attacker (\ByzO, \ByzT), but it is with three (\ByzH), although three
-of seven is below the geometric median's breakdown point. This is Theorem~\ref{thm:byz}'s caveat in
-practice: during drift the victim agrees with the consensus, so a consistent bias of order $C_\alpha r$
-per cycle is applied, and our default common budget is generous enough to let it accumulate. Without
-drift the victim's own traffic does not back the biased consensus and no number of Byzantine peers
-compromised it. A tighter common budget would trade shared-drift liveness for this case.
+\textbf{Byzantine peers.} We give the attacker full control, keys included, of $f$ of a victim's seven or
+eight diverse peers, during strong drift, for five victims (Figure~\ref{fig:gossip}a). On their own,
+Byzantine peers compromised no victim at any $f$ up to four (\ByzAloneMax): the victim's own traffic does
+not back what they send, and its agreement $\lambda$ stays low. Combined with a traffic poisoner on the
+victim, they erode FOA's protection gradually: \ByzTZ, \ByzTO, \ByzTH\ of victims compromised with
+0, 1 and 3 Byzantine peers and \ByzTF\ with four, against \ByzAuto\ for single-device adaptation under
+the poisoner alone. The victims that fall are the three closest to their benign traffic (1.5 to 1.9 alarm
+radii); the two with larger margins were never compromised. Tracing the runs, the extra help travels
+mostly through the common spread channel: Byzantine frames report spread growth, the poisoned victim's
+own proposals agree, and a small extra inflation tips a borderline victim. We tried two repairs on the
+development seeds (letting the device's own median shift choose the common direction, with significance
+judged from its own noise; and a tighter common spread budget); neither changed this outcome, so we
+report it as a limit.
 \textbf{Keyless attackers.} Twelve forged frames per cycle plus replays of the previous cycle's frames
 had no effect (\SybilFOA\ compromised; every forged and replayed frame was rejected). With
 authentication switched off, the same attacker compromised the victim in \SybilNoHMAC\ of runs.
@@ -62,7 +68,7 @@ its residual budget and false alarms rise.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{figures/fig_gossip.pdf}
-\caption{Attacks on the gossip. (a) Byzantine peers with valid keys. (b) Frame loss.}
+\caption{Attacks on the gossip. (a) Byzantine peers with valid keys, alone and together with a traffic poisoner on the victim (strong drift, 5 victims, 10 held-out seeds). (b) Frame loss.}
 \label{fig:gossip}
 \end{figure*}
 

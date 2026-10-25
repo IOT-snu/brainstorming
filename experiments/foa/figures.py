@@ -229,13 +229,15 @@ def fig_gossip():
     """E6: Byzantine peers with stolen keys, and frame loss."""
     fig, ax = plt.subplots(1, 2, figsize=(W2, 2.1))
     fs = [0, 1, 2, 3, 4, 5]
-    for d, ls, lab in (("strong", "-", "with strong shared drift"), ("none", (0, (3, 2)), "no drift")):
-        ys, es = zip(*[rate_ci([r["compromised_attr"] for r, _ in rows_of("E6", kind="byzantine", f=f, drift=d, policy="foa")]) for f in fs])
-        ax[0].plot(fs, ys, marker="o", ms=3, lw=2.0 if d == "strong" else 1.3, ls=ls, color=COLOR["foa"], label=f"FOA, {lab}")
-    ax[0].text(0.1, 62, "mean-based and no-common-budget\nvariants give identical curves", fontsize=5.5, color=MUTED)
-    ax[0].axvline(3.5, color=MUTED, lw=0.8); ax[0].text(3.6, 50, "half of the\n7 peers", fontsize=6, color=MUTED)
-    ax[0].set_xlabel("Byzantine peers (of 7)"); ax[0].set_ylabel("victim compromised (%)"); ax[0].set_ylim(-3, 103)
-    ax[0].set_title("a. Peers with stolen keys"); ax[0].legend(fontsize=6, loc="upper left")
+    fs = [0, 1, 2, 3, 4]
+    for pol, traffic, lab, ls in (("foa", True, "FOA: Byzantine peers + traffic poisoner", "-"),
+                                  ("foa", False, "FOA: Byzantine peers alone", (0, (3, 2))),
+                                  ("auto", True, "single device: traffic poisoner", "-")):
+        ys = [rate_ci([r.get("compromised_attr") for r, _ in rows_of("E6b", policy=pol, f=f, traffic=traffic)])[0] for f in fs]
+        ax[0].plot(fs, ys, marker="o", ms=3, ls=ls, lw=2.0 if pol == "foa" else 1.3, color=COLOR[pol], label=lab)
+    ax[0].set_xlabel("Byzantine peers (of the victim's 7 or 8)"); ax[0].set_ylabel("victim compromised (%)"); ax[0].set_ylim(-3, 103)
+    ax[0].set_title("a. Peers with stolen keys (strong drift)")
+    ax[0].legend(fontsize=5.5, loc="upper left", bbox_to_anchor=(0.0, 0.74)); ax[0].set_xticks(fs)
     losses = [0.0, 0.1, 0.3, 0.5, 0.7, 0.9]
     y1 = [ci([100 * r["fpr_fleet_after"] for r, _ in rows_of("E6", kind="loss", loss=l)])[0] for l in losses]
     y2 = [rate_ci([r["compromised_attr"] for r, _ in rows_of("E6", kind="loss", loss=l)])[0] for l in losses]
