@@ -69,110 +69,78 @@ doc.addPageTemplates([PageTemplate("p", [Frame(2 * cm, 1.8 * cm, A4[0] - 4 * cm,
 W = A4[0] - 4 * cm
 S = []
 
+# numbers come from the paper's generated macros, so report and paper always agree
+import re
+NUM = {k: v.replace("\\%", "%").replace("\\,", " ").replace("{,}", ",")
+       for k, v in re.findall(r"\\newcommand\{\\(\w+)\}\{(.*)\}", open(os.path.join(HERE, "..", "paper", "numbers.tex")).read())}
+FIGS = os.path.join(EXP, "foa", "figures")
+
 # ============================================================ PAGE 1
 S += [P("CSD457 INTERNET OF THINGS  ·  GROUP G-04  ·  OCTOBER 2026", "eye"),
-      P('Progress report: <font color="#0071E3">Poison-Resilient</font> On-Device Intrusion Detection for Drifting IoT', "cover"),
-      Spacer(1, 4), P("Rishit Kamboj and Farhan Naik  ·  Changes since the proposal deck, progress, and what we will build and test next.", "sub"),
+      P('Progress report: <font color="#0071E3">Fleet-Orthogonal Adaptation</font>, poison-resilient on-device intrusion detection for drifting IoT', "cover"),
+      Spacer(1, 4), P("Rishit Kamboj and Farhan Naik  ·  What we built and measured, what it shows, and what the hardware will add.", "sub"),
       P("The project in one paragraph", "h2"),
-      P("An IoT device that learns what normal traffic looks like can be taught, slowly, that attacks are normal. We are "
-        "building a detector that <b>keeps learning on an ESP32</b> and cannot be steered that way. Our first method "
-        "rationed the part of each update that moves toward a known attack. New 2026 papers prove that a detector "
-        "watching one stream cannot reliably tell honest change from slow poisoning, so the next step gives each device "
-        "a <b>second source of evidence: its neighbours</b>. Devices on the same network see the same honest drift; an "
-        "attacker usually reaches only one."),
+      P("An IoT device that learns what normal traffic looks like can be taught, slowly, that attacks are normal; and a defence that "
+        "stops learning when traffic looks suspicious can be frozen. From one device's traffic alone, honest change and slow "
+        "poisoning cannot be told apart. Our method, <b>Fleet-Orthogonal Adaptation (FOA)</b>, uses the device's neighbours as a "
+        "second witness: the part of an update that vulnerability-diverse peers also see is learned in full, the device-only rest "
+        "is admitted through a budget that never closes. It is implemented, tested on all nine N-BaIoT devices and on 40 weeks of "
+        "real CESNET traffic, written up as an IEEE-format paper, and ported to ESP32 firmware that is waiting for the boards."),
       P("Where we stand", "h2")]
 S.append(table([["Area", "Status", "One line"],
-                ["Idea and literature", ok(), "3 research rounds; 36 references compiled, 26 from 2025 to 2026 (last page)"],
-                ["Method v1: Threat-Orthogonal Adaptation (TOA)", ok(), "Works on synthetic and real N-BaIoT traffic"],
-                ["Method v2: signature-free version", ok(), "Beats a normal and a smart attacker on real traffic; fails if the attack hides inside strong honest drift"],
-                ["Freeze attack on published defence designs", ok(), "Tested on three published gate mechanisms (simplified re-implementations): one is lockable (page 2)"],
-                ["Method v3: peer-witnessed adaptation (FOA)", part("Designed"), "Mechanism and tests written; not yet implemented"],
-                ["Reproducible real data", ok(), "get_nbaiot.py downloads just the files we need"],
-                ["ESP32 hardware", todo(), "No measurements yet; parts list and wiring on pages 4 to 5"]],
-               [5.6 * cm, 1.9 * cm, W - 7.5 * cm]))
-S += [P("What changed since the proposal deck (24 September)", "h2")]
-S += B(["<b>Real traffic.</b> Real N-BaIoT doorbell and Mirai packets added. Naive learning is poisoned at 10 to 20% attacker share.",
-        "<b>Signature-free method</b> added, so TOA no longer needs a known attack signature. Its weakness (an attack hidden in strong "
-        "honest drift) is, per three 2026 papers, a proven limit of any single-stream detector; the way out is outside evidence.",
-        "<b>Novelty narrowed honestly:</b> ANTIDOTE (2009) already defends a server-side detector, and every direction we checked was "
-        "only partly new, so we claim a specific combination (page 3).",
-        "<b>Freeze attack now tested on published defence designs,</b> not just our own baselines."])
-S += [P("Corrections and decisions", "h2"),
-      P("The 10% figure holds only for the scan attack (20% for ack and syn). The 52% traffic-drop figure came from an outside analysis "
-        "of the CESNET data, not from the CESNET paper. <b>We need:</b> how many ESP32 boards and INA219 modules we have, and the real "
-        "mid-review and final dates.", "p")]
+                ["Method (FOA) and theory", ok(), "Algorithm, four results with proofs (containment, Byzantine bound, frontier, no freeze state)"],
+                ["Simulation on real traffic", ok(), "All 9 N-BaIoT devices, 8 baselines, 12 attacker types, about 19,500 fleet runs, held-out seeds"],
+                ["Real drift", ok(), "40 weeks of CESNET traffic, 12 addresses of one institution"],
+                ["Freeze attack", ok(), "Shown on the alarm-rate switch-off; FOA provably and measurably immune"],
+                ["Paper", ok(), "paper/main.pdf, 11 pages, every number generated from the results"],
+                ["ESP32 firmware", part("Built, not run"), "Compiles; matches the Python reference on every recorded cycle; adds about 22 KB flash"],
+                ["ESP32 measurements", todo(), "Latency, energy and radio loss need the boards"]],
+               [5.0 * cm, 2.4 * cm, W - 7.4 * cm]))
+S += [P("Main results", "h2")]
+S += B([f"<b>Following honest drift.</b> Under strong network-wide drift FOA ends at <b>{NUM['FOAFleetFPR']}</b> false alarms; a single "
+        f"device learning alone {NUM['AutoFleetFPR']}, defences that pause learning {NUM['GateFleetFPR']}, a detector that never learns {NUM['StrongStaticFPR']}.",
+        f"<b>Poisoning hidden inside drift.</b> Compromised overall: FOA <b>{NUM['FOAComp']}</b>, single device {NUM['AutoComp']}. "
+        f"The classic slow poisoner never beat FOA ({NUM['FOABoundaryComp']}).",
+        f"<b>Monoculture botnet.</b> Same-model consensus (CIoTA style) {NUM['MonoCiotaThree']} compromised once most cameras of a model are "
+        f"infected; FOA with diverse peers {NUM['MonoFOAThree']}.",
+        f"<b>Freeze attack.</b> 5% decoy traffic locks an alarm-rate switch-off at <b>{NUM['KLFrozenFPR']}</b> false alarms for good; FOA unchanged.",
+        f"<b>Real CESNET drift.</b> FOA compromised in {NUM['CesFOAComp']} of runs, single device {NUM['CesAutoComp']}.",
+        f"<b>Bound.</b> The proven minimum time to compromise held in every attacked FOA run ({NUM['BoundViolations']} violations)."])
 S.append(PageBreak())
 
 # ============================================================ PAGE 2
-S += [P("RESULTS", "eye"), P("What we have shown so far", "h1")]
-S += [table([["Test", "Result"],
-                ["Synthetic, attacker at 40% of traffic", "Naive: attack hidden after 24 cycles. Freeze-style defences: 85 to 87% false alarms. TOA: 100% detection, 0.3% false alarms"],
-                ["Real doorbell, boundary attacker, 10 to 50% share", "Naive fails at 10% (scan) or 20% (ack, syn). TOA and signature-free: 100% detection, 0.8% to 1.5% false alarms"],
-                ["Real traffic, smart attacker hiding poison in the core", "Signature-free: 100% detection, 0.2% to 0.7% false alarms"],
-                ["Strong honest drift and attack together (synthetic)", "Signature-free still poisoned in 3 of 4 settings (2% to 46% detection): the open problem"],
-                ["New device joins (real thermostat traffic)", "All detectors about 34% false alarms: one shared detector cannot absorb a new device"]],
-               [5.6 * cm, W - 5.6 * cm]),
-      P("New: the freeze attack on published defence mechanisms", "h2"),
-      P("Many published defences protect themselves by <b>withholding updates when something looks suspicious</b>. We "
-        "re-implemented the gating rule of three of them around our detector (simplified versions of the mechanism, not the "
-        "full systems; rule details to be checked against the PDFs). The attacker sends only <b>loud decoy traffic that "
-        "never poisons anything</b>. It holds a gate closed while honest drift begins, then leaves. If the detector "
-        "cannot follow the drift, its own false alarms keep the gate shut."),
-      ]
-S += [table([["Defence mechanism", "No attacker, false alarms at the end (synthetic / real)", "After the attacker left (synthetic)", "After the attacker left (real packets)", "Verdict"],
-                ["Alarm-rate switch-off (Kloft and Laskov, JMLR 2012, style)", "1.3% / 2.7%", "52%", "100%", "<b>Locked out</b>"],
-                ["Outlier-ratio gate (DriftXpert, 2026, style)", "1.3% / 2.7%", "1.2%", "2.7%", "Recovers"],
-                ["Score-spike rollback (T2T, 2026, style)", "1.3% / 2.7%", "1.2%", "2.7%", "Recovers"],
-                ["Ours (no gate)", "1.1% / 0.8%", "1.1%", "0.8%", "Unaffected"]],
-               [5.2 * cm, 2.9 * cm, 2.9 * cm, 2.9 * cm, W - 13.9 * cm]),
-      Spacer(1, 3),
-      P("<b>How much attacking it takes.</b> Against the alarm-rate gate, the lock-in is a threshold effect: too short a push "
-        "and the gate reopens and the detector catches up. Holding the gate for about 40 cycles (synthetic) or 15 cycles "
-        "(real, faster drift) locked it in <b>10 of 10 runs</b>, with decoys as low as 5% of traffic (about 200 to 600 packets). "
-        "Gates whose baseline moves with the traffic (outlier ratio) or that only roll back two cycles (T2T) were not vulnerable "
-        "as modelled. A fourth, confident-sample stop rule (RTTAD style), broke even with no attacker, so our simplified version "
-        "says nothing about the attack and is excluded.", "p"),
-      img(os.path.join(EXP, "freeze_published_real.png"), W * 0.92),
-      P("Real N-BaIoT doorbell packets with an injected gradual drift; decoys are real Mirai udp packets; 5 seeds. Purple: attacker "
-        "present then leaves. Grey: same gate, no attacker. Blue dashed: ours.", "small"),
-      PageBreak()]
+S += [P("RESULTS", "eye"), P("Two figures that carry the story", "h1"),
+      img(os.path.join(FIGS, "fig_headline.png"), W),
+      P("Poisoning hidden inside strong shared drift, 7 victims, 10 held-out seeds. (a) Boundary poisoner: FOA is never compromised. "
+        "(b) FOA alone is low on both compromise and false alarms. (c) Detection of the target attack over time.", "small"),
+      Spacer(1, 6), img(os.path.join(FIGS, "fig_liveness.png"), W),
+      P("False alarms with no attacker. Shared drift is followed through the peers; drift on one device only is admitted at the "
+        "budget rate, the trade-off the theory says no rule can avoid.", "small"),
+      P("What goes against us (reported in the paper)", "h2")]
+S += B([f"A device whose own traffic changes a lot, on top of shared drift, is lost by FOA (single-device adaptation keeps it): device-only drift "
+        f"ends at {NUM['FOAIdioFPR']} false alarms for FOA against {NUM['AutoIdioFPR']}.",
+        f"Malicious peers alone never compromised anyone, but helping a traffic poisoner they beat borderline victims: {NUM['ByzTH']} with "
+        f"three of seven peers.",
+        f"Core-hiding and mimicry poisoners at 40% share still win about a third of the time ({NUM['FOACoreHigh']}, {NUM['FOAMimicHigh']}).",
+        "Fleet concurrency, the N-BaIoT drift and the poisoner are simulated; hardware numbers are estimates."])
+S.append(PageBreak())
 
 # ============================================================ PAGE 3
-S += [P("DIRECTION", "eye"), P("What our research is now about", "h1"),
-      KEY("Fleet of ESP32 detectors that keep learning honest change but cannot be steered, using neighbouring devices as "
-          "witnesses, and measure what it costs on real hardware."),
-      P("Research questions", "h2")]
-S += B(["<b>RQ1.</b> Can peer witnesses let a device keep learning honest drift while resisting poisoning, where a single-stream "
-        "detector provably cannot?",
-        "<b>RQ2.</b> Which published defences fall to a freeze attack, and does never-stopping adaptation avoid it? "
-        "(Answered in simulation; to repeat on the ESP32.)",
-        "<b>RQ3.</b> What does it cost on an ESP32 in memory, latency, radio bytes and energy?"])
-S += [P("Method: Fleet-Orthogonal Adaptation (FOA)", "h2"),
-      P("Each device keeps its own centre-and-spread detector. Every cycle it proposes an update from the dense core of its own "
-        "traffic and shares it (10 numbers, signed, about 72 bytes) with peers over ESP-NOW. The peers' geometric median is the "
-        "<b>common part</b> (network-wide drift); the rest is the <b>residual</b>.")]
-S += B(["Common part: applied in full, so honest drift is learned and the detector never freezes.",
-        "Residual: goes through TOA's slow budget, so a campaign only one device sees is rationed.",
-        "Peers differ in vendor or firmware, so one exploit cannot make several devices agree.",
-        "A new device starts from its peers' median and learns under the residual budget, bounding join-time poisoning."])
-S += [table([["Closest published work", "How we differ"],
-                ["CIoTA (NDSS DISS 2018, JPDC 2020): same-firmware devices must agree; disagreement is discarded", "Diverse peers, so a one-exploit botnet cannot fake agreement; the disagreeing part is admitted slowly, not discarded"],
-                ["WARDEN/CDC and two other 2026 theory papers: single-stream limits", "A second stream escapes them; we must prove that as our own theorem"],
-                ["Gate-based defences (Kloft and Laskov, DriftXpert, T2T, OWAD)", "FOA has no stop gate; the freeze-attack study above shows why that matters"]],
-               [8.4 * cm, W - 8.4 * cm]),
-      P("Every candidate direction was only partly new in our prior-art checks, so the claim is a specific combination, not a first.", "small"),
-      P("What we will test", "h2")]
-S += [table([["#", "Test", "Against", "We win if", "Status"],
-                ["1", "Attack hidden inside strong honest drift", "Signature-free single stream; WARDEN-style frozen reserve", "FOA keeps detection where single-stream fails", todo("Week 1")],
-                ["2", "Monoculture botnet reaches several same-firmware peers", "CIoTA-style same-firmware consensus", "Diverse peers hold; same-firmware consensus is fooled", todo("Week 1")],
-                ["3", "Freeze attack on published gates", "Kloft and Laskov, DriftXpert, T2T styles", "Gated defences lock out; FOA does not", ok("Done in sim")],
-                ["4", "New device joins; adaptive attackers (core-hiding, pulsing, omission)", "One shared detector; naive", "False alarms near nominal; no attacker beats the budget", todo("Week 2")],
-                ["5", "ESP32 cost: RAM, latency, radio bytes, energy", "Naive detector on the same board", "Overhead small enough to justify", todo("Week 3")]],
-               [0.6 * cm, 4.6 * cm, 4.0 * cm, 4.6 * cm, W - 13.8 * cm]),
-      P("Data: N-BaIoT doorbell, thermostat and cameras as peers (devices were recorded separately, so shared drift is injected and "
-        "labelled synthetic); the real ESP32 fleet with a router change supplies genuine shared drift. Headline figure: under a "
-        "monoculture botnet, same-firmware consensus is compromised while diverse peers hold; plus false alarms after the attacker "
-        "leaves.", "small"), PageBreak()]
+S += [P("METHOD AND FIRMWARE", "eye"), P("How FOA works and what is ready for the boards", "h1"),
+      KEY("Learn freely what the neighbours also see; ration what only this device sees; never stop learning."),
+      img(os.path.join(HERE, "..", "paper", "fig_system_preview.png"), W) if os.path.exists(os.path.join(HERE, "..", "paper", "fig_system_preview.png")) else Spacer(1, 1),
+      P("Firmware status", "h2")]
+S += [table([["Check", "Result"],
+                ["C core vs Python reference, 480 recorded cycles", "0 mismatches"],
+                ["Tampered gossip frames accepted (bit flips, wrong keys, replays)", "0 of 23,104"],
+                ["HMAC-SHA256, RFC 4231 test vector", "pass"],
+                ["Node firmware for ESP32 (Arduino core 3.3.12)", "915 KB flash, 69 KB RAM; FOA's own share about 22 KB / 20 KB"],
+                ["Power monitor (INA219, no library)", "compiles; about 1 kHz samples"],
+                ["Laptop tools", "poisoner (boiling frog, pulse, decoy, flood) and collector (latency, peers, mJ per cycle)"]],
+               [8.0 * cm, W - 8.0 * cm]),
+      P("Hardware-day steps are in firmware/README.md: wire the INA219, fix the router channel, flash four nodes, record 20 minutes "
+        "of clean traffic to fit the shared space, then run idle, drift, poisoning and freeze sessions.", "small"),
+      PageBreak()]
 
 # ============================================================ PAGE 4: hardware diagrams
 S += [P("HARDWARE", "eye"), P("IoT set-up and wiring", "h1"),
@@ -184,7 +152,7 @@ S += [P("HARDWARE", "eye"), P("IoT set-up and wiring", "h1"),
         "the ESP32 DevKitC are GPIO21 (SDA) and GPIO22 (SCL).", "small"), PageBreak()]
 
 # ============================================================ PAGE 5: parts and plan
-S += [P("PARTS AND PLAN", "eye"), P("What we need, and the next four weeks", "h1")]
+S += [P("PARTS AND PLAN", "eye"), P("What we need, and what comes next", "h1")]
 S += [table([["Item", "Qty", "Why"],
                 ["ESP32 development boards (for example ESP32-DevKitC)", "4, plus 1 for monitoring", "Fleet nodes A to D and the power monitor"],
                 ["INA219 current-sensor module, 5 V supply or USB breakout", "1 to 2", "Measures a node's power and energy"],
@@ -195,22 +163,19 @@ S += [table([["Item", "Qty", "Why"],
       P("Software: ESP-IDF or the Arduino core (ESP-NOW and mbedTLS HMAC are standard), Python and NumPy, Mosquitto, and our experiment "
         "scripts. Two run modes: <b>replay</b> (N-BaIoT features fed over serial, for reliable cost numbers) and <b>live</b> (the "
         "board's own telemetry). Measured on the board: peak RAM and flash, latency per update and per signed message, ESP-NOW bytes "
-        "per learning event, and energy per update from the INA219. Our estimate is about 1,000 multiply-adds and under 10 KB per "
-        "packet on a 240 MHz, 520 KB part; that is an estimate until we measure it.", "p"),
-      P("Four-week plan", "h2")]
-S += [table([["Week", "Work", "Output"],
-                ["1", "Implement FOA in simulation: geometric median, signed gossip, two cumulative budgets, join rule. Add the CIoTA-style baseline. Run tests 1 and 2. Read the three unread papers. Order or check parts", "FOA results in simulation"],
-                ["2", "Attacker matrix and test 4. Build the headline figure and the mid-review pack. Port the detector to the ESP32 in replay mode. Wire the INA219", "First real results; board running"],
-                ["3", "Bring up the ESP32 fleet with FOA over ESP-NOW. Router change as real shared drift. Measure RAM, latency, bytes and energy (test 5)", "Hardware demo and cost numbers"],
-                ["4", "Proofs as a stated assumption plus the matching negative case; ablations (peer count, budget, diverse vs random peers); IEEE report, code package with README, demo", "Final deliverables"]],
-               [1.3 * cm, W - 5.8 * cm, 4.5 * cm]),
-      P("To fit four weeks we drop the CESNET real-drift test and a separate vendor-specific-drift test, and keep the proof minimal.", "small"),
+        "per learning event, and energy per update from the INA219. The firmware already logs the time of every stage; our current "
+        "figure (about 2 ms of compute per 10 s learning cycle) is an estimate until we measure it.", "p"),
+      P("Next steps", "h2")]
+S += [table([["When", "Work", "Output"],
+                ["Boards arrive", "Flash four nodes and the monitor; fit the shared basis on clean testbed traffic; idle baseline", "Real latency, RAM, bytes, energy per cycle"],
+                ["Week after", "Real shared drift (a router or telemetry change on every node); laptop poisoner; decoy freeze test", "FOA on real hardware with real drift"],
+                ["Before submission", "Independent code review; read the three unread preprints; replace estimates in the paper with measurements", "Final paper and demo"]],
+               [2.6 * cm, W - 7.1 * cm, 4.5 * cm]),
       P("Risks and fallbacks", "h2")]
 S += [table([["Risk", "Fallback"],
-                ["Novelty is partial (CIoTA is close); some 2026 papers are preprints", "Claim the specific combination and win test 2; verify numbers against the PDFs before citing"],
-                ["Peer concurrency on N-BaIoT is synthetic", "Let the real ESP32 router change carry the real-drift claim"],
-                ["Multi-device plumbing or on-board features slip", "Ship the simpler variant that learns threat directions from its own alarms; use replay mode for cost; the freeze-attack study stands alone"],
-                ["The multi-device proof is harder than it looks", "State it as an assumption plus the matching negative result"]],
+                ["Novelty is partial (CIoTA is close); several 2026 papers are preprints", "We beat CIoTA-style consensus head to head; claims say 'we found no prior work', never 'first'"],
+                ["Simulated concurrency and drift on N-BaIoT", "CESNET supplies real drift; the testbed supplies a real shared change"],
+                ["ESP-NOW and Wi-Fi on one channel misbehave", "Fall back to UDP gossip through the router (same frames, same HMAC)"]],
                [6.2 * cm, W - 6.2 * cm]),
       PageBreak()]
 
