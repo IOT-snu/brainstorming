@@ -11,7 +11,8 @@ and the victim rule) were made on development seeds 0 and 1; every number below 
 2 to 11. A device is a victim only if its target attack sits at least 1.3 alarm radii from its own
 benign traffic under the calibrated static detector (median score over $\tau$). Philips (1.04) and
 SimpleHome XCS7-1002 (1.16) fail this test; no centroid detector protects an attack that close for
-long, and they remain in the fleet as peers. Finally, honest drift by itself can carry benign traffic
+long, and they remain in the fleet as peers. (The margins were measured on the held-out attack traffic
+with the static detector, before any adaptive run; the rule selects victims, it does not tune any method.) Finally, honest drift by itself can carry benign traffic
 into an attack region: on one camera, even an attacker-free run loses its scan detection under strong
 drift. Every attacked run is therefore paired with the same run without the attacker, and a victim
 counts as compromised only when it loses detection that its attacker-free twin keeps.
