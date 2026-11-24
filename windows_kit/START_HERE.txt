@@ -1,0 +1,75 @@
+FOA TESTBED - WINDOWS STEP BY STEP          (Group G-04, Rishit Kamboj and Farhan Naik)
+=====================================================================================
+All the .bat files are in this folder. Double-click them in number order.
+Full wiring diagram: build_guide.pdf (page 3).
+
+PART A - SETUP (once per laptop, about 20 minutes, needs internet)
+-----------------------------------------------------------------
+1. Unzip this folder somewhere simple, e.g.  C:\FOA
+2. Double-click 1_install_tools.bat. When it finishes, CLOSE the window.
+3. Double-click 2_setup_arduino.bat.
+   (If it says "arduino-cli is not recognized", restart the laptop and run it again.)
+4. Turn on your phone hotspot on 2.4 GHz (iPhone: turn on "Maximize Compatibility").
+   Connect THIS laptop to it. Open Command Prompt, type  ipconfig  and note the
+   "IPv4 Address" under Wi-Fi, e.g. 192.168.43.20
+5. Open  firmware\esp8266_foa\foa_config.h  in Notepad and change three lines:
+       #define WIFI_SSID "your hotspot name"
+       #define WIFI_PASS "your hotspot password"
+       #define COLLECTOR_IP 192, 168, 43, 20      <- this laptop's IP, COMMAS not dots
+   Save.
+
+PART B - FLASH THE FOUR BOARDS (about 20 minutes)
+-------------------------------------------------
+6. Plug in ONE ESP8266. Double-click 3_find_ports.bat and note its COM port.
+   Not listed? Try another USB cable (some only charge), or install the driver:
+   CH340 (search "CH340 driver", wch.cn) or CP2102 (search "CP210x driver", silabs.com).
+7. Double-click 4_flash_node.bat, type the COM port and node number 0.
+8. Double-click 5_watch_node.bat. You should see  BOOT,0,wifi=1,...  (Ctrl+C to stop).
+   wifi=0 means wrong hotspot name/password or the hotspot is on 5 GHz.
+9. Unplug it, stick a label "0" on it. Repeat steps 6-8 for the other boards as 1, 2, 3.
+
+PART C - WIRING (unplug a board before wiring it)
+-------------------------------------------------
+Pin names (D1, D2, ...) are printed on the NodeMCU. Use breadboard rails for 3V3 and GND.
+
+Node 0:  OLED  VCC->3V3  GND->GND  SDA->D2  SCL->D1
+Node 1:  OLED  VCC->3V3  GND->GND  SDA->D2  SCL->D1
+         DHT22 + ->3V3   out->D5   - ->GND
+         D6 -> 220 ohm -> RED LED long leg,   short leg -> GND
+         D7 -> 220 ohm -> GREEN LED long leg, short leg -> GND
+Node 2:  DHT22 + ->3V3   out->D5   - ->GND
+Node 3:  DHT22 + ->3V3   out->D5   - ->GND
+
+Check: plug each in and run 5_watch_node.bat. The BOOT line shows
+  Node 0: oled=1      Node 1: oled=1 dht22=1      Nodes 2,3: dht22=1
+
+PART D - RUN IT
+---------------
+10. Plug in all four boards (USB hub if needed). Run 3_find_ports.bat to get all COM ports.
+11. Double-click 6_run_fleet.bat, enter all four ports, run name "idle1".
+    Wait about 1 minute: OLEDs go from "Calibrating" to "normal", peers 3, green LED on.
+    Leave it 10 minutes = idle baseline.
+12. While it runs, double-click 7_attack.bat
+       Node 1 IP: from Node 1's BOOT line (ip=...)
+       mode: flood, duration: 60
+    Node 1's RED LED and OLED should switch to ALARM.  <- real detection on hardware
+13. Stop logging (Ctrl+C). Double-click 8_summarise_run.bat to see latency and peers.
+
+PART E - INA226 ENERGY MONITOR (once it is soldered)
+----------------------------------------------------
+14. INA226 to Node 0:  VCC->3V3  GND->GND  SDA->D2  SCL->D1  (same wires as the OLED)
+    ALE: nothing.  VBS: wire it to the INA226's own IN- pin.
+15. Node 1's USB cable: strip the middle, cut ONLY the RED wire.
+    Red from the LAPTOP side -> IN+ ;  red from the BOARD side -> IN-.
+    White, green, black stay uncut. Tape everything.
+16. Plug Node 0 in, run 5_watch_node.bat: BOOT line shows ina226=1, then PWR,... lines
+    with about 70-150 mA while Node 1 runs. About 0 mA = red wire bypasses the shunt.
+17. Full experiment: build_guide.pdf section 7 (calibration run, idle, network change,
+    boiling poisoning, flood, decoy freeze attack, summarise).
+
+TROUBLESHOOTING
+---------------
+- "arduino-cli not recognized": restart the laptop, run 2_setup_arduino.bat again.
+- Upload fails: hold the FLASH button on the board while it says "Connecting...".
+- peers 0: boards are not on the same hotspot.
+- If you change laptop or hotspot: update foa_config.h and flash all four again.
