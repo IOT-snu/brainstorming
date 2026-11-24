@@ -107,6 +107,73 @@ draws now flows through the 0.1\,$\Omega$ shunt.
 \end{tikzpicture}
 \end{center}
 
+
+\newpage
+\section*{4b. Full circuit diagram}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,
+  mcu/.style={draw=black!70,line width=0.8pt,fill=black!3,minimum width=2.6cm,minimum height=4.6cm},
+  mod/.style={draw=black!60,fill=white,minimum width=2.3cm,align=center,font=\sffamily\scriptsize},
+  pl/.style={font=\sffamily\scriptsize},
+  dot/.style={circle,fill,inner sep=1pt}]
+% ---------- Node 0
+\node[mcu] (A) at (0,0) {};
+\node[font=\sffamily\bfseries\small] at (0,2.55) {Node 0 (NodeMCU)};
+\foreach \y/\p in {1.8/3V3,1.2/GND,0.6/D2,0.0/D1} {\node[pl,anchor=east] at (1.25,\y) {\p}; \coordinate (A\p) at (1.3,\y);}
+\node[mod,minimum height=2.6cm] (INA) at (4.6,1.0) {};
+\node[font=\sffamily\bfseries\scriptsize] at (4.6,2.5) {INA226 (R100)};
+\foreach \y/\p in {1.95/VCC,1.5/GND,1.05/SDA,0.6/SCL,0.15/ALE,-0.3/VBS} {\node[pl,anchor=west] at (3.5,\y) {\p}; \coordinate (I\p) at (3.45,\y);}
+\node[pl,anchor=east] at (5.75,1.5) {IN+}; \coordinate (IINp) at (5.8,1.5);
+\node[pl,anchor=east] at (5.75,0.3) {IN$-$}; \coordinate (IINm) at (5.8,0.3);
+\node[mod,minimum height=1.6cm] (OL0) at (4.6,-2.2) {};
+\node[font=\sffamily\bfseries\scriptsize] at (4.6,-1.25) {OLED SSD1306};
+\foreach \y/\p in {-1.6/VCC,-2.0/GND,-2.4/SDA,-2.8/SCL} {\node[pl,anchor=west] at (3.5,\y) {\p}; \coordinate (O\p) at (3.45,\y);}
+\draw[w,v33] (A3V3) -- (2.2,1.8) |- (IVCC); \draw[w,v33] (2.2,1.8) |- (OVCC);
+\draw[w,gnd] (AGND) -- (2.4,1.2) |- (IGND); \draw[w,gnd] (2.4,1.2) |- (OGND);
+\draw[w,sda] (AD2) -- (2.6,0.6) |- (ISDA); \draw[w,sda] (2.6,0.6) |- (OSDA);
+\draw[w,scl] (AD1) -- (2.8,0.0) |- (ISCL); \draw[w,scl] (2.8,0.0) |- (OSCL);
+\node[pl,anchor=east] at (3.4,0.15) {nc};
+\draw[w,dat] (IVBS) -- (3.1,-0.3) -- (3.1,-0.75) -- (6.2,-0.75) -- (6.2,0.3) -- (IINm);
+\node[pl,text=dat] at (4.6,-0.95) {VBS to IN$-$};
+% ---------- Node 1
+\node[mcu] (B) at (10,0) {};
+\node[font=\sffamily\bfseries\small] at (10,2.55) {Node 1, victim};
+\node[pl,anchor=west] at (8.75,1.8) {VIN}; \coordinate (BVIN) at (8.7,1.8);
+\foreach \y/\p in {1.2/GND,0.6/3V3,0.0/D2,-0.6/D1,-1.2/D5,-1.8/D6,-2.25/D7} {\node[pl,anchor=east] at (11.25,\y) {\p}; \coordinate (B\p) at (11.3,\y);}
+\draw[w,red5] (IINp) -- (7.0,1.5) -- (7.0,3.4) node[above,pl,text=red5]{from laptop USB red 5\,V};
+\draw[w,red5] (IINm) -- (7.4,0.3) -- (7.4,1.8) -- (BVIN);
+\node[pl,text=red5,align=center] at (7.75,2.3) {through\\shunt};
+% Node 1 peripherals (right side)
+\node[mod,minimum height=1.6cm] (OL1) at (14.2,1.4) {}; \node[font=\sffamily\bfseries\scriptsize] at (14.2,2.35) {OLED};
+\node[mod,minimum height=1.2cm] (DH1) at (14.2,-0.6) {}; \node[font=\sffamily\bfseries\scriptsize] at (14.2,0.15) {DHT22};
+\coordinate (Br) at (11.3,0);
+\foreach \y/\c/\lab in {1.8/v33/VCC,1.4/gnd/GND,1.0/sda/SDA,0.6/scl/SCL} \node[pl,anchor=west] at (13.1,\y) {\lab};
+\foreach \y/\lab in {-0.3/+,-0.6/out,-0.9/$-$} \node[pl,anchor=west] at (13.1,\y) {\lab};
+\draw[w,v33] (B3V3) -- (12.2,0.6) |- (13.05,1.8); \draw[w,v33] (12.2,0.6) |- (13.05,-0.3);
+\draw[w,gnd] (BGND) -- (12.5,1.2) |- (13.05,1.4); \draw[w,gnd] (12.5,1.2) |- (13.05,-0.9);
+\draw[w,sda] (BD2) -- (12.0,0.0) |- (13.05,1.0);
+\draw[w,scl] (BD1) -- (11.8,-0.6) |- (13.05,0.6);
+\draw[w,dat] (BD5) -- (12.8,-1.2) |- (13.05,-0.6);
+% LEDs
+\draw[w,red5] (BD6) -- (12.6,-1.8) node[pl,above]{220$\Omega$} -- (13.3,-1.8);
+\draw[w,red5,fill=red5!30] (13.3,-1.65) -- (13.6,-1.8) -- (13.3,-1.95) -- cycle; \node[pl] at (13.45,-2.1) {red};
+\draw[w,sda] (BD7) -- (12.6,-2.45) node[pl,below]{220$\Omega$} -- (13.3,-2.45);
+\draw[w,sda,fill=sda!30] (13.3,-2.3) -- (13.6,-2.45) -- (13.3,-2.6) -- cycle; \node[pl] at (13.45,-2.75) {green};
+\draw[w,gnd] (13.6,-1.8) -- (14.4,-1.8) -- (14.4,-2.45) -- (13.6,-2.45); \draw[w,gnd] (14.4,-2.1) -- (14.9,-2.1) node[right,pl]{GND};
+% ---------- Nodes 2 and 3
+\foreach \x/\n in {2.5/2,9.5/3} {
+  \node[draw=black!70,line width=0.8pt,fill=black!3,minimum width=2.2cm,minimum height=1.9cm] at (\x,-5.6) {};
+  \node[font=\sffamily\bfseries\small] at (\x,-4.45) {Node \n};
+  \foreach \y/\p in {-5.0/3V3,-5.6/GND,-6.2/D5} \node[pl,anchor=west] at (\x+0.3,\y) {\p};
+  \node[mod,minimum height=1.3cm] at (\x+3.2,-5.6) {}; \node[font=\sffamily\bfseries\scriptsize] at (\x+3.2,-4.75) {DHT22};
+  \foreach \y/\l in {-5.0/+,-5.6/$-$,-6.2/out} \node[pl,anchor=west] at (\x+2.15,\y) {\l};
+  \draw[w,v33] (\x+1.1,-5.0) -- (\x+2.1,-5.0); \draw[w,gnd] (\x+1.1,-5.6) -- (\x+2.1,-5.6); \draw[w,dat] (\x+1.1,-6.2) -- (\x+2.1,-6.2);
+}
+\node[pl,align=left,anchor=north west] at (-1.3,-7.0) {\textcolor{red5}{$\blacksquare$} 5\,V \quad \textcolor{v33}{$\blacksquare$} 3V3 \quad \textcolor{gnd}{$\blacksquare$} GND \quad \textcolor{sda}{$\blacksquare$} SDA (D2) / green LED \quad \textcolor{scl}{$\blacksquare$} SCL (D1) \quad \textcolor{dat}{$\blacksquare$} DHT data (D5) / VBS\\
+All boards are powered and logged over USB. Node 1's USB cable has only its red wire routed through the INA226 (IN+ laptop side, IN$-$ board side).};
+\end{tikzpicture}
+\end{center}
+
 \newpage
 \section*{5. Software and flashing}
 \begin{enumerate}
