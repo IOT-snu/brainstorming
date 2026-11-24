@@ -9,7 +9,7 @@
 #define NODE_ID 0                 /* set per board: arduino-cli ... --build-property build.extra_flags=-DNODE_ID=1 */
 #endif
 #define N_NODES 4
-#define WIFI_CHANNEL 6            /* router fixed to this channel so ESP-NOW and Wi-Fi share it */
+#define WIFI_CHANNEL 0            /* 0 = take the access point's channel; ESP-NOW then uses the same one */
 #define WIFI_SSID "your-ssid"
 #define WIFI_PASS "your-password"
 #define COLLECTOR_IP 192, 168, 1, 100

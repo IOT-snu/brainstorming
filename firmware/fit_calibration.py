@@ -56,6 +56,7 @@ def main():
     g.add_argument("--placeholder", action="store_true")
     g.add_argument("--from-logs", nargs="+")
     ap.add_argument("--nodes", type=int, default=4)
+    ap.add_argument("--board", choices=["esp32", "esp8266"], default="esp32")
     a = ap.parse_args()
     if a.placeholder:
         mean, std = np.zeros(FEAT_N), np.ones(FEAT_N)
@@ -78,7 +79,7 @@ def main():
 #define NODE_ID 0                 /* set per board: arduino-cli ... --build-property build.extra_flags=-DNODE_ID=1 */
 #endif
 #define N_NODES {a.nodes}
-#define WIFI_CHANNEL 6            /* router fixed to this channel so ESP-NOW and Wi-Fi share it */
+#define WIFI_CHANNEL 0            /* 0 = take the access point's channel; ESP-NOW then uses the same one */
 #define WIFI_SSID "your-ssid"
 #define WIFI_PASS "your-password"
 #define COLLECTOR_IP 192, 168, 1, 100
@@ -99,8 +100,11 @@ static const uint8_t FOA_KEYS[N_NODES][32] = {{
 {arr("FEAT_W", W)}
 #endif
 """
-    open(OUT, "w").write(h)
-    print("wrote", OUT, "-", note)
+    out = os.path.join(HERE, f"{a.board}_foa", "foa_config.h")
+    if a.board == "esp8266":   # smaller batch and calibration window: about 40 KB of free RAM
+        h = h.replace("#define BATCH 200", "#define BATCH 150").replace("#define CAL_CYCLES 6", "#define CAL_CYCLES 2")
+    open(out, "w").write(h)
+    print("wrote", out, "-", note)
 
 
 if __name__ == "__main__":

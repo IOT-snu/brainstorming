@@ -1,0 +1,180 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=1.8cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage{tikz,booktabs,xcolor,enumitem,array,tabularx}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usepackage[hidelinks]{hyperref}
+\definecolor{foa}{HTML}{2A78D6}\definecolor{red5}{HTML}{E34948}\definecolor{gnd}{HTML}{333333}
+\definecolor{sda}{HTML}{1BAF7A}\definecolor{scl}{HTML}{EDA100}\definecolor{v33}{HTML}{E87BA4}\definecolor{dat}{HTML}{6250D6}
+\setlist{itemsep=1pt,topsep=2pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{4pt}
+\tikzset{
+  blk/.style={draw=black!50,rounded corners=3pt,fill=white,align=center,inner sep=4pt,font=\sffamily\footnotesize},
+  stp/.style={draw=foa,rounded corners=3pt,fill=foa!7,align=center,inner sep=4pt,text width=4.2cm,font=\sffamily\footnotesize},
+  dec/.style={draw=red5,diamond,aspect=2.4,fill=red5!6,align=center,inner sep=1pt,font=\sffamily\footnotesize},
+  arr/.style={-{Stealth[length=4pt]},line width=0.6pt,draw=black!60},
+  w/.style={line width=1.1pt},
+}
+\begin{document}
+{\sffamily\color{foa}\small CSD457 · GROUP G-04 · HARDWARE BUILD}\\[2pt]
+{\sffamily\bfseries\LARGE FOA testbed: build and run guide}\\[3pt]
+{\sffamily Four ESP8266 nodes, one INA226 energy monitor, OLED, DHT22 and LEDs. Rishit Kamboj and Farhan Naik.}
+
+\section*{1. What we are building}
+Four ESP8266 boards each run the same FOA firmware: a traffic detector that keeps learning, and that
+shares a 92-byte signed update with the other boards over ESP-NOW every learning cycle. The laptop
+receives their telemetry, logs everything over USB, and plays the attacker. An INA226 measures how much
+energy one node (Node~1) uses per learning cycle.
+
+\begin{center}
+\begin{tikzpicture}[node distance=6mm]
+\node[blk,minimum width=3.4cm] (lap) {\textbf{Laptop}\\collector.py (logs)\\poisoner.py (attacker)};
+\node[blk,right=2.2cm of lap,minimum width=3cm] (wifi) {\textbf{Phone hotspot}\\or router (Wi-Fi)};
+\node[blk,below left=1.2cm and -0.6cm of lap,draw=foa,line width=0.8pt] (n0) {\textbf{Node 0}\\INA226 + OLED};
+\node[blk,right=0.5cm of n0,draw=red5,line width=0.8pt] (n1) {\textbf{Node 1} (victim)\\OLED + LEDs + DHT22};
+\node[blk,right=0.5cm of n1] (n2) {\textbf{Node 2}\\DHT22};
+\node[blk,right=0.5cm of n2] (n3) {\textbf{Node 3}\\DHT22};
+\draw[arr,dashed,foa] (n0.south) to[bend right=12] node[below,font=\sffamily\scriptsize,text=foa]{ESP-NOW: one 92-byte HMAC frame per node per cycle} (n3.south);
+\foreach \n in {n0,n1,n2,n3} \draw[arr,black!35] (\n.north) -- ($(\n.north)+(0,0.45)$) -| (wifi.south);
+\draw[arr] (lap.east) -- node[above,font=\sffamily\scriptsize]{UDP} (wifi.west);
+\draw[arr,red5] (lap.south) -- node[left,font=\sffamily\scriptsize,text=red5,pos=0.4]{USB serial} ($(lap.south)+(0,-0.7)$);
+\draw[arr,red5,line width=0.9pt] ($(n0.east)+(0,-0.15)$) -- node[below,font=\sffamily\scriptsize,text=red5]{measures} ($(n1.west)+(0,-0.15)$);
+\end{tikzpicture}
+\end{center}
+
+\section*{2. Parts and roles}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Node 0 & ESP8266 + INA226 (energy monitor for Node 1) + OLED (status). Also a normal FOA node.\\
+Node 1 & ESP8266, the \textbf{victim}: the board the attacker targets and the INA226 measures. OLED, red and green LEDs, DHT22.\\
+Nodes 2, 3 & ESP8266 + DHT22. Peers.\\
+Shared & 2 breadboards, jumper wires, 4 USB data cables (one of them modified, Section 4), 220\,$\Omega$ resistors for the LEDs. The 5\,k$\Omega$ resistors are not needed: the INA226 and DHT22 modules have their own pull-ups.\\
+Wi-Fi & Phone hotspot or router. Every node and the laptop must be on the same network.\\
+\bottomrule
+\end{tabularx}
+
+\section*{3. Before wiring}
+\begin{enumerate}
+\item \textbf{Solder the INA226 header pins} (8 pins, short side through the board, solder on the top).
+  Do it in the lab. Unsoldered pins give wrong readings.
+\item On the INA226, the big resistor should read \textbf{R100} (0.1\,$\Omega$); the firmware assumes this.
+\item Label the boards Node 0 to Node 3 with tape. NodeMCU pin names (D1, D2, ...) are printed on the board.
+\end{enumerate}
+
+\section*{4. Wiring}
+\textbf{All nodes share one I2C rule:} SDA = \textbf{D2}, SCL = \textbf{D1}, sensors get \textbf{3V3} and \textbf{GND}.
+OLED and INA226 sit on the same two I2C wires (they have different addresses, 0x3C and 0x40).
+
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Part & Part pin & ESP8266 pin & Notes\\
+\midrule
+INA226 (Node 0) & VCC / GND & 3V3 / GND & \\
+ & SDA / SCL & D2 / D1 & \\
+ & ALE & not connected & alert pin, unused\\
+ & VBS & \textbf{IN$-$} (jumper on the module side) & so it reads Node 1's supply voltage\\
+ & IN+ / IN$-$ & see power path below & in series with Node 1's 5\,V\\
+OLED SSD1306 (Nodes 0, 1) & VCC / GND & 3V3 / GND & \\
+ & SDA / SCL & D2 / D1 & shares the bus with the INA226 on Node 0\\
+DHT22 (Nodes 1--3) & + / out / $-$ & 3V3 / \textbf{D5} / GND & module version has its pull-up\\
+Red LED (Node 1) & long leg & \textbf{D6} through 220\,$\Omega$ & short leg to GND\\
+Green LED (Node 1) & long leg & \textbf{D7} through 220\,$\Omega$ & short leg to GND\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Power path for the measurement (Node 1).} Take Node 1's own USB data cable. Carefully open it
+in the middle and \textbf{cut only the red wire} (5\,V). Leave the data wires (white, green) and the black
+ground wire intact, so Node 1 still talks to the laptop. Connect the red wire from the \textbf{laptop side}
+to \textbf{IN+} and the red wire from the \textbf{board side} to \textbf{IN$-$}. All the current Node 1
+draws now flows through the 0.1\,$\Omega$ shunt.
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+\node[blk,minimum width=2.3cm,minimum height=2.2cm] (lap) at (0,0) {\textbf{Laptop}\\USB port};
+\node[blk,draw=foa,line width=0.8pt,minimum width=2.6cm,minimum height=1.3cm] (ina) at (5.5,-1.2) {\textbf{INA226}\\shunt R100};
+\node[blk,draw=red5,line width=0.8pt,minimum width=2.3cm,minimum height=2.2cm] (n1) at (11,0) {\textbf{Node 1}\\ESP8266\\(measured)};
+\draw[w,gnd] (1.15,0.6) -- node[above,font=\sffamily\scriptsize]{data wires + black GND: left uncut} (9.85,0.6);
+\draw[w,red5] (1.15,-0.6) -- (2.6,-0.6) |- node[pos=0.75,below,font=\sffamily\scriptsize,text=red5]{red 5\,V, laptop side} (ina.west);
+\draw[w,red5] (ina.east) -| node[pos=0.25,below,font=\sffamily\scriptsize,text=red5]{red 5\,V, board side} (8.4,-0.6) -- (9.85,-0.6);
+\node[font=\sffamily\scriptsize,anchor=south east] at (ina.north west) {IN+};
+\node[font=\sffamily\scriptsize,anchor=south west] at (ina.north east) {IN$-$ (+ VBS jumper)};
+\node[blk,draw=foa,minimum width=2.3cm] (n0) at (5.5,-3.4) {\textbf{Node 0}\\reads the INA226};
+\draw[w,sda] (ina.south) -- node[right,font=\sffamily\scriptsize,align=left]{4 wires: VCC$\to$3V3, GND$\to$GND,\\SDA$\to$D2, SCL$\to$D1} (n0.north);
+\end{tikzpicture}
+\end{center}
+
+\newpage
+\section*{5. Software and flashing}
+\begin{enumerate}
+\item Laptop and boards on the same Wi-Fi. Find the laptop's IP (System Settings $\to$ Wi-Fi $\to$ Details).
+\item In \texttt{firmware/esp8266\_foa/foa\_config.h} set \texttt{WIFI\_SSID}, \texttt{WIFI\_PASS} and
+  \texttt{COLLECTOR\_IP} (laptop IP, written with commas, e.g.\ \texttt{192, 168, 43, 20}). Do not commit the password.
+\item Plug in one board, find its port: \texttt{ls /dev/cu.usb*}
+\item Flash it (repeat for \texttt{NODE\_ID=1, 2, 3}, one board at a time):
+\end{enumerate}
+{\small\begin{verbatim}
+bash firmware/flash_esp8266.sh /dev/cu.usbserial-XXXX 0
+\end{verbatim}}
+\begin{enumerate}[resume]
+\item Check it: \texttt{arduino-cli monitor -p /dev/cu.usbserial-XXXX -c baudrate=115200}. The first line
+  should read \texttt{BOOT,0,wifi=1,...,ina226=1,oled=1}. Node 0 then prints \texttt{PWR} lines.
+\end{enumerate}
+
+\section*{6. What the firmware does}
+\begin{center}
+\begin{tikzpicture}[node distance=5mm]
+\node[stp] (boot) {Boot: detect INA226, OLED, DHT22; join Wi-Fi; start ESP-NOW};
+\node[stp,below=of boot] (cal) {Calibrate: collect clean traffic features, compute centre, spread, alarm radius};
+\node[stp,below=of cal] (samp) {Every 50\,ms: update traffic statistics, project to 16 numbers, add to batch};
+\node[dec,below=of samp] (full) {batch\\full?};
+\node[stp,below=of full] (prop) {Propose an update from the batch's normal-looking core};
+\node[stp,below=of prop] (send) {Sign it (HMAC) and broadcast 92 bytes over ESP-NOW};
+\node[stp,right=1.4cm of send] (recv) {Collect peers' frames for 300\,ms; drop bad tag, unknown sender, old cycle};
+\node[stp,above=of recv] (foa) {FOA step: geometric median of peers $\to$ common part in full, residual through the budget};
+\node[stp,above=of foa] (log) {Print \texttt{FOA,...} line; update OLED and LEDs};
+\draw[arr] (boot) -- (cal); \draw[arr] (cal) -- (samp); \draw[arr] (samp) -- (full);
+\draw[arr] (full) -- node[right,font=\sffamily\scriptsize]{yes} (prop);
+\draw[arr] (full.east) -- node[above,font=\sffamily\scriptsize]{no} ++(0.6,0) |- (samp.east);
+\draw[arr] (prop) -- (send); \draw[arr] (send) -- (recv); \draw[arr] (recv) -- (foa); \draw[arr] (foa) -- (log);
+\draw[arr] (log.north) |- (samp.east);
+\node[stp,right=1.4cm of boot,draw=red5,fill=red5!6] (pwr) {Node 0 only: every 40\,ms read the INA226 and print a \texttt{PWR} line (mA, mW)};
+\end{tikzpicture}
+\end{center}
+
+\section*{7. Experiment day}
+\begin{center}
+\begin{tikzpicture}[node distance=4mm]
+\node[stp,text width=5.6cm] (a) {\textbf{1. Calibration run}, 20 min, clean: flash with \texttt{-DCALIB\_LOG}, record with collector.py};
+\node[stp,text width=5.6cm,below=of a] (b) {\textbf{2. Fit the shared basis:} \texttt{fit\_calibration.py --from-logs logs/calib/*.log --board esp8266}, reflash all four};
+\node[stp,text width=5.6cm,below=of b] (c) {\textbf{3. Idle baseline}, 10 min: latency, peers per cycle, idle power};
+\node[stp,text width=5.6cm,below=of c] (d) {\textbf{4. Real shared drift:} change the hotspot or raise every node's telemetry rate mid-run};
+\node[stp,text width=5.6cm,right=1.2cm of a] (e) {\textbf{5. Poisoning:} \texttt{poisoner.py --node <Node 1 IP> --mode boiling --share 0.3}};
+\node[stp,text width=5.6cm,below=of e] (f) {\textbf{6. Attack:} \texttt{--mode flood}. Node 1's red LED and OLED should show ALARM};
+\node[stp,text width=5.6cm,below=of f] (g) {\textbf{7. Freeze attack:} \texttt{--mode decoy --duration 600}. FOA should not change};
+\node[stp,text width=5.6cm,below=of g,draw=sda,fill=sda!7] (h) {\textbf{8. Summarise:} \texttt{collector.py logs/<run> --summarise} $\to$ latency, bytes, mJ per cycle};
+\draw[arr] (a) -- (b); \draw[arr] (b) -- (c); \draw[arr] (c) -- (d); \draw[arr] (d.east) -- ++(0.6,0) |- (e.west);
+\draw[arr] (e) -- (f); \draw[arr] (f) -- (g); \draw[arr] (g) -- (h);
+\end{tikzpicture}
+\end{center}
+Run the collector in a second terminal during every step:
+{\small\begin{verbatim}
+pip3 install pyserial
+python3 firmware/laptop/collector.py logs/run1 --serial /dev/cu.usbserial-A /dev/cu.usbserial-B ...
+\end{verbatim}}
+
+\section*{8. If something does not work}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\texttt{wifi=0} & Wrong SSID or password; the ESP8266 only joins 2.4\,GHz networks (turn on 2.4\,GHz / "maximise compatibility" on the hotspot).\\
+\texttt{ina226=0} & Check SDA $\to$ D2, SCL $\to$ D1, 3V3 and GND; resolder the header.\\
+\texttt{peers 0} & Boards on different Wi-Fi networks or channels; all must join the same hotspot.\\
+\texttt{PWR} current near 0 & Node 1 still gets 5\,V around the shunt: only the red wire must go through IN+/IN$-$.\\
+OLED blank & Address must be 0x3C; check the wires are on D1/D2.\\
+Board resets & Weak cable or hub; use the laptop port directly.\\
+\bottomrule
+\end{tabularx}
+\end{document}
