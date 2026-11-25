@@ -24,19 +24,24 @@ def capture(out_dir, ports, baud):
     import serial
     os.makedirs(out_dir, exist_ok=True)
 
+    count = {}
+
     def pump(port):
         s = serial.Serial(port, baud, timeout=1)
-        with open(os.path.join(out_dir, os.path.basename(port) + ".log"), "a") as f:
+        with open(os.path.join(out_dir, os.path.basename(port) + ".log"), "a", encoding="utf-8", errors="replace") as f:
             while True:
                 line = s.readline().decode(errors="replace").strip()
                 if line:
                     f.write(f"{time.time():.6f} {line}\n"); f.flush()
+                    n = count[port] = count.get(port, 0) + 1
+                    if n % 100 == 1:
+                        print(f"{port}: {n} lines recorded", flush=True)
 
     for p in ports:
         threading.Thread(target=pump, args=(p,), daemon=True).start()
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp.bind(("0.0.0.0", 5005))
-    with open(os.path.join(out_dir, "telemetry.log"), "a") as f:
+    with open(os.path.join(out_dir, "telemetry.log"), "a", encoding="utf-8", errors="replace") as f:
         while True:
             data, addr = udp.recvfrom(2048)
             f.write(f"{time.time():.6f} {addr[0]} {len(data)} {data[:120].decode(errors='replace')}\n"); f.flush()
@@ -45,7 +50,7 @@ def capture(out_dir, ports, baud):
 def summarise(out_dir):
     rows, pwr = {}, []
     for p in glob.glob(os.path.join(out_dir, "*.log")):
-        for line in open(p):
+        for line in open(p, encoding="utf-8", errors="replace"):
             ts, _, rest = line.partition(" ")
             if rest.startswith("FOA,"):
                 v = rest.strip().split(",")
@@ -65,7 +70,7 @@ def summarise(out_dir):
             for k in range(1, len(r)):
                 m = (pwr[:, 0] >= r[k - 1, 0]) & (pwr[:, 0] < r[k, 0])
                 if m.sum() > 2:
-                    ej.append(np.trapz(np.maximum(pwr[m, 1] - base, 0), pwr[m, 0]))
+                    ej.append(getattr(np, 'trapezoid', getattr(np, 'trapz', None))(np.maximum(pwr[m, 1] - base, 0), pwr[m, 0]))
             e = float(np.median(ej)) if ej else e
         print(f"{node:>4} {len(r):6d} {np.mean(r[:, 5]):5.2f} {np.median(r[:, 12]):11.0f} {np.median(r[:, 13]):8.0f}"
               f" {np.median(r[:, 14]):8.0f} {np.median(r[:, 15]):9.0f} {e:9.3f}")
