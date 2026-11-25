@@ -17,7 +17,7 @@ Needs pyserial for live capture (pip install pyserial); summarising needs only n
 import argparse, glob, os, socket, threading, time
 import numpy as np
 
-FRAME_BYTES = 68
+FRAME_BYTES = 92
 
 
 def capture(out_dir, ports, baud):
