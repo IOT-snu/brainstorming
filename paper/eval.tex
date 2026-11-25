@@ -26,7 +26,8 @@ noisy estimate of the shared drift than any one device's batch. Only naive learn
 everything and is trivially poisoned, is lower (\NaiveFleetFPR). The price shows under device-only
 drift: FOA admits a device's own change only at rate $B$, so that device ends at \FOAIdioFPR\ false alarms
 against \AutoIdioFPR\ for single-device adaptation. This is Proposition~\ref{prop:frontier} made
-visible, and Section~\ref{sec:frontier} shows how $B$ moves it.
+visible, and Section~\ref{sec:frontier} shows how $B$ moves it. Section~\ref{sec:floor} later shows that
+single-device adaptation's false alarms here are largely an artefact of unrestricted spread shrinking.
 
 \begin{figure*}[t]
 \centering

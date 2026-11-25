@@ -14,6 +14,9 @@ fleet false alarms at \FOAFleetFPR\ (single-device adaptation \AutoFleetFPR, gat
 \GateFleetFPR) while cutting attack-attributable compromise from \AutoComp\ to \FOAComp; it is never
 compromised by the classic boundary poisoner, resists a monoculture botnet that defeats same-model
 consensus, and is unaffected by a freeze attack that locks an alarm-rate switch-off at
-\KLFrozenFPR\ false alarms. On 40 weeks of real CESNET traffic it is never compromised. A C
-implementation matches the reference on every recorded cycle and adds about 22\,KB of flash to an ESP32
-build.
+\KLFrozenFPR\ false alarms. On 40 weeks of real CESNET traffic it is never compromised. On three real
+ESP8266 boards FOA gossips reliably at about 15\,ms of computing per cycle, but identical boards shrank
+their detectors together until false alarms reached 90\%. A coverage floor removes this in simulation
+(strong-drift false alarms \FlFOAFStrongFPR) and revises our claim: with the floor a single device raises
+no more false alarms than FOA, but is compromised in \FlAutoFCompStrong\ of attacked runs under drift
+against FOA's \FlFOAFCompStrong.

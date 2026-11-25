@@ -3,10 +3,12 @@ A detector that learns on the device needs a second witness, and an IoT fleet pr
 each device take freely whatever drift its vulnerability-diverse peers also see, and rations only what
 is specific to it. It never stops learning, so it cannot be frozen; it bounds what an attacker on one
 device can do and how fast; and it costs one 92-byte frame per cycle and about 22\,KB of flash on an
-ESP32. On real IoT traffic with strong shared drift it was the only rule we tested that kept both
-poisoning and false alarms low. What it cannot do, and what no rule can, is tell a device's own honest
-change from an attack on that device; FOA turns that limit into a single, explicit rate. The next step
-is the four-node ESP32 testbed, where the drift, the radio and the energy are real.
+ESP32. Three real boards then showed what simulation had missed: identical, repetitive devices can shrink
+their detectors together until almost everything alarms. A coverage floor removes that failure in
+simulation, and in doing so shows that FOA's real advantage is not fewer false alarms than a single
+device but resistance to poisoning hidden inside drift. The next steps are the floored rule and attacks on
+the boards. What FOA cannot do, and what no rule can, is tell a device's own honest change from an attack
+on that device.
 
 \section*{Artifacts}
 Code, data scripts, experiment logs and firmware are in the project repository: the simulator and all

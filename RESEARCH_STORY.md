@@ -14,7 +14,7 @@ Status as of 26 November 2026
 > We asked the neighbours: **change that other devices also see is learned freely; change only one device sees is rationed.**
 > It worked in simulation on real IoT traffic. Then we built it on real boards, **found a flaw the simulations missed**, reproduced it, and designed a fix.
 
-| 🧪 About 19,500 simulated fleet runs | 📡 9 real IoT devices + 40 weeks of real network traffic | 🔌 3 real ESP8266 boards | 📄 11-page paper |
+| 🧪 About 19,500 simulated fleet runs | 📡 9 real IoT devices + 40 weeks of real network traffic | 🔌 3 real ESP8266 boards | 📄 12-page paper |
 |:---:|:---:|:---:|:---:|
 
 ---
@@ -117,7 +117,7 @@ Real traffic from all **9 N-BaIoT devices** with real Mirai and BASHLITE attacks
 - Malicious neighbours **plus** a poisoner beat borderline devices (56% with 3 of 7 neighbours).
 - Stealthy poisoners at 40% of traffic still win about a third of the time.
 
-> ⚠️ The fleet's concurrency, the drift on N-BaIoT and the attacker are simulated. The false-alarm numbers above are being re-examined because of what the hardware showed (section 5).
+> ⚠️ The fleet's concurrency, the drift on N-BaIoT and the attacker are simulated. Section 6 revises the false-alarm comparison with a single device.
 
 ---
 
@@ -184,18 +184,19 @@ We then **reproduced it in simulation** with no attacker. This chain is our best
 
 It only cancels shrinking, so both budgets and the containment theorem still hold. The C version matches Python exactly.
 
-| Development-seed result (preliminary) | Without floor | With floor |
-|---|---|---|
-| Repetitive traffic, false alarms (FOA) | 31.8% | **6.3%** |
-| Strong drift, false alarms (FOA) | 9.3% | **2.6%** |
-| Strong drift, compromised (FOA) | 21.4% | **16.7%** |
-| Strong drift, false alarms (single device) | 24.7% | **0.8%** |
-| Strong drift, compromised (single device) | 66.7% | 71.4% |
+| Held-out seeds | Single device | Single device + floor | FOA | FOA + floor |
+|---|:---:|:---:|:---:|:---:|
+| False alarms, strong drift | 24.6% | **0.8%** | 9.0% | 2.5% |
+| False alarms, device-only drift | 20.3% | **0.9%** | 28.2% | 24.6% |
+| Compromised, no drift | 7.4% | 7.6% | 4.6% | **4.3%** |
+| Compromised, strong drift | 39.2% | 43.1% | 10.8% | **9.4%** |
+| Slow poisoner under strong drift | 63.2% | 75.4% | **0%** | **0%** |
+| Repetitive traffic, false alarms | 13.7% | **1.5%** | 13.2% | **1.5%** |
 
 ### 🔬 The honest lesson
-With the floor, a **single device** also stops raising false alarms. So much of FOA's earlier false-alarm advantage came from this shrinking flaw. FOA's advantage that **remains** in these runs is resisting **poisoning hidden inside drift** (16.7% against 71.4% compromised).
+With the floor, a **single device** raises even fewer false alarms than FOA. Most of FOA's earlier false-alarm advantage came from the shrinking flaw. What **survives** is the main point: **FOA resists poisoning hidden inside drift** (9.4% against 43.1% compromised) and a one-model botnet.
 
-⏳ **Pending:** held-out simulation test, and the first hardware run with the floor (`floor1`).
+⏳ **Pending:** a hardware run with the floor (`floor1`).
 
 ---
 
@@ -206,11 +207,12 @@ With the floor, a **single device** also stops raising false alarms. So much of 
 | Literature review | ✅ |
 | Method and proofs | ✅ |
 | Simulator, 16 tests | ✅ |
-| Paper (hardware section to be added) | 🟡 |
+| Paper, with hardware section | ✅ |
 | ESP32 and ESP8266 firmware | ✅ |
 | 3-board testbed: radio, timing, power | ✅ |
 | Collapse found and reproduced | ✅ |
-| Coverage floor: held-out and hardware test | ⏳ |
+| Coverage floor: held-out simulation | ✅ |
+| Coverage floor: hardware run | ⏳ |
 | Attack tests on hardware (flood, freeze, poisoning) | ❌ not yet |
 
 ---

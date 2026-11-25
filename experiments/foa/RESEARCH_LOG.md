@@ -88,3 +88,14 @@ What we did, in order, including what did not work. Dates are 2026.
 - Byzantine minorities help a traffic poisoner beat borderline victims during drift; open problem.
 - The independent multi-agent code review planned for 24 Oct did not run (usage limit); the C core is
   verified against Python, and the Python is covered by unit tests, but a second reviewer is still owed.
+
+## 25-26 Nov: hardware and the coverage floor
+
+- Three ESP8266 boards. Fixed on hardware: calibration during the statistics' start-up (warm-up), peer frames
+  rejected for unequal cycle numbers, INA226 at address 0x44, Windows log encoding.
+- Collapse: spread under 2% and about 90% false alarms in 20 minutes with identical boards. Logs and analysis
+  in experiments/hardware; reproduced in repro.py.
+- Coverage floor s >= s0, chosen on development seeds, held-out E12 (floor_eval.py, results/E12.txt). It removes
+  most false alarms for single-device adaptation too, so FOA's false-alarm advantage over a single device does
+  not survive; its safety advantage under drift does (9.4% vs 43.1% compromised).
+- Not yet done: floored hardware run, hardware attacks, fitted testbed basis.

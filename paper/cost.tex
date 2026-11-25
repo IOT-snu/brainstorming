@@ -2,7 +2,7 @@
 
 FOA's on-device part is about 500 lines of portable C99 with no heap: the detector, the signature-free
 proposal with the median agreement projection, ten Weiszfeld iterations, the FOA step, the 92-byte frame
-and HMAC-SHA256. Table~\ref{tab:cost} summarises what we could verify before the boards arrived.
+and HMAC-SHA256. Table~\ref{tab:cost} summarises the checks made without hardware; Section~\ref{sec:hw} reports measurements on boards.
 
 \textbf{Equivalence.} On 480 recorded cycles from three synthetic fleets (one with 85\% frame loss, so
 130 cycles had fewer than two peers), the C proposal matches the Python reference to a worst relative
