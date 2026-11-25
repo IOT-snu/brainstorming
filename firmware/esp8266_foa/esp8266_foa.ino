@@ -28,6 +28,12 @@ extern "C" {
 #include "foa_features.h"
 }
 #include "foa_config.h"
+#ifndef WARMUP_MS
+#define WARMUP_MS 180000     /* let the slow traffic statistics settle before calibrating */
+#endif
+#ifndef CAL_EVERY
+#define CAL_EVERY 10         /* keep every 10th sample, so calibration spans 150 s */
+#endif
 
 #define PIN_DHT 14      /* D5 */
 #define PIN_RED 12      /* D6 */
@@ -35,6 +41,13 @@ extern "C" {
 #define INA_ADDR 0x40
 #define OLED_ADDR 0x3C
 #define R_SHUNT 0.1f    /* "R100" on the CJMCU-226 board */
+
+/* Freshness: boards boot at different times, so their cycle counters differ. A frame is fresh if its
+   cycle number is higher than the last one accepted from that sender (blocks replays); a sender that
+   has been silent for PEER_RESET_MS may restart from a lower number (it rebooted). */
+#define PEER_RESET_MS 60000
+static uint32_t peer_cycle[N_NODES], peer_ms[N_NODES];
+static bool peer_known[N_NODES];
 
 static foa_detector_t det;
 static foa_state_t st;
@@ -202,10 +215,13 @@ static void learning_cycle() {
         uint8_t snd = foa_frame_sender(f);
         if (snd >= N_NODES || snd == NODE_ID || seen[snd]) { rejected++; continue; }
         uint16_t nc; uint32_t v0 = micros();
-        int rc = foa_frame_verify(f, FOA_FRAME_BYTES, FOA_KEYS[snd], cycle, pdmu + K * FOA_D, pdls + K, &nc);
+        uint32_t theirs = (uint32_t)f[4] | ((uint32_t)f[5] << 8) | ((uint32_t)f[6] << 16) | ((uint32_t)f[7] << 24);
+        int rc = foa_frame_verify(f, FOA_FRAME_BYTES, FOA_KEYS[snd], theirs, pdmu + K * FOA_D, pdls + K, &nc);   /* tag check */
+        if (rc == FOA_OK && peer_known[snd] && theirs <= peer_cycle[snd] && millis() - peer_ms[snd] < PEER_RESET_MS) rc = FOA_ERR_STALE;
         verify_us += micros() - v0;
         if (rc != FOA_OK) { rejected++; continue; }
         seen[snd] = true; K++;
+        peer_known[snd] = true; peer_cycle[snd] = theirs; peer_ms[snd] = millis();
     }
     float dmu[FOA_D], dls;
     uint32_t t3 = micros();
