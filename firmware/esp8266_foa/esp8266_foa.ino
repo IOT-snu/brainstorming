@@ -28,6 +28,9 @@ extern "C" {
 #include "foa_features.h"
 }
 #include "foa_config.h"
+#ifndef S_FLOOR
+#define S_FLOOR 1.0f        /* coverage floor; build with -DS_FLOOR=0.0f to reproduce the collapse */
+#endif
 #ifndef WARMUP_MS
 #define WARMUP_MS 180000     /* let the slow traffic statistics settle before calibrating */
 #endif
@@ -265,6 +268,7 @@ void setup() {
         Serial.println("WARN,calibrating on one batch (low heap)");
     }
     foa_default_params(&prm);
+    prm.s_floor = S_FLOOR;
     feat_init(&fx);
 
     WiFi.mode(WIFI_STA);

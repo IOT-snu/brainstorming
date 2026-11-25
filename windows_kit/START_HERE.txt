@@ -72,3 +72,16 @@ TROUBLESHOOTING
 - Upload fails: hold the FLASH button on the board while it says "Connecting...".
 - peers 0: boards are not on the same hotspot.
 - If you change laptop or hotspot: update foa_config.h and flash all three again.
+
+PART F - NOTES FROM OUR FIRST HARDWARE RUNS
+-------------------------------------------
+- Only ONE program can use a COM port. Close every 5_watch_node window before 6_run_fleet.
+- COM numbers can change when you move a cable: run 3_find_ports.bat again.
+- Opening 5_watch_node restarts that board (about 6 minutes to warm up and calibrate again).
+- INA226 is detected at boot (any address 0x40-0x4F; ours was 0x44). Press RST after wiring it.
+  Check it with 9_test_ina.bat, then flash Node 0 again with 4_flash_node.bat.
+- Energy: only the board powered through the INA226 (Node 1) is measured.
+- NEW: the firmware now has a "coverage floor" so the normal region cannot keep shrinking.
+  This is tested in simulation and compiles, but has NOT yet been run on the boards.
+  For a new test run all three for 30 minutes with run name floor1 and compare the alarm values.
+- Never upload foa_config.h with your Wi-Fi password anywhere.

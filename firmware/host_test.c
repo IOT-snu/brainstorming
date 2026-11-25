@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     rfv(det.mu0, FOA_D); det.s0 = rf(); det.tau = rf(); det.c = rf(); det.kappa = rf(); det.beta = rf(); det.f0 = rf(); det.eta = rf();
     foa_params_t prm;
     prm.B0 = rf(); prm.B = rf(); prm.B0s = rf(); prm.Bs = rf(); prm.B0c = rf(); prm.Bc = rf(); prm.B0cs = rf(); prm.Bcs = rf();
-    prm.alpha = rf(); prm.z0 = rf(); prm.z1 = rf();
+    prm.alpha = rf(); prm.z0 = rf(); prm.z1 = rf(); prm.s_floor = rf();
     prm.k_min = (uint8_t)ri(); prm.lam_gate = (uint8_t)ri(); prm.signif = (uint8_t)ri(); prm.common_budget = (uint8_t)ri();
     prm.robust_lam = (uint8_t)ri();
 

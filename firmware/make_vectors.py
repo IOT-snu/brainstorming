@@ -10,6 +10,7 @@ Run from the repo root:  python3 firmware/make_vectors.py  ->  firmware/vectors.
 """
 import os, struct, sys
 import numpy as np
+from dataclasses import replace
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "experiments", "foa"))
@@ -18,6 +19,7 @@ from fleet import FleetSim, Member, POLICIES
 from attacks import TrafficAttacker
 import gossip
 
+FLOORED = replace(POLICIES["foa"], s_floor=float(os.environ.get("S_FLOOR", "1.0")))
 F = lambda xs: struct.pack(f"<{len(xs)}f", *[float(x) for x in xs])
 I = lambda *xs: struct.pack(f"<{len(xs)}i", *xs)
 ST = ("C", "R", "m_ema", "p_ema")
@@ -32,14 +34,14 @@ def record(seed, loss, n=7, cycles=160):
     v = np.random.default_rng(seed).normal(size=D); v = v / np.linalg.norm(v) * 6
     streams = [SynthStream(i, seed=seed) for i in range(n)]
     members = [Member(s.short, f"v{i}") for i, s in enumerate(streams)]
-    sim = FleetSim(members, streams, SynthWorld(common=(v, 30, 130)), POLICIES["foa"], cycles=cycles,
+    sim = FleetSim(members, streams, SynthWorld(common=(v, 30, 130)), FLOORED, cycles=cycles,
                    attackers=[TrafficAttacker(0, "atk", "boundary", 0.3, t0=30)], loss=loss, seed=seed, trace_device=0)
     sim.run()
     return sim.dets[0], sim.trace
 
 
 def main():
-    pol = POLICIES["foa"]
+    pol = FLOORED
     cases, det = [], None
     for seed, loss in ((0, 0.0), (1, 0.0), (2, 0.85)):
         det, tr = record(seed, loss)
@@ -48,7 +50,7 @@ def main():
     out += I(len(cases))
     d0 = cases[0][0]
     out += F(list(d0.mu0) + [d0.s0, d0.tau, d0.c, d0.kappa, d0.beta, d0.f0, d0.eta])
-    out += F([pol.B0, pol.B, pol.B0s, pol.Bs, pol.B0c, pol.Bc, pol.B0cs, pol.Bcs, pol.alpha, pol.z0, pol.z1])
+    out += F([pol.B0, pol.B, pol.B0s, pol.Bs, pol.B0c, pol.Bc, pol.B0cs, pol.Bcs, pol.alpha, pol.z0, pol.z1, pol.s_floor])
     out += I(pol.k_min, int(pol.lam_gate), int(pol.signif), int(pol.common_budget), int(pol.robust_lam))
     for det, c in cases:
         X, peers = c["batch"], c["peers"]

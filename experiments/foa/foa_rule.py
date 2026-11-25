@@ -137,6 +137,13 @@ def foa_step(st, pol, rho, tj, dmu, dls, peer_dmu, peer_dls, own_along=0.0, own_
         r_app, r_s_app = np.zeros(D), 0.0
     else:
         r_app, r_s_app = r, r_s
+    if pol.s_floor > 0:
+        # Coverage floor: cancel as much of this cycle's shrinking as needed (residual first). Increments only
+        # move toward zero, so both budgets still hold.
+        deficit = np.log(pol.s_floor) - (st.Cs + st.Rs + a_s + r_s_app)
+        if deficit > 0:
+            k = min(deficit, max(-r_s_app, 0.0)); r_s_app += k; deficit -= k
+            a_s += min(deficit, max(-a_s, 0.0))
     st.C, st.Cs = st.C + a, st.Cs + a_s
     st.R, st.Rs = st.R + r_app, st.Rs + r_s_app
     st.log.update(lam=lam, w=w, ws=ws, a=float(np.linalg.norm(a) / rho), r_app=float(np.linalg.norm(r_app) / rho),

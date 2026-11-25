@@ -58,6 +58,7 @@ class Policy:
     z1: float = 4.0
     residual: str = "budget"
     robust_lam: bool = True     # agreement from the median projection of own core points
+    s_floor: float = 0.0        # coverage floor: spread never below s_floor * calibrated spread (0 = off)
     joint: bool = False         # one budget for centre and spread residuals (ablation)
     common_dir: str = "consensus"   # "own": doubly robust common channel (direction from own median shift)
     B0: float = 0.1             # residual budget, in alarm radii (tau * s0)
@@ -250,7 +251,10 @@ class FleetSim:
                 if pol.mode == "static":
                     applied = False
                 elif pol.mode in ("self", "frozen"):
-                    det.apply(prop.dmu, prop.dls)
+                    dls = prop.dls
+                    if pol.s_floor > 0:
+                        dls = max(dls, float(np.log(pol.s_floor * det.s0 / det.s)))
+                    det.apply(prop.dmu, dls)
                 elif pol.mode == "clip":
                     det.apply(project_ball(prop.dmu, pol.clip * det.s0), float(np.clip(prop.dls, -0.05, 0.05)))
                 elif pol.mode == "kl":

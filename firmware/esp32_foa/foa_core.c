@@ -48,6 +48,7 @@ void foa_default_params(foa_params_t *p) {
     p->B0 = 0.1f; p->B = 0.005f; p->B0s = 0.1f; p->Bs = 0.001f;
     p->B0c = 0.75f; p->Bc = 0.06f; p->B0cs = 0.7f; p->Bcs = 0.02f;
     p->alpha = 0.2f; p->z0 = 2.0f; p->z1 = 4.0f;
+    p->s_floor = 0.0f;
     p->k_min = 2; p->lam_gate = 1; p->signif = 1; p->common_budget = 1; p->robust_lam = 1;
 }
 
@@ -258,6 +259,16 @@ void foa_step(foa_state_t *st, const foa_params_t *p, float rho, uint32_t tj, co
     for (int i = 0; i < D; i++) r_app[i] = v[i] - st->R[i];
     float lim = p->B0s + p->Bs * (float)tj;
     float r_s_app = clampf(st->Rs + (own->dls - a_s), -lim, lim) - st->Rs;
+    if (p->s_floor > 0.0f) {                     /* cancel shrinking below the floor, residual first */
+        float deficit = logf(p->s_floor) - (st->Cs + st->Rs + a_s + r_s_app);
+        if (deficit > 0.0f) {
+            float k = r_s_app < 0.0f ? -r_s_app : 0.0f;
+            if (k > deficit) k = deficit;
+            r_s_app += k; deficit -= k;
+            k = a_s < 0.0f ? -a_s : 0.0f;
+            a_s += k < deficit ? k : deficit;
+        }
+    }
     for (int i = 0; i < D; i++) {
         st->C[i] += a[i];
         st->R[i] += r_app[i];

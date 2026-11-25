@@ -41,6 +41,7 @@ typedef struct {
     float B0, B, B0s, Bs;        /* residual budget: displacement (alarm radii) and log spread */
     float B0c, Bc, B0cs, Bcs;    /* common-channel budget (alarm radii, log spread)            */
     float alpha, z0, z1;         /* EMA weight and significance ramp                           */
+    float s_floor;               /* coverage floor: spread never below s_floor * s0 (0 = off) */
     uint8_t k_min, lam_gate, signif, common_budget, robust_lam;
 } foa_params_t;
 

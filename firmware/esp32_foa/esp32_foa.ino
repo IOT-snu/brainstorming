@@ -25,6 +25,9 @@
 #include "foa_core.h"
 #include "foa_features.h"
 #include "foa_config.h"
+#ifndef S_FLOOR
+#define S_FLOOR 1.0f        /* coverage floor; build with -DS_FLOOR=0.0f to reproduce the collapse */
+#endif
 
 /* Freshness: boards boot at different times, so their cycle counters differ. A frame is fresh if its
    cycle number is higher than the last one accepted from that sender (blocks replays); a sender that
@@ -159,6 +162,7 @@ void setup() {
     scratch = (float *)malloc(sizeof(float) * CAL_CYCLES * BATCH);
     if (!calbuf || !scratch) Serial.println("ERR,calibration buffers");
     foa_default_params(&prm);
+    prm.s_floor = S_FLOOR;
     feat_init(&fx);
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASS, WIFI_CHANNEL);
