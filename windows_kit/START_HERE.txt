@@ -1,7 +1,7 @@
 FOA TESTBED - WINDOWS STEP BY STEP          (Group G-04, Rishit Kamboj and Farhan Naik)
 =====================================================================================
 All the .bat files are in this folder. Double-click them in number order.
-Full wiring diagram: build_guide.pdf (page 3).
+Full wiring diagram: build_guide.pdf (page 3; this kit uses Nodes 0, 1, 2 only, skip Node 3).
 
 PART A - SETUP (once per laptop, about 20 minutes, needs internet)
 -----------------------------------------------------------------
@@ -18,7 +18,7 @@ PART A - SETUP (once per laptop, about 20 minutes, needs internet)
        #define COLLECTOR_IP 192, 168, 43, 20      <- this laptop's IP, COMMAS not dots
    Save.
 
-PART B - FLASH THE FOUR BOARDS (about 20 minutes)
+PART B - FLASH THE THREE BOARDS (about 20 minutes)
 -------------------------------------------------
 6. Plug in ONE ESP8266. Double-click 3_find_ports.bat and note its COM port.
    Not listed? Try another USB cable (some only charge), or install the driver:
@@ -26,7 +26,7 @@ PART B - FLASH THE FOUR BOARDS (about 20 minutes)
 7. Double-click 4_flash_node.bat, type the COM port and node number 0.
 8. Double-click 5_watch_node.bat. You should see  BOOT,0,wifi=1,...  (Ctrl+C to stop).
    wifi=0 means wrong hotspot name/password or the hotspot is on 5 GHz.
-9. Unplug it, stick a label "0" on it. Repeat steps 6-8 for the other boards as 1, 2, 3.
+9. Unplug it, stick a label "0" on it. Repeat steps 6-8 for the other boards as 1 and 2.
 
 PART C - WIRING (unplug a board before wiring it)
 -------------------------------------------------
@@ -38,17 +38,16 @@ Node 1:  OLED  VCC->3V3  GND->GND  SDA->D2  SCL->D1
          D6 -> 220 ohm -> RED LED long leg,   short leg -> GND
          D7 -> 220 ohm -> GREEN LED long leg, short leg -> GND
 Node 2:  DHT22 + ->3V3   out->D5   - ->GND
-Node 3:  DHT22 + ->3V3   out->D5   - ->GND
 
 Check: plug each in and run 5_watch_node.bat. The BOOT line shows
-  Node 0: oled=1      Node 1: oled=1 dht22=1      Nodes 2,3: dht22=1
+  Node 0: oled=1      Node 1: oled=1 dht22=1      Node 2: dht22=1
 
 PART D - RUN IT
 ---------------
-10. Plug in all four boards (USB hub if needed). Run 3_find_ports.bat to get all COM ports.
-11. Double-click 6_run_fleet.bat, enter all four ports, run name "idle1".
-    Wait about 1 minute: OLEDs go from "Calibrating" to "normal", peers 3, green LED on.
-    Leave it 10 minutes = idle baseline.
+10. Plug in all three boards (USB hub if needed). Run 3_find_ports.bat to get all COM ports.
+11. Double-click 6_run_fleet.bat, enter all three ports, run name "idle1".
+    Wait about 6 minutes (3 min warm-up, about 3 min calibration): OLEDs go to "normal",
+    peers 2, green LED on. Then leave it 10 minutes = idle baseline.
 12. While it runs, double-click 7_attack.bat
        Node 1 IP: from Node 1's BOOT line (ip=...)
        mode: flood, duration: 60
@@ -72,4 +71,4 @@ TROUBLESHOOTING
 - "arduino-cli not recognized": restart the laptop, run 2_setup_arduino.bat again.
 - Upload fails: hold the FLASH button on the board while it says "Connecting...".
 - peers 0: boards are not on the same hotspot.
-- If you change laptop or hotspot: update foa_config.h and flash all four again.
+- If you change laptop or hotspot: update foa_config.h and flash all three again.

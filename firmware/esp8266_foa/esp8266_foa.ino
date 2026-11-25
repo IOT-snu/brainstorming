@@ -104,6 +104,14 @@ static void ina_sample() {
 }
 
 /* ---------------------------------------------------------------- display and LEDs */
+static void progress() {          /* one line every 10 s until calibration is done */
+    static uint32_t last = 0;
+    if (calibrated || millis() - last < 10000) return;
+    last = millis();
+    if (millis() < WARMUP_MS) Serial.printf("WARMUP,%lu s left\n", (unsigned long)((WARMUP_MS - millis()) / 1000));
+    else Serial.printf("CALIBRATING,%d/%d\n", ncal, cal_target);
+}
+
 static void show() {
     bool alarm = last_alarm > 0.05f;
     digitalWrite(PIN_RED, alarm ? HIGH : LOW);
@@ -112,7 +120,9 @@ static void show() {
     oled.clearDisplay();
     oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE); oled.setCursor(0, 0);
     oled.printf("FOA node %d  cyc %lu\n", NODE_ID, (unsigned long)cycle);
-    if (!calibrated) {
+    if (!calibrated && millis() < WARMUP_MS) {
+        oled.printf("\nWarming up...\n%lu s left\n", (unsigned long)((WARMUP_MS - millis()) / 1000));
+    } else if (!calibrated) {
         oled.printf("\nCalibrating...\n%d / %d samples\n", ncal, cal_target);
     } else {
         float R = 0, C = 0;
@@ -155,6 +165,8 @@ static void sample() {
 #endif
     feat_project(raw, FEAT_MEAN, FEAT_STD, FEAT_W, z);
     if (!calibrated) {
+        static uint32_t skip = 0;
+        if (millis() < WARMUP_MS || ++skip % CAL_EVERY) return;
         memcpy(calbuf + ncal * FOA_D, z, sizeof z);
         if (++ncal == cal_target) {
             calibrated = foa_calibrate(&det, calbuf, ncal, scratch, 0.5f) == 0;
@@ -266,6 +278,6 @@ void loop() {
         sample();
         if (calibrated && nb >= BATCH) learning_cycle();
     }
-    if (now - last_show >= 1000) { last_show = now; show(); }
+    if (now - last_show >= 1000) { last_show = now; show(); progress(); }
     yield();
 }

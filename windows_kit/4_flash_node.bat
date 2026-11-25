@@ -1,6 +1,8 @@
 @echo off
 set /p PORT=COM port of the board (for example COM5):
-set /p ID=Node number (0, 1, 2 or 3):
+set PORT=%PORT:COM=%
+set PORT=COM%PORT:com=%
+set /p ID=Node number (0, 1 or 2):
 echo Flashing node %ID% on %PORT% ...
 arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --build-property "build.extra_flags=-DNODE_ID=%ID%" --upload -p %PORT% firmware\esp8266_foa
 echo.

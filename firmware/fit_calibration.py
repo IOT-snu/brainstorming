@@ -102,7 +102,7 @@ static const uint8_t FOA_KEYS[N_NODES][32] = {{
 """
     out = os.path.join(HERE, f"{a.board}_foa", "foa_config.h")
     if a.board == "esp8266":   # smaller batch and calibration window: about 40 KB of free RAM
-        h = h.replace("#define BATCH 200", "#define BATCH 150").replace("#define CAL_CYCLES 6", "#define CAL_CYCLES 2")
+        h = h.replace("#define BATCH 200", "#define BATCH 150").replace("#define CAL_CYCLES 6", "#define CAL_CYCLES 2\n#define WARMUP_MS 180000     /* let the slow traffic statistics settle */\n#define CAL_EVERY 10         /* keep every 10th sample, so calibration spans 150 s */")
     open(out, "w").write(h)
     print("wrote", out, "-", note)
 
