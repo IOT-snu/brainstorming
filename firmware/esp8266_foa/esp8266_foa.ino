@@ -1,7 +1,7 @@
 /*
  * FOA node firmware for ESP8266 (NodeMCU / Wemos D1 mini), Arduino core esp8266 3.x.
  * One firmware for all four boards; only NODE_ID differs. Each board detects what is attached:
- *   INA226 (I2C 0x40)  -> also acts as the energy monitor, printing PWR lines about 25 times a second
+ *   INA226 (I2C 0x40-0x4F, auto-detected) -> also acts as the energy monitor, printing PWR lines about 25 times a second
  *   SSD1306 OLED (I2C 0x3C) -> live status screen
  *   DHT22 on D5        -> real temperature and humidity in the telemetry (dummy values if absent)
  *   LEDs on D6 (red) and D7 (green) -> red while the last batch raised alarms, green otherwise
@@ -38,7 +38,7 @@ extern "C" {
 #define PIN_DHT 14      /* D5 */
 #define PIN_RED 12      /* D6 */
 #define PIN_GREEN 13    /* D7 */
-#define INA_ADDR 0x40
+static uint8_t INA_ADDR = 0x40;   /* found at boot: any address 0x40-0x4F answering with TI's ID */
 #define OLED_ADDR 0x3C
 #define R_SHUNT 0.1f    /* "R100" on the CJMCU-226 board */
 
@@ -103,7 +103,12 @@ static uint16_t ina_read(uint8_t reg) {
 }
 
 static void ina_setup() {
-    if (!i2c_present(INA_ADDR) || ina_read(0xFE) != 0x5449) return;   /* manufacturer ID "TI" */
+    bool ok = false;
+    for (uint8_t a = 0x40; a <= 0x4F && !ok; a++) {
+        INA_ADDR = a;
+        ok = i2c_present(a) && ina_read(0xFE) == 0x5449;   /* manufacturer ID "TI" */
+    }
+    if (!ok) return;
     /* averages 16, bus and shunt conversion 1.1 ms each, continuous: one result every ~35 ms */
     ina_write(0x00, 0x4527);
     has_ina = true;
