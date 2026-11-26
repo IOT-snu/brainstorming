@@ -1,0 +1,5 @@
+condition                  | no attack: false alarms mean (worst), spread end | poisoned: detected before -> end, compromised runs
+connected, old firmware    |  13.6% ( 76.0%), 0.85 | 100.0% -> 100.0%, 0/20
+connected, with floor      |   1.6% (  5.9%), 1.02 | 100.0% -> 100.0%, 0/20
+isolated, old firmware     |  13.9% ( 63.1%), 0.84 | 100.0% -> 100.0%, 0/20
+isolated, with floor       |   1.5% (  5.9%), 1.03 | 100.0% -> 100.0%, 0/20
