@@ -281,8 +281,8 @@ void setup() {
     esp_now_register_recv_cb(on_recv);
     esp_now_add_peer(BROADCAST, ESP_NOW_ROLE_COMBO, WiFi.channel(), NULL, 0);   /* frames carry their own HMAC */
 
-    Serial.printf("BOOT,%d,wifi=%d,ch=%d,ip=%s,oled=%d,ina226=%d,dht22=%d,heap=%u\n", NODE_ID, WiFi.status() == WL_CONNECTED,
-                  WiFi.channel(), WiFi.localIP().toString().c_str(), has_oled, has_ina, has_dht, ESP.getFreeHeap());
+    Serial.printf("BOOT,%d,wifi=%d,ch=%d,ip=%s,oled=%d,ina226=%d,dht22=%d,heap=%u,floor=%.2f\n", NODE_ID, WiFi.status() == WL_CONNECTED,
+                  WiFi.channel(), WiFi.localIP().toString().c_str(), has_oled, has_ina, has_dht, ESP.getFreeHeap(), prm.s_floor);
     Serial.println("HDR,node,cycle,n,alarm,n_core,peers,lam,w,R,C,s_ratio,disp,us_propose,us_step,us_mac,us_verify,rejected");
     show();
 }
