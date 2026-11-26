@@ -245,6 +245,15 @@ for x, big, t, b in ((0.9, "0%", "One-model botnet", "FOA compromised. Same-mode
     s.text(x, 4.12, 3.35, 0.5, t, 20, bold=True)
     s.text(x, 4.75, 3.2, 1.6, b, 16, GREY, spacing=1.2)
 
+# 7b ---------------------------------------------------------------- testbed photo
+s = Slide("This is our actual testbed. Three ESP8266 boards and an INA226 power sensor in the supply line of one of them, connected over USB to the laptop that records their output. The boards talk to each other directly over ESP-NOW.")
+s.head("Our testbed", "Three ESP8266 boards, an INA226 power sensor, and a laptop recording every board.")
+photo = os.path.join(HERE, "testbed_photo.jpg")
+pw, ph = Image.open(photo).size
+w_in = 5.2 * pw / ph
+s.s.shapes.add_picture(photo, Inches((13.333 - w_in) / 2), Inches(2.05), Inches(w_in), Inches(5.2))
+s.im.paste(Image.open(photo).resize((int(w_in * PX), int(5.2 * PX))), (int((13.333 - w_in) / 2 * PX), int(2.05 * PX)))
+
 # 8 ---------------------------------------------------------------- hardware
 s = Slide("Then we built it. Three ESP8266 boards on a phone hotspot talk over ESP-NOW, and an INA226 measures one board's power. Each learning cycle needs about fifteen milliseconds of computing. We could not detect any extra energy for learning with this sensor.")
 s.head("Then we put it on real boards", "Three ESP8266 boards, a phone hotspot, one INA226 power sensor.")

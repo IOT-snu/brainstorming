@@ -83,6 +83,10 @@ Q = [
   [("Explain the botnet test.", "Three cameras of one model are infected and poisoned together. Same-model peers agree with the poison. Other-vendor peers do not."),
    ("Which defence did the freeze attack beat?", "An alarm-rate switch-off: 100% false alarms with decoys at 5% share, 26% without the attacker. The outlier-ratio gate we tested recovered, so not every gate freezes."),
    ("What is CESNET?", "40 weeks of traffic statistics from a national research network. Drift is real; the attack there is modelled.")]),
+ ("A photo of the real setup.",
+  [("Point to each part.", "The ESP8266 boards, the INA226 sensor and its wiring, the USB hub and cables, and the recording laptop. Practise pointing at them on the photo before the talk."),
+   ("Which board is measured?", "Node 1: its 5 V line runs through the INA226. Node 0 reads the sensor over two I2C wires."),
+   ("Is the sensor wired in series or parallel?", "In series: only the red 5 V wire of Node 1's cable goes through the 0.1 ohm shunt.")]),
  ("What we measured on hardware.",
   [("Which boards?", "Three ESP8266 NodeMCU boards (single core, about 80 KB RAM; our firmware uses about 51 KB). We also compiled for ESP32."),
    ("Why ESP-NOW?", "Direct short broadcasts between boards without a broker, up to 250 bytes; our message is 92 bytes."),
@@ -118,7 +122,7 @@ assert len(slides) == len(Q), (len(slides), len(Q))
 S = [P("Presentation and viva preparation", title), P("Fleet-Orthogonal Adaptation  ·  Group G-04  ·  Rishit Kamboj and Farhan Naik", small), Spacer(1, 8),
      P("How to use this", h1),
      P("Each slide has: what it means, what to say, and likely questions. Read it once fully, then practise aloud with only the slides. "
-       "Aim for about 10 to 12 minutes. A natural split: one person takes slides 1 to 10, the other 11 to 16, and both answer questions.", p),
+       "Aim for about 10 to 12 minutes. A natural split: one person takes slides 1 to 10, the other 11 to 17, and both answer questions.", p),
      P("The 30-second answer", h1),
      P("IoT detectors must keep learning because normal traffic changes, but learning can be poisoned and pausing can be exploited. Our method lets a device "
        "learn in full what neighbours from other vendors also see, and rations what only it sees. In simulation on real IoT traffic it resisted poisoning "
