@@ -153,14 +153,14 @@ for x, t, b in ((0.9, "Trust yourself", "An attacker feeds slightly unusual traf
     s.text(x, 3.55, 3.3, 2.4, b, 17, GREY, spacing=1.2)
 
 # 3 ---------------------------------------------------------------- idea
-s = Slide("Our idea is to use neighbouring devices as a second witness. A router change reaches everyone. An exploit usually reaches one device. So the part of an update that neighbours also see is applied in full, and the part only this device sees goes through a small budget that grows slowly and never closes.")
+s = Slide("Our idea is to use neighbouring devices as a second witness. A router change reaches everyone. An exploit usually reaches one device. So the part of an update that neighbours also see is applied, as far as this device's own traffic agrees, and the part only this device sees goes through a small budget that grows slowly and never closes.")
 s.head("Ask the neighbours", "Honest change reaches everyone. An attack usually reaches one.")
 for y, n in ((2.55, "Doorbell"), (3.75, "Thermostat"), (4.95, "Baby monitor")):
     s.box(0.9, y, 2.4, 0.85); s.text(0.9, y, 2.4, 0.85, n, 16, align="c", anchor="m")
     s.line(3.35, y + 0.42, 4.55, 4.17, GREY, 1.25, True)
 s.box(4.6, 3.55, 2.5, 1.25, WHITE, BLUE); s.text(4.7, 3.55, 2.3, 1.25, "Robust middle of the neighbours' updates", 15, BLUE, True, "c", "m")
 s.line(7.15, 3.9, 8.5, 3.15, GREY, 1.25, True); s.line(7.15, 4.45, 8.5, 5.2, GREY, 1.25, True)
-s.box(8.55, 2.55, 3.9, 1.3, BLUE); s.text(8.8, 2.55, 3.5, 1.3, "Neighbours see it too\nLearn it in full", 17, WHITE, True, anchor="m")
+s.box(8.55, 2.55, 3.9, 1.3, BLUE); s.text(8.8, 2.55, 3.5, 1.3, "Neighbours see it too\nLearn it, as far as my traffic agrees", 17, WHITE, True, anchor="m")
 s.box(8.55, 4.65, 3.9, 1.3); s.text(8.8, 4.65, 3.5, 1.3, "Only I see it\nAllow it slowly, within a budget", 17, INK, True, anchor="m")
 s.text(0.9, 6.45, 11.5, 0.4, "Each device sends one signed 92-byte message per learning cycle. We call this Fleet-Orthogonal Adaptation (FOA).", 14, GREY)
 
@@ -171,7 +171,7 @@ for i, (t, b) in enumerate((("Look", "Summarise recent traffic as 16 numbers per
                             ("Propose", "Work out an update from the clearly normal core of the batch."),
                             ("Share", "Sign it with HMAC and broadcast 92 bytes."),
                             ("Agree", "Take the geometric median of verified neighbour updates."),
-                            ("Split", "Part the neighbours back is learned in full. The rest is budgeted."),
+                            ("Split", "Learn the part neighbours back, as far as my traffic agrees. Budget the rest."),
                             ("Check", "Score new traffic. Alarm if it falls outside the threshold."))):
     x, y = 0.9 + (i % 3) * 3.98, 2.35 + (i // 3) * 2.15
     s.line(x, y, x + 3.55, y, INK if i < 5 else INK, 1.5)
@@ -179,11 +179,11 @@ for i, (t, b) in enumerate((("Look", "Summarise recent traffic as 16 numbers per
     s.text(x, y + 0.82, 3.4, 1.0, b, 16, GREY, spacing=1.2)
 
 # 4 ---------------------------------------------------------------- guarantees
-s = Slide("We proved four things. The main one: an attacker on one device can only move its detector by a fixed amount plus a slow rate, so there is a minimum time before an attack can hide. We also state the limit honestly: if only one device changes, no method can know whether it is honest.")
+s = Slide("We proved four things. The main one: an attacker on one device can only move its detector by a fixed amount plus a slow rate, so there is a minimum time before an attack can hide. On our boards that is about seventeen minutes for an attack two alarm radii away, so it is a delay, not a wall. Nothing in the rule switches learning off, but if all traffic suddenly lands outside the normal region there is nothing to learn from. And if only one device changes, no method can know whether it is honest.")
 s.head("What we can prove")
-for i, (t, b) in enumerate((("Bounded", "An attacker on one device moves its detector by at most B0 + Bt alarm radii beyond what neighbours back."),
-                            ("Resistant to bad peers", "Fewer than half malicious neighbours add only a limited push each cycle."),
-                            ("No freeze switch", "Loud decoy traffic never enters learning, and learning never stops."),
+for i, (t, b) in enumerate((("Bounded", "One attacked device moves at most B0 + Bt alarm radii beyond what neighbours back. A delay, not a wall."),
+                            ("Resistant to bad peers", "Fewer than half malicious neighbours add only a limited push each cycle. Needs at least 3 peers."),
+                            ("No stop switch", "Nothing switches learning off, and alarmed decoys never enter it. It can still starve after a sudden jump."),
                             ("An honest limit", "If only one device changes, no rule can tell its own change from an attack."))):
     y = 1.95 + i * 1.22
     s.line(0.9, y, 12.43, y)
@@ -191,8 +191,8 @@ for i, (t, b) in enumerate((("Bounded", "An attacker on one device moves its det
     s.text(4.8, y + 0.34, 7.5, 0.75, b, 18, INK)
 
 # 4b ---------------------------------------------------------------- novelty
-s = Slide("Using peers is not new. CIoTA did it with devices of the same model, and it discards what they do not agree on. We use devices from other vendors, we ration the rest instead of discarding it, and we bound how far an attacker can move the detector. We say we found no prior work that combines these, not that we are first.")
-s.head("What is new here", "Closest earlier work: CIoTA (2018), which also learns with peers.")
+s = Slide("Using peers is not new. CIoTA did it with devices of the same model, and it discards what they do not agree on. We use devices from other vendors, we ration the rest instead of discarding it, and we bound how far an attacker can move the detector. We say we found no prior work that combines these, not that we are first. Structurally the closest work is a consensus method with a bounded local step by Chen, Kar and Moura, and BALANCE from CCS 2024; both assume a fixed target and a shrinking tolerance. A Darktrace patent already compares devices with their peers so that compromised ones are not learned as normal. What we add is the growing budget, the time-to-compromise bound and the freeze analysis.")
+s.head("What is new here", "Closest: CIoTA (2018). Each piece exists elsewhere; the combination is what is new.")
 s.text(4.6, 2.2, 3.6, 0.4, "CIoTA", 18, GREY, True); s.text(8.5, 2.2, 3.9, 0.4, "Ours", 18, BLUE, True)
 for i, (k, a, b) in enumerate((("Who are the peers", "Same device model", "Other vendors"),
                                ("What neighbours do not back", "Discarded", "Admitted slowly, within a budget"),
@@ -202,7 +202,7 @@ for i, (k, a, b) in enumerate((("Who are the peers", "Same device model", "Other
     s.line(0.9, y, 12.43, y)
     s.text(0.9, y + 0.24, 3.6, 0.5, k, 16, INK, True); s.text(4.6, y + 0.24, 3.7, 0.5, a, 16, GREY); s.text(8.5, y + 0.24, 3.9, 0.5, b, 16, INK)
 s.line(0.9, 6.2, 12.43, 6.2)
-s.text(0.9, 6.45, 11.5, 0.4, "CIoTA column: our re-implementation of its consensus idea, not the full published system.", 13, GREY)
+s.text(0.9, 6.4, 11.5, 0.8, "Also close: consensus with a bounded local step (Chen, Kar, Moura), BALANCE (CCS 2024), and a Darktrace patent that compares devices with peers. CIoTA column: our re-implementation, not the full published system.", 13, GREY)
 
 # 5 ---------------------------------------------------------------- evaluation setup
 s = Slide("We tested on real traffic from nine IoT devices with real botnet attacks, and on forty weeks of real network traffic. The drift on the nine devices and the poisoner are simulated by us, and we say so. Design choices were made on separate runs from the ones we report.")
@@ -215,13 +215,13 @@ for x, big, small in ((0.9, "9", "real IoT devices with real Mirai and BASHLITE 
 s.text(0.9, 6.3, 11.4, 0.4, "Reported simulation results use test runs that played no part in any design decision.", 15, INK, True)
 
 # 6 ---------------------------------------------------------------- main result
-s = Slide("This is the main result. During a strong network change, an attacker hides poisoning inside it. A single device is compromised in about forty percent of runs. FOA brings that to about ten percent, and the classic slow poisoner never beats it.")
+s = Slide("This is the main result. During a strong network change, an attacker hides poisoning inside it. A single device is compromised in about forty percent of runs. FOA brings that to about ten percent, and the classic slow poisoner never beats it. This is simulation, with drift we injected.")
 s.head("Poisoning hidden inside network change", "Share of attacked runs where the target attack went undetected. Lower is better.")
 s.bars(1.4, 2.1, 10.5, 4.4, ["Single device", "Single device\n+ floor", "FOA", "FOA\n+ floor"], [39.2, 43.1, 10.8, 9.4], {2, 3})
-s.text(0.9, 6.75, 11.5, 0.35, "The classic slow poisoner under the same change: 63% and 75% for a single device, 0% for FOA.", 14, INK)
+s.text(0.9, 6.75, 11.5, 0.35, "Simulation with injected drift. Classic slow poisoner: 63% and 75% for a single device, 0% for FOA.", 14, INK)
 
 # 6b ---------------------------------------------------------------- all rules
-s = Slide("Here is every rule side by side under strong network change. Rules that stop or restrict learning keep some safety but raise many false alarms. The naive rule is quiet but easy to poison. TOA is very safe but needs to know the attack in advance. FOA is low on both. These numbers are without the floor.")
+s = Slide("Here is every rule side by side under strong network change. Rules that stop or restrict learning keep some safety but raise many false alarms. The naive rule is quiet but easy to poison. TOA is very safe but needs to know the attack in advance. FOA is low on both. These numbers are without the floor; with it, the false-alarm column changes, as the fix slide shows.")
 s.head("Eight rules, side by side", "Strong network change. Lower is better in both columns. Without the floor.")
 s.text(7.0, 1.98, 2.4, 0.35, "False alarms", 14, GREY, True, "r"); s.text(9.8, 1.98, 2.6, 0.35, "Compromised", 14, GREY, True, "r")
 for i, (n, w, a, c) in enumerate((("Never learn", "cannot follow change", "78.3%", "not attacked"), ("Learn everything", "easy to poison", "2.6%", "35%"),
@@ -235,11 +235,11 @@ for i, (n, w, a, c) in enumerate((("Never learn", "cannot follow change", "78.3%
     s.text(7.0, y + 0.12, 2.4, 0.35, a, 16, hi, n == "FOA", "r"); s.text(9.8, y + 0.12, 2.6, 0.35, c, 16, hi, n == "FOA", "r")
 
 # 7 ---------------------------------------------------------------- other attacks
-s = Slide("Three more tests. When a botnet infects most cameras of one model, same-model voting fails completely, while neighbours from other vendors hold. Five percent decoy traffic permanently locks a stop-learning defence. On forty weeks of real drift, FOA was never compromised. These three were run without the floor.")
-s.head("Three more tests", "Run without the floor.")
+s = Slide("Three more tests. When a botnet infects most cameras of one model, same-model voting fails completely, while neighbours from other vendors hold. Five percent decoy traffic permanently locks a stop-learning defence. On forty weeks of real drift, FOA was never compromised, although a detector that never learns had fewer false alarms there, because that drift was mild. These three are simulation, run without the floor.")
+s.head("Three more tests", "Simulation, run without the floor.")
 for x, big, t, b in ((0.9, "0%", "One-model botnet", "FOA compromised. Same-model voting: 100% once two of three cameras are infected."),
                      (5.0, "100%", "Freeze attack", "False alarms for a stop-learning defence after 5% decoys. FOA's behaviour is unchanged by them."),
-                     (9.1, "0%", "40 weeks of real change", "FOA compromised. Single device: 18%.")):
+                     (9.1, "0%", "40 weeks of real change", "FOA compromised. Single device: 18%. A never-learning detector had fewer false alarms: 5.9% vs 9.1%.")):
     s.text(x, 2.1, 3.7, 1.4, big, 72, BLUE if big == "0%" else RED, True, anchor="b")
     s.line(x, 3.85, x + 3.35, 3.85)
     s.text(x, 4.12, 3.35, 0.5, t, 20, bold=True)
@@ -248,21 +248,23 @@ for x, big, t, b in ((0.9, "0%", "One-model botnet", "FOA compromised. Same-mode
 # 7b ---------------------------------------------------------------- testbed photo
 s = Slide("This is our actual testbed. Three ESP8266 boards and an INA226 power sensor in the supply line of one of them, connected over USB to the laptop that records their output. The boards talk to each other directly over ESP-NOW.")
 s.head("Our testbed", "Three ESP8266 boards, an INA226 power sensor, and a laptop recording every board.")
-photo = os.path.join(HERE, "testbed_photo.jpg")
+photo = os.path.join(ROOT, "research.jpeg")
+if not os.path.exists(photo) or "--blurred" in sys.argv:
+    photo = os.path.join(HERE, "testbed_photo.jpg")
 pw, ph = Image.open(photo).size
 w_in = 5.2 * pw / ph
 s.s.shapes.add_picture(photo, Inches((13.333 - w_in) / 2), Inches(2.05), Inches(w_in), Inches(5.2))
 s.im.paste(Image.open(photo).resize((int(w_in * PX), int(5.2 * PX))), (int((13.333 - w_in) / 2 * PX), int(2.05 * PX)))
 
 # 8 ---------------------------------------------------------------- hardware
-s = Slide("Then we built it. Three ESP8266 boards on a phone hotspot talk over ESP-NOW, and an INA226 measures one board's power. Each learning cycle needs about fifteen milliseconds of computing. We could not detect any extra energy for learning with this sensor.")
+s = Slide("Then we built it. Three ESP8266 boards talk over ESP-NOW, and an INA226 measures one board's power. Over two sessions, computing took about fourteen milliseconds per learning cycle in the first runs and about twenty-five in the later runs, and the board drew 365 to 391 milliwatts, mostly for the radio. We could not detect any extra energy for learning with this sensor.")
 s.head("Then we put it on real boards", "Three ESP8266 boards, a phone hotspot, one INA226 power sensor.")
-for i, (k, v) in enumerate((("Cycles hearing both neighbours", "97 to 100%"), ("Compute an update", "11.2 ms"), ("Combine with neighbours", "1.6 ms"),
-                            ("Sign one message, check two", "0.6 ms and 0.95 ms"), ("Board power", "365 mW"), ("Extra energy for learning", "Too small to detect"))):
+for i, (k, v) in enumerate((("Cycles hearing both neighbours", "88 to 100%"), ("Compute an update", "11 to 24 ms"), ("Combine with neighbours", "1.2 to 1.9 ms"),
+                            ("Sign one message, check two", "0.6 ms and about 1 ms"), ("Board power", "365 to 391 mW"), ("Extra energy for learning", "Too small to detect"))):
     y = 2.35 + i * 0.7
     s.text(0.9, y + 0.15, 6, 0.4, k, 18, GREY); s.text(6.9, y + 0.15, 5.5, 0.4, v, 20, INK, True, "r")
     s.line(0.9, y + 0.68, 12.43, y + 0.68)
-s.text(0.9, 6.75, 11.5, 0.35, "Measured on hardware. No attacks were run on the boards.", 13, GREY)
+s.text(0.9, 6.75, 11.5, 0.35, "Measured on three ESP8266 boards over two sessions. No attacks have been run on the boards.", 13, GREY)
 
 # 9 ---------------------------------------------------------------- failure
 con, iso = spread_series()
@@ -291,39 +293,65 @@ s.text(9.8, 4.5, 2.7, 0.9, "61%", 40, INK, True)
 s.text(9.8, 5.3, 2.6, 1.2, "left after 50 minutes isolated. About 50% false alarms.", 15, GREY)
 
 # 10 ---------------------------------------------------------------- why
-s = Slide("Our best explanation. The boards send very repetitive traffic. The detector was free to shrink its normal region but limited in growing it, because growth is what an attacker wants. Identical boards agree on the shrink, and our method treats agreement as a real shared change. We reproduced it in simulation with no attacker.")
+s = Slide("Our best explanation. The boards send very repetitive traffic. The detector was free to shrink its normal region but limited in growing it, because growth is what an attacker wants. Identical boards agree on the shrink, and our method treats agreement as a real shared change. We reproduced it in simulation with no attacker. Later runs on the boards found a second cause, calibration aliasing, which comes up next.")
 s.head("Why it happened", "A guard in one direction, nothing in the other.")
 for i, t in enumerate(("Traffic from identical boards is very repetitive.", "The detector may shrink “normal” freely. Growth is limited, to stop attackers.",
                        "The neighbours shrink too, so they agree.", "FOA reads agreement as real change and applies it.")):
     y = 2.35 + i * 0.95
     s.text(0.9, y, 0.7, 0.6, str(i + 1), 30, BLUE, True); s.text(1.75, y + 0.07, 10.4, 0.5, t, 22)
-s.text(0.9, 6.45, 11.4, 0.4, "We reproduced the collapse in simulation, with no attacker. The placeholder feature basis may also contribute.", 15, GREY)
+s.text(0.9, 6.45, 11.4, 0.4, "Reproduced in simulation with no attacker. Later runs found a second cause: calibration aliasing.", 15, GREY)
 
 # 11 ---------------------------------------------------------------- fix
-s = Slide("The fix is one rule: the normal region may never become smaller than it was at calibration. It cuts false alarms sharply on unseen test runs. It also showed us that most of our earlier false-alarm advantage over a single device came from the same flaw. What remains is the safety advantage. The fix has not yet been run successfully on the boards.")
+s = Slide("The fix is one rule: the normal region may never become smaller than it was at calibration. It cuts false alarms sharply on unseen test runs. It also showed us that most of our earlier false-alarm advantage over a single device came from the same flaw. What remains is the safety advantage. On the twenty-seventh of November we ran it on the boards, and it held.")
 s.head("One rule fixes it, and corrects our claim", "False alarms after a strong network change, on unseen test runs. Lower is better.")
 s.bars(0.9, 2.1, 7.9, 4.4, ["Single device", "Single device\n+ floor", "FOA", "FOA\n+ floor"], [24.6, 0.8, 9.0, 2.5], {1, 3})
 s.text(9.3, 2.4, 3.2, 0.45, "The rule", 20, bold=True)
 s.text(9.3, 2.95, 3.1, 1.1, "“Normal” never shrinks below its calibrated size.", 17, GREY)
 s.text(9.3, 4.35, 3.2, 0.45, "The correction", 20, bold=True)
 s.text(9.3, 4.9, 3.1, 1.6, "With the floor, a single device raises fewer false alarms than FOA. FOA's real advantage is safety under change.", 17, GREY)
-s.text(0.9, 6.75, 11.5, 0.35, "Validated in simulation only. A hardware run with the floor has not been completed.", 14, INK)
+s.text(0.9, 6.75, 11.5, 0.35, "Bars: simulation on unseen test runs. On the boards the floor held in every run (next slide).", 14, INK)
+
+# 11b ---------------------------------------------------------------- floor on the boards
+s = Slide("On the twenty-seventh of November we ran the floor on the boards. The normal region never shrank below its starting size in any run. False alarms were still about twenty-five percent, and the cause was a calibration bug: calibration kept every tenth sample, which lined up with the 200 millisecond telemetry, so it only saw some phases of the traffic. Spacing the samples unevenly brought false alarms to about one and a half percent. Then we doubled every board's traffic rate at once. All traffic landed outside the normal region, nothing was left to learn from, and false alarms stayed near ninety-nine percent, with or without neighbours. These are single runs, and there are still no attacks on the boards.")
+s.head("The floor on the boards", "27 November. Three ESP8266 boards, single runs of 24 to 37 minutes each.")
+for x, big, col, t, b in ((0.9, "1.0", BLUE, "The floor held", "The normal region never fell below its starting size in any run. An earlier run without the floor fell to 0.035."),
+                          (5.0, "1.6%", BLUE, "After a calibration fix", "False alarms fell from 25% to 1.5 to 1.7% once calibration stopped sampling in step with the 200 ms traffic."),
+                          (9.1, "99%", RED, "After a sudden jump", "All boards' traffic rate doubled at once. Nothing stayed inside the normal region, so nothing could be learned.")):
+    s.text(x, 2.1, 3.7, 1.4, big, 72, col, True, anchor="b")
+    s.line(x, 3.85, x + 3.35, 3.85)
+    s.text(x, 4.12, 3.35, 0.5, t, 20, bold=True)
+    s.text(x, 4.75, 3.2, 1.6, b, 16, GREY, spacing=1.2)
+s.text(0.9, 6.6, 11.5, 0.5, "Single runs, so descriptive. A never-learning detector was not rerun with the fixed calibration. No attacks yet.", 14, INK)
 
 # 12 ---------------------------------------------------------------- limits and next
-s = Slide("Where we stand honestly, and what is next. We have not attacked the physical boards, and the fix is not yet tested on them. FOA is also weak when one device changes a lot on its own, and malicious neighbours combined with a poisoner can beat borderline devices.")
+s = Slide("Where we stand honestly, and what is next. We have not attacked the physical boards yet, and a sudden jump bigger than the normal region stalls learning. FOA is also weak when one device changes a lot on its own, and malicious neighbours combined with a poisoner can beat borderline devices.")
 s.head("What is still open")
 s.text(0.9, 1.9, 5.3, 0.45, "Where it falls short", 21, bold=True)
 s.text(7.1, 1.9, 5.3, 0.45, "What we do next", 21, bold=True)
-for i, (a, b) in enumerate((("A big change on one device alone is learned very slowly.", "Run the floored firmware on the boards."),
-                            ("Bad neighbours plus a poisoner beat borderline devices.", "Fit the feature basis on the boards' own traffic."),
-                            ("Stealthy poisoners still win in some runs.", "Attack the boards: flood, freeze, slow poisoning."),
-                            ("No attack has been run on hardware yet.", "Use devices that really differ as neighbours."))):
+for i, (a, b) in enumerate((("A big change on one device alone is learned very slowly.", "Attack the boards: slow poisoning, decoys, forged messages."),
+                            ("Bad neighbours plus a poisoner beat borderline devices.", "Recover safely from a sudden jump."),
+                            ("A sudden jump outside the normal region stalls learning.", "Run one detector per device on a gateway, with per-source statistics."),
+                            ("No attack has been run on hardware yet.", "Repeat board runs; compare with BALANCE and ClippedGossip."))):
     y = 2.6 + i * 0.98
     s.line(0.9, y, 6.2, y); s.line(7.1, y, 12.43, y)
     s.text(0.9, y + 0.18, 5.2, 0.75, a, 17, GREY); s.text(7.1, y + 0.18, 5.2, 0.75, b, 17)
 
+# 12b ---------------------------------------------------------------- where it fits
+s = Slide("An honest view of where this helps. It is not revolutionary: it is a new combination of known pieces for one narrow threat, slow poisoning hidden inside change that many devices share. For a single-purpose device, an allow-list of the addresses its maker intends cannot be poisoned at all. Loud botnets like Mirai are mostly caught even by a detector that never learns, and Mirai kills other programs on a device it infects, so a detector on that device dies with it. Where it fits is one detector per device on a gateway, with many neighbours, in places that today learn a baseline once and then stop. We have not tested those settings.")
+s.head("Where this helps, and where it does not", "Not revolutionary: a new combination of known pieces, for one narrow threat.")
+s.text(0.9, 1.9, 5.3, 0.45, "Not the right tool", 21, bold=True)
+s.text(7.1, 1.9, 5.3, 0.45, "Where it fits", 21, bold=True)
+for i, (a, b) in enumerate((("Single-purpose devices: an allow-list of intended addresses (MUD, RFC 8520) cannot be poisoned.", "One detector per device on a gateway or edge box, with many neighbours."),
+                            ("Loud botnets like Mirai: even a never-learning detector catches most of their traffic.", "Industrial monitoring that today learns a baseline once, then stops."),
+                            ("A detector on the infected device itself: Mirai kills other programs.", "Any fleet of per-device baselines facing shared change and slow local tampering."),
+                            ("Fleets of two or three devices: too few peers for the bad-peer bound.", "Commercial tools already compare devices with peers; we add a rule for when a baseline may move."))):
+    y = 2.6 + i * 0.98
+    s.line(0.9, y, 6.2, y); s.line(7.1, y, 12.43, y)
+    s.text(0.9, y + 0.15, 5.2, 0.8, a, 15, GREY); s.text(7.1, y + 0.15, 5.2, 0.8, b, 15)
+s.text(0.9, 6.6, 11.5, 0.5, "None of the settings on the right has been tested by us.", 14, INK)
+
 # 13 ---------------------------------------------------------------- close
-s = Slide("To close: learn freely what the neighbours also see, ration what only you see, and test on real hardware early, because that is where we learned the most. These are the five works we build on most. Thank you, we are happy to take questions.")
+s = Slide("To close: learn more freely what the neighbours also see, ration what only you see, and test on real hardware early, because that is where we learned the most. These are the five works we build on most. Thank you, we are happy to take questions.")
 s.text(0.9, 0.85, 11.5, 1.7, "Learn what neighbours see.\nRation what only you see.", 40, bold=True, spacing=1.05)
 s.text(0.9, 2.85, 11, 0.45, "And test on real hardware early. That is where we learned the most.", 18, GREY)
 s.line(0.9, 3.75, 12.43, 3.75)
@@ -336,11 +364,35 @@ for i, r in enumerate(("Rubinstein et al., ANTIDOTE: poisoning of anomaly detect
     s.text(0.9, 4.45 + i * 0.37, 11.5, 0.35, r, 13, GREY)
 s.text(0.9, 6.7, 6, 0.4, "Thank you. Questions?", 18, BLUE, True)
 
+# 14 ---------------------------------------------------------------- recent research
+s = Slide("These are six recent papers behind our work, all from 2025 and 2026. From DriftXpert we took its outlier-ratio statistic; DriftXpert uses it to trigger retraining, and our baseline uses it to pause learning. RTTAD adapts only on samples it is confident about, normal or anomalous, and reports that unguarded adaptation hurts. WARDEN argues that one stream cannot tell drift from poisoning, which is why we add neighbours. Su and others, and Rapid Poison, show that systems which adapt can be poisoned, which shapes our threat model. The TinyML survey reviews about seventy on-device learning works and does not discuss security, which is the gap we work in. Four of these are preprints and not yet peer reviewed.")
+s.head("Recent research we build on", "Six papers from 2025 and 2026, and what each gave us.")
+s.text(0.9, 2.1, 5.6, 0.35, "Paper", 13, GREY, True); s.text(7.0, 2.1, 5.4, 0.35, "What we took from it", 13, BLUE, True)
+for i, (t, v, b) in enumerate((
+        ("DriftXpert: drift adaptation for intrusion detection", "arXiv 2609.08623, 2026 (preprint)",
+         "Its outlier-ratio statistic, used in our baseline as a stop gate."),
+        ("RTTAD: risk-aware test-time adaptation", "arXiv 2605.10242, 2026 (preprint)",
+         "Adapt only on samples you are confident about, normal or anomalous. Unguarded adaptation hurts."),
+        ("WARDEN: self-poisoning in adaptive detection", "arXiv 2607.21673, 2026 (preprint)",
+         "One stream cannot separate drift from poisoning, so we add neighbours."),
+        ("Su et al.: poisoning test-time adaptation", "ICLR 2025",
+         "A realistic attacker with limited knowledge, for our threat model."),
+        ("Rapid Poison: attacks on a rapid response framework", "ICML 2026",
+         "Evidence that adaptation itself is an attack surface."),
+        ("Survey: on-device learning in TinyML", "arXiv 2605.31226, 2026 (preprint)",
+         "About 70 on-device learning works, and no discussion of security."))):
+    y = 2.5 + i * 0.75
+    s.line(0.9, y, 12.43, y)
+    s.text(0.9, y + 0.1, 5.8, 0.3, t, 15, INK, True); s.text(0.9, y + 0.42, 5.8, 0.28, v, 12, GREY)
+    s.text(7.0, y + 0.1, 5.4, 0.62, b, 14, INK, anchor="m")
+
 out = os.path.join(ROOT, "G04_FOA_Final.pptx")
 prs.save(out); print("wrote", out, len(prs.slides), "slides")
 if PREV:
     os.makedirs(PREV, exist_ok=True)
-    sheet = Image.new("RGB", (1600 * 3 + 40, 900 * 5 + 80), "#555555")
+    for i, im in enumerate(previews, 1):
+        im.save(os.path.join(PREV, f"s{i}.png"))
+    sheet = Image.new("RGB", (1600 * 3 + 40, 920 * ((len(previews) + 2) // 3) + 20), "#555555")
     for i, im in enumerate(previews):
         sheet.paste(im, (i % 3 * 1620, i // 3 * 920))
     sheet.resize((sheet.width // 3, sheet.height // 3)).save(os.path.join(PREV, "sheet.png"))

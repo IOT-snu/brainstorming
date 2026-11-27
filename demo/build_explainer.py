@@ -50,7 +50,7 @@ P("Rishit Kamboj and Farhan Naik  ·  Group G-04  ·  CSD457 Internet of Things 
 P("<b>The whole story in one paragraph.</b> Smart devices need to notice when something attacks them. A program that learns what is normal for a device must keep learning, "
   "because normal changes. But a patient attacker can teach it bad habits. We built a method where each device asks its neighbours: if they see the same change, accept it; "
   "if only this device sees it, accept it slowly. It worked well in computer simulation on real recorded traffic. On real boards we found a flaw, understood it, and designed a "
-  "fix that works in simulation but has not yet been confirmed on the boards.", note)
+  "fix that works in simulation and, since 27 November, on the boards too. No attack has been run on the boards yet.", note)
 
 H("1. The background, in plain words")
 P("An <b>IoT device</b> is an everyday object with a small computer and a network connection: a camera, a doorbell, a thermostat. They are often weakly protected. "
@@ -70,8 +70,8 @@ P("Use <b>neighbouring devices as witnesses</b>. A router change affects everyon
 B(["works out how it would like to update its circle;",
    "sends that proposal to its neighbours in a tiny signed message (92 bytes);",
    "finds the <b>robust middle</b> of the neighbours' proposals (the geometric median), which a minority of liars cannot drag far;",
-   "applies the <b>shared part</b> in full, and lets its own <b>leftover part</b> through only within a budget that grows slowly."])
-P("It never switches learning off, so there is nothing for a freeze attack to trigger. Neighbours should be from <b>different makers</b>, so one trick cannot fool them all. "
+   "applies the <b>shared part</b> as far as its own traffic agrees, and lets its own <b>leftover part</b> through only within a budget that grows slowly."])
+P("Nothing in it switches learning off, so there is nothing for a freeze attack to trigger (it can still run out of traffic to learn from, see section 8). Neighbours should be from <b>different makers</b>, so one trick cannot fool them all. "
   "We named the method <b>Fleet-Orthogonal Adaptation (FOA)</b>.")
 fig("paper/fig_system_preview.png", "How the method works: shared change flows through the neighbours; change seen by one device is rationed.")
 P("We also proved mathematically that an attacker who controls only one device's traffic can move its circle only a limited amount in a given time. We cannot solve one case: "
@@ -104,7 +104,8 @@ T([["Situation", "Our method", "Comparison"],
    ["Classic slow poisoner: runs fooled", "0%", "single device up to 84%"],
    ["Most cameras of one model infected: fooled", "0%", "same-model voting 100%"],
    ["Freeze attack", "unaffected", "a stop-on-alarms defence stuck at 100% false alarms"],
-   ["40 weeks of real change: fooled", "0%", "single device 18%"]], [7.2 * cm, 2.7 * cm, W - 9.9 * cm])
+   ["40 weeks of real change: fooled", "0%", "single device 18%"],
+   ["40 weeks of real change: false alarms", "9.1%", "never learning 5.9% (that change was mild)"]], [7.2 * cm, 2.7 * cm, W - 9.9 * cm])
 fig("experiments/foa/figures/fig_headline.png", "Attacks hidden inside network change, before the later fix.")
 P("Weaknesses seen in simulation: a device that changes a lot by itself is learned slowly; lying neighbours combined with an attacker can win; careful attackers sometimes succeed.")
 
@@ -124,9 +125,9 @@ T([["What we saw", "Cause and fix"],
    ["Recording failed on Windows", "Odd start-up characters broke the logger. Fixed the text encoding."],
    ["A board kept restarting", "A loose power wire."]], [6 * cm, W - 6 * cm])
 H2("What we measured")
-B(["Boards heard both neighbours in 97 to 100% of cycles.",
-   "Working out an update took about 11 ms and combining it about 1.6 ms, in a cycle of about 7.8 seconds.",
-   "A board drew about 365 mW. Any extra energy for learning was too small for the sensor to detect."])
+B(["Boards heard both neighbours in 88 to 100% of cycles.",
+   "Working out an update took 11 to 24 ms and combining it 1.2 to 1.9 ms, in a cycle of about 7.8 seconds.",
+   "A board drew 365 to 391 mW, mostly for the radio. Any extra energy for learning was too small for the sensor to detect."])
 
 H("7. The surprise: it failed on the boards")
 P("Within 20 minutes every board's circle shrank to <b>under 2%</b> of its starting size, and about <b>90%</b> of normal traffic raised alarms.")
@@ -141,14 +142,19 @@ T([["", "Single device", "Single + fix", "Ours", "Ours + fix"],
    ["False alarms after large change", "24.6%", "0.8%", "9.0%", "2.5%"],
    ["Runs fooled during large change", "39.2%", "43.1%", "10.8%", "9.4%"]], [5.6 * cm] + [(W - 5.6 * cm) / 4] * 4)
 P("<b>An honest correction.</b> With the fix, a single device raises <i>fewer</i> false alarms than our method. What remains true is that our method is much harder to fool during a change. "
-  "Our attempts to confirm the fix on the boards did not succeed, because the boards ran the older program. So the fix is <b>shown in simulation only</b>.", note)
+  "On 27 November the boards ran the fixed program, and the circle never shrank below its starting size. False alarms stayed near 25% until we fixed a second problem: "
+  "calibration took its samples in step with the repeating traffic. After that they were about 1.5%. When every board's traffic rate doubled at once, all traffic fell "
+  "outside the circle, nothing was left to learn from, and false alarms stayed near 99%. These are single runs, and no attack has been run on the boards.", note)
 
 H("9. What is and is not established")
 T([["Established", "Not established"],
    ["Simulation results on real recorded traffic", "Behaviour when real devices of different makers run together"],
    ["The boards communicate and compute within their limits", "Any attack test on the boards"],
-   ["The collapse, measured on real boards", "That the fix works on the boards"]], [W / 2, W / 2])
-P("Next steps: run the fixed program on the boards, tune the traffic compression to their own data, run attacks on them, and use genuinely different devices as neighbours.")
+   ["The collapse, and the fix holding, on real boards", "Recovery from a sudden large change"]], [W / 2, W / 2])
+P("Next steps: run attacks on the boards, add a safe way to recover from sudden jumps, tune the traffic compression to their own data, and use genuinely different devices as neighbours.")
+P("<b>How useful is this, honestly?</b> It is not revolutionary: it combines known pieces against one narrow threat, slow poisoning hidden inside change that many devices share. "
+  "For a single-purpose device, an allow-list of the addresses its maker intends (the MUD standard) cannot be poisoned at all, and loud botnets are mostly caught without any learning. "
+  "The method fits best as one detector per device on a gateway or edge box with many neighbours, where today's tools often learn a baseline once and then stop. We have not tested that setting.")
 
 H("10. Where everything is")
 T([["Item", "File or folder"], ["Research paper", "paper/main.pdf"], ["Presentation", "G04_FOA_Final.pptx"], ["Question practice", "G04_Viva_Prep.pdf"],
