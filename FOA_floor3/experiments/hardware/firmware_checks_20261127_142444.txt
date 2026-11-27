@@ -1,0 +1,58 @@
+FOA host and ESP8266 build checks. No serial I/O. 
+Host compiler and regression 
+0 peers: spread ratio 0.70539 without floor, 1.00000 with floor
+2 peers: spread ratio 0.00241 without floor, 1.00000 with floor
+Host floor regression passed.
+Synthetic periodic fixture: 101/400 flagged with fixed stride, 11/400 with phase rotation
+ 
+ESP8266 default compile 
+C:\Users\HP\OneDrive\Desktop\AAAA-IOT-FINAL\FOA_floor3\firmware\esp8266_foa\esp8266_foa.ino: In function 'uint16_t ina_read(uint8_t)':
+C:\Users\HP\OneDrive\Desktop\AAAA-IOT-FINAL\FOA_floor3\firmware\esp8266_foa\esp8266_foa.ino:113:33: warning: ISO C++ says that these are ambiguous, even though the worst conversion for the first is better than the worst conversion for the second:
+  113 |     Wire.requestFrom(INA_ADDR, 2);
+      |                                 ^
+In file included from C:\Users\HP\OneDrive\Desktop\AAAA-IOT-FINAL\FOA_floor3\firmware\esp8266_foa\esp8266_foa.ino:20:
+C:\Users\HP\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\Wire/Wire.h:73:13: note: candidate 1: 'uint8_t TwoWire::requestFrom(int, int)'
+   73 |     uint8_t requestFrom(int, int);
+      |             ^~~~~~~~~~~
+C:\Users\HP\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\Wire/Wire.h:71:13: note: candidate 2: 'uint8_t TwoWire::requestFrom(uint8_t, uint8_t)'
+   71 |     uint8_t requestFrom(uint8_t, uint8_t);
+      |             ^~~~~~~~~~~
+. Variables and constants in RAM (global, static), used 51248 / 80192 bytes (63%)
+║   SEGMENT  BYTES    DESCRIPTION
+╠══ DATA     1532     initialized variables
+╠══ RODATA   7380     constants       
+╚══ BSS      42336    zeroed variables
+. Instruction RAM (IRAM_ATTR, ICACHE_RAM_ATTR), used 61031 / 65536 bytes (93%)
+║   SEGMENT  BYTES    DESCRIPTION
+╠══ ICACHE   32768    reserved space for flash instruction cache
+╚══ IRAM     28263    code in IRAM    
+. Code in flash (default, ICACHE_FLASH_ATTR), used 280812 / 1048576 bytes (26%)
+║   SEGMENT  BYTES    DESCRIPTION
+╚══ IROM     280812   code in flash   
+Default build exit code: 0 
+ 
+ESP8266 compile with diagnostic flags 
+C:\Users\HP\OneDrive\Desktop\AAAA-IOT-FINAL\FOA_floor3\firmware\esp8266_foa\esp8266_foa.ino: In function 'uint16_t ina_read(uint8_t)':
+C:\Users\HP\OneDrive\Desktop\AAAA-IOT-FINAL\FOA_floor3\firmware\esp8266_foa\esp8266_foa.ino:113:33: warning: ISO C++ says that these are ambiguous, even though the worst conversion for the first is better than the worst conversion for the second:
+  113 |     Wire.requestFrom(INA_ADDR, 2);
+      |                                 ^
+In file included from C:\Users\HP\OneDrive\Desktop\AAAA-IOT-FINAL\FOA_floor3\firmware\esp8266_foa\esp8266_foa.ino:20:
+C:\Users\HP\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\Wire/Wire.h:73:13: note: candidate 1: 'uint8_t TwoWire::requestFrom(int, int)'
+   73 |     uint8_t requestFrom(int, int);
+      |             ^~~~~~~~~~~
+C:\Users\HP\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\libraries\Wire/Wire.h:71:13: note: candidate 2: 'uint8_t TwoWire::requestFrom(uint8_t, uint8_t)'
+   71 |     uint8_t requestFrom(uint8_t, uint8_t);
+      |             ^~~~~~~~~~~
+. Variables and constants in RAM (global, static), used 51228 / 80192 bytes (63%)
+║   SEGMENT  BYTES    DESCRIPTION
+╠══ DATA     1532     initialized variables
+╠══ RODATA   7384     constants       
+╚══ BSS      42312    zeroed variables
+. Instruction RAM (IRAM_ATTR, ICACHE_RAM_ATTR), used 61031 / 65536 bytes (93%)
+║   SEGMENT  BYTES    DESCRIPTION
+╠══ ICACHE   32768    reserved space for flash instruction cache
+╚══ IRAM     28263    code in IRAM    
+. Code in flash (default, ICACHE_FLASH_ATTR), used 279420 / 1048576 bytes (26%)
+║   SEGMENT  BYTES    DESCRIPTION
+╚══ IROM     279420   code in flash   
+Diagnostic build exit code: 0 
