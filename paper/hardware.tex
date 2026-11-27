@@ -17,6 +17,7 @@ Update proposal / FOA step & 11.2\,ms / 1.6\,ms \\
 Sign one frame / verify two & 0.60\,ms / 0.95\,ms \\
 Learning cycle period & 7.77\,s \\
 Board power (second run) & 365\,mW at 5.04\,V \\
+Board power (27 Nov runs) & 382 to 391\,mW \\
 Energy per cycle, whole board & 2.84\,J \\
 \bottomrule
 \end{tabular}
@@ -24,8 +25,8 @@ Energy per cycle, whole board & 2.84\,J \\
 
 No extra energy for a learning cycle was detectable with the sensor sampling every 40\,ms: power in the
 0.6\,s learning window was in fact $4.2\pm0.1$\,mJ \emph{below} normal running, plausibly because the
-board mostly waits for frames then. About 19\,ms of computing per cycle at full board power would be
-about 7\,mJ; this is an estimate. Deployment also exposed defects that simulation had not: frames were
+board mostly waits for frames then. The table's computing adds up to about 14\,ms per cycle; at
+full board power that would be about 5\,mJ, an upper bound rather than a measurement. Deployment also exposed defects that simulation had not: frames were
 rejected because boards boot at different times (now each sender's cycle number must only increase), and
 calibration ran before the damped statistics had settled (now preceded by a warm-up).
 
@@ -35,7 +36,8 @@ value within 20 minutes and false alarms reached about 90\% (Figure~\ref{fig:hw}
 highly repetitive. The core-only rule may shrink the spread freely while growth is gated by outer-ring
 support, a one-way ratchet; identical boards agree on the shrink, and FOA applies it as common change.
 In a second run, two restarted boards beside an already collapsed one levelled off near 54\%, which is
-consistent with this account but does not prove it; the placeholder basis may also contribute. A
+consistent with this account but does not prove it; the placeholder basis may also contribute, and
+later runs found a second cause, calibration aliasing (Section~\ref{sec:hw27}). A
 simulation of repetitive traffic with no attacker reproduces the collapse.
 
 \begin{figure*}[t]
@@ -63,4 +65,37 @@ false-alarm advantage over a single device therefore does not survive. What surv
 to use FOA, is safety under drift: with the floor in both, FOA is compromised in \FlFOAFCompStrong\ of
 runs against \FlAutoFCompStrong\ for a single device, never by the boundary attacker against
 \FlAutoFCompBound, and it still withstands the monoculture botnet that defeats a single device in every
-run. The floored rule has not yet been run on the boards.
+run.
+
+\subsection{The floor on the boards}\label{sec:hw27}
+On 27 November we reran the three boards with the floor, with Wi-Fi connected and both peers heard in
+88 to 97\% of cycles. These are single runs of 24 to 37 learning minutes per configuration, each with
+its own boot and calibration, so we read them descriptively.
+
+\textbf{The floor held.} In every run the spread never fell below its calibrated value (minimum ratio
+1.0000), against 0.035 in an earlier peer-connected run without the floor.
+
+\textbf{Calibration aliasing.} With the floor, false alarms were still about 25\% on every board.
+Calibration kept every tenth 50\,ms sample, which lines up with the 200\,ms telemetry period and saw
+only some of its phases. Rotating the stride (9, 9, 9 and 13 ticks) cut false alarms over the first 20
+learning minutes from 25.3\% to 1.5 to 1.7\%; a detector that never learns, with the original stride,
+was at 46\%. A run with three different telemetry periods points the same way: only the board on the
+200\,ms period stayed near 25\%. The static control was not rerun with the rotated stride, so these runs
+do not yet show what adaptation itself adds on the boards.
+
+\textbf{Abrupt change.} When all three boards' telemetry periods halved at once (from 160, 200 and
+240\,ms to 80, 100 and 120\,ms), false alarms went from between 0.5 and 26\% before the change to about
+99\% after it, both with peers and with node 0 ignoring them, and stayed there for the rest of the run.
+In 78 of the 79 cycles after the change each board had no core samples left: all of its traffic was
+outside the alarm radius, so there was nothing to learn from (Section~\ref{sec:theory}). FOA follows
+drift that arrives gradually relative to its alarm radius; a step larger than the radius needs a
+separate recovery mechanism.
+
+\textbf{Cost.} Board power was 382 to 391\,mW, dominated by the radio. Computing took about 25\,ms per
+cycle (proposal 21 to 24\,ms, FOA step 1.2 to 1.9\,ms, signing 0.6\,ms, verifying two frames about
+1\,ms); the proposal is slower than in the first runs for a reason we have not traced. At full board
+power that is at most about 10\,mJ per cycle. The ESP8266 build uses 26\% of flash, 63\% of static RAM
+and 93\% of instruction RAM.
+
+No poisoning, decoy or forgery trial has been run on the boards yet; every security result in this
+paper comes from simulation.

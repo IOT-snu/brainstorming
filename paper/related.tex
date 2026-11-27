@@ -7,18 +7,20 @@ analysed exactly our detector, the online centroid, and showed that the attacker
 traffic bounds how far it can be moved; they also proposed switching learning off when the alarm rate
 rises~\cite{kloft}. Poisoning of test-time adaptation~\cite{su2025tta}, of on-device learning on
 microcontroller-class hardware~\cite{sensors2024}, and of rapid-response adaptation
-pipelines~\cite{rapidpoison} shows the problem is current. A 2026 survey of about seventy on-device
-learning works for TinyML found no security mechanism among them~\cite{tinymlsurvey}. FOA targets this
+pipelines~\cite{rapidpoison} shows the problem is current. A 2026 survey of on-device learning in
+TinyML does not discuss security or poisoning~\cite{tinymlsurvey}. FOA targets this
 gap with a per-device detector that adapts on the device.
 
 \textbf{Adaptive intrusion detection and its gates.} Kitsune made online, per-packet anomaly
 detection practical but stops learning after training~\cite{kitsune}. Later adaptive detectors decide
 \emph{when} to learn: OWAD detects normality shift and adapts after a test~\cite{owad}; DriftXpert
-gates adaptation on an outlier ratio~\cite{driftxpert}; RTTAD updates only from confidently normal
-points and stops otherwise~\cite{rttad}; a continual-learning analysis of poisoning proposes rolling back
+triggers retraining when an outlier ratio rises~\cite{driftxpert}; RTTAD adapts in rounds on the test
+samples it is confident about, both normal and anomalous, and ends when too few such samples
+remain~\cite{rttad}; a continual-learning analysis of poisoning proposes rolling back
 when the score spikes~\cite{clpoison}; ACORN-IDS and CND-IDS continue learning from normal-only
-streams~\cite{acorn,cndids}. Each has a condition under which it stops learning. Our freeze experiments
-show that an attacker who can make such a condition true with loud traffic can turn honest drift into a
+streams~\cite{acorn,cndids}. Each decides from a traffic statistic when to learn, and several stop
+learning when traffic looks suspicious. Our freeze experiments show that an attacker who can make such
+a stop condition true with loud traffic can turn honest drift into a
 lasting flood of false alarms. Korycki and Krawczyk discussed attacks that impair adaptation in data
 streams~\cite{korycki}; we found no prior evaluation of this freeze effect on the gating rules of
 adaptive intrusion detectors.
@@ -40,3 +42,15 @@ changes; and the guarantee is a bound on movement and time to compromise, not ag
 aggregation (Krum~\cite{krum}, the geometric median~\cite{lopuhaa,minsker}) protects a shared model in
 federated learning; FOA uses the geometric median only to estimate the common component of per-device
 updates, and keeps every device's own detector.
+
+Structurally, FOA is closest to consensus with a bounded local term. In the saturated innovation update
+of Chen, Kar and Moura, sensors combine a consensus step with a norm-limited local innovation and still
+estimate a fixed parameter when fewer than half of them are attacked~\cite{siu}; BALANCE accepts a
+neighbour's model only within a distance that shrinks over time~\cite{balance}; ClippedGossip clips
+neighbours' updates~\cite{clippedgossip}. These target a fixed optimum with a tolerance that shrinks,
+which would reject honest drift that arrives late; FOA tracks a moving normal with a residual allowance
+that grows. We have not compared against them experimentally. The intuition is not new in practice either: a
+Darktrace patent describes continually updated per-entity models that compare each entity with its own
+history and with its peers', so that compromised entities, which behave unlike their peers, are not
+learned as normal~\cite{darktrace}. What FOA adds is a specific rule with a stated bound on how fast one device
+can be moved, the freeze analysis, and an implementation on microcontrollers.

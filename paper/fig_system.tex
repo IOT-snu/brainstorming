@@ -37,7 +37,7 @@
 \node[box] (prop) at (-5.9,-1.45) {own proposal $d_i$\\[-1pt]{\scriptsize core-only, ring-backed}};
 \node[box] (gm) at (-5.9,-2.75) {verified peer proposals $\{d_j\}$\\[-1pt]{\scriptsize vulnerability-diverse $P(i)$}};
 \node[hero] (cons) at (-2.35,-2.75) {$\bar m$: smoothed\\geometric median};
-\node[hero] (common) at (1.15,-1.45) {\textbf{common part} $a=w\,\lambda\,\bar m$\\[-1pt]{\scriptsize backed by peers: applied in full}};
+\node[hero] (common) at (1.15,-1.45) {\textbf{common part} $a=w\,\lambda\,\bar m$\\[-1pt]{\scriptsize backed by peers: applied as far as own traffic agrees}};
 \node[warn] (res) at (1.15,-2.75) {\textbf{residual} $r=d_i-a$\\[-1pt]{\scriptsize device-only: rationed}};
 \node[box] (bud) at (5.0,-2.75) {budget $\lVert R(t)\rVert\le(B_0+Bt)\,\rho_i$\\[-1pt]{\scriptsize never closes, never discards}};
 \node[box, fill=black!3] (upd) at (5.0,-1.45) {$\mu_i \leftarrow \mu_i + a + r_{\text{applied}}$};
@@ -52,8 +52,9 @@
 \end{tikzpicture}
 \caption{Fleet-Orthogonal Adaptation. Every device runs its own detector and broadcasts its proposed
 update each cycle. On each device, the part of its proposal that a robust consensus of
-vulnerability-diverse peers backs is applied in full; the device-specific remainder, which is where a
+vulnerability-diverse peers backs is applied as far as the device's own traffic agrees; the
+device-specific remainder, which is where a
 single-device poisoning campaign lives, passes through a cumulative budget that grows forever, so
-learning never stops and the attacker's extra movement is bounded.}
+no gate switches learning off and the attacker's extra movement is bounded.}
 \label{fig:system}
 \end{figure*}

@@ -33,7 +33,9 @@ the outlier-ratio gate compares the alarm rate with its own moving average, whic
 so it reopened and ended where it would have without the attacker (\ORFrozenFPR); the frozen reserve has
 no gate to trip but suffers from the drift itself. FOA's trajectory is unchanged (\FOAFreezeFPR\ with the attacker,
 \FOAFreezeClean\ without), exactly as Proposition~\ref{prop:freeze} states; our unit tests check that the
-two trajectories are bit-for-bit identical.
+two trajectories are bit-for-bit identical. This holds in simulation, where decoys are separate samples;
+on our boards, whose features summarise all incoming packets together, a decoy flood would shift every
+sample (Section~\ref{sec:theory}).
 
 \begin{figure*}[t]
 \centering
@@ -46,7 +48,8 @@ by decoy share.}
 
 \subsection{Attacks on the gossip}
 \textbf{Byzantine peers.} We give the attacker full control, keys included, of $f$ of a victim's seven or
-eight diverse peers, during strong drift, for five victims (Figure~\ref{fig:gossip}a). On their own,
+eight diverse peers, during strong drift, for five victims (Figure~\ref{fig:gossip}a). Four of seven peers is past the breakdown point of
+Theorem~\ref{thm:byz} and four of eight is at it, so $f=4$ lies outside the theorem. On their own,
 Byzantine peers compromised no victim at any $f$ up to four (\ByzAloneMax): the victim's own traffic does
 not back what they send, and its agreement $\lambda$ stays low. Combined with a traffic poisoner on the
 victim, they erode FOA's protection gradually: \ByzTZ, \ByzTO, \ByzTH\ of victims compromised with

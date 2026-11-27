@@ -1,7 +1,7 @@
 \section{Discussion and Limitations}\label{sec:discussion}
 
 \textbf{What is real and what is modelled.} The benign and attack traffic are real N-BaIoT
-captures~\cite{nbaiot}, and the C implementation is real and compiled for the ESP32. Three things are
+captures~\cite{nbaiot}, and the C implementation is real: compiled for the ESP32 and run on three ESP8266 boards. Three things are
 ours and synthetic: the concurrency of the fleet (the nine devices were captured separately), the honest
 drift (physically modelled transforms of the Kitsune statistics, not a recorded network change), and the
 poisoner (crafted feature vectors, not packets). A public intrusion dataset with documented concept
@@ -33,7 +33,21 @@ mostly the two cameras whose scan traffic is closest to benign.
 inflated the spread rather than dragging the centre, the radius attack Kloft and Laskov warned
 about~\cite{kloft}. FOA's spread budget is what holds it, and it is the parameter we would tune first.
 
-\textbf{Hardware.} Section~\ref{sec:hw} reports three ESP8266 boards. Attack and freeze tests on hardware,
-a testbed-fitted feature basis, and a hardware run with the coverage floor remain to be done. The results
+\textbf{Where FOA fits.} For a single-purpose device, an allow-list of the endpoints its maker intends,
+as in Manufacturer Usage Descriptions~\cite{mud}, cannot be poisoned at all and catches scanning and
+flooding without learning; anomaly detection, and so FOA, matters where normal behaviour is too varied
+or changes too often to list. An infected device can also stop its own detector, as Mirai kills
+competing processes~\cite{mirai}, so a deployment would more naturally run one FOA detector per device
+on a gateway or edge box, with peers drawn from other devices and sites, and with someone to act on its
+alarms. Our false-alarm rates are per sample; an operator needs alerts per device per day, which we did
+not evaluate. The pattern itself, per-entity baselines that must follow shared change but not one
+entity's slow manipulation, is wider than IoT, and peer comparison is already used in commercial
+network detection~\cite{darktrace}.
+
+\textbf{Hardware.} Section~\ref{sec:hw} reports three ESP8266 boards. The floor now holds on them, but
+attack and freeze tests on hardware, a testbed-fitted feature basis, repeated runs and recovery from
+abrupt change remain to be done. The board firmware summarises all incoming packets together, so on the
+boards an attacker's traffic shifts every sample instead of adding separate ones; statistics kept per
+source would bring the boards closer to the simulated threat model. The results
 of Section~\ref{sec:eval} use the rule without the floor; Section~\ref{sec:floor} states which of them
 change with it.

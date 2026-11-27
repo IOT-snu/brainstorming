@@ -53,11 +53,15 @@ Theorem~\ref{thm:contain}. The approximation uses $e^{y}\approx1+y$.
 We checked the bound in every cycle of all 3{,}630 attacked runs of FOA and its budgeted variants and of 120
 synthetic runs: it was never violated. The only violations came from the ablation that removes the
 residual budget, to which the corollary does not apply (Section~\ref{sec:ablation}), which shows the
-bound is not vacuous.
+bound is not vacuous. In time units, with our defaults ($B_0=B_0^s=0.1$, $B=0.005$, $B^s=0.001$) a
+target at $M=2$ alarm radii needs at least about 130 cycles: about 17 minutes at the boards' 7.8\,s
+cycle, or five and a half days at one cycle per hour. The bound is a delay, not a wall. A patient
+attacker on one device always succeeds in the end, as Proposition~\ref{prop:frontier} says any rule
+that follows a device's own drift must allow, and the cycle length sets how long that takes.
 
 \subsection{Byzantine peers}
 \begin{lemma}[Minsker~\cite{minsker}, Lemma 2.1]\label{lem:gm}
-Let $0<\alpha<1/2$ and $C_\alpha=(1-\alpha)\sqrt{1/(1-2\alpha)}$. If more than $(1-\alpha)K$ of $K$ points
+Let $0<\alpha<1/2$ and $C_\alpha=(1-\alpha)\sqrt{1/(1-2\alpha)}$. If at least $(1-\alpha)K$ of $K$ points
 lie within distance $r$ of $z$, their geometric median lies within $C_\alpha r$ of $z$.
 \end{lemma}
 
@@ -69,13 +73,24 @@ $w_t\lambda_t$ times an average of such terms, and the total adversarial common 
 $\min\big(\sum_u C_{f/K} r_u,\;(B_0^c+B^c t)\rho\big)$.
 \end{theorem}
 \begin{proof}
-Apply Lemma~\ref{lem:gm} with $z=m_t^H$: $K-f>(1-f/K)K$ points lie within $r_t$ of it. The exponential
+For $f=0$ there is nothing to prove. Otherwise apply Lemma~\ref{lem:gm} with $\alpha=f/K$ and
+$z=m_t^H$: the $K-f=(1-f/K)K$ honest points lie within $r_t$ of it. The exponential
 average is a convex combination, $w_t\lambda_t\le1$, and the common budget caps $\norm{C(t)}$.
 \end{proof}
 This is a bound on \emph{rate}, not immunity: a minority of compromised peers can still push a
 consistent bias of order $C_\alpha r$ per cycle until the common budget stops it, and a majority
 ($f\ge K/2$) can move the consensus anywhere. Keyless attackers have no effect: frames with a bad tag,
 an unknown sender or a stale cycle are dropped before aggregation.
+
+\textbf{Scope of the theorem.} Three limits apply. (i) It is stated for the exact geometric median; the
+implementation runs ten Weiszfeld iterations, so it holds only approximately for the computed median,
+while the common budget caps $\norm{C(t)}$ regardless. (ii) It covers the centre. The common log-spread
+change is the plain median of the peers' changes, which for $f<K/2$ stays within the range of the honest
+peers' values and is then capped by its budget; that range still leaves room to inflate the spread,
+which is how Byzantine peers helped a poisoner in our runs (Section~\ref{sec:eval}). (iii) It needs
+$f<K/2$. On our three-board testbed each device has $K=2$ peers, so the theorem covers only $f=0$: one
+key-holding peer can move a two-point median by half its own offset, without bound, and what then limits
+the common movement is the device's own agreement $\lambda_t$ and the common budget, not the median.
 
 \subsection{The frontier}
 \begin{proposition}[Device-only drift and poisoning are indistinguishable]\label{prop:frontier}
@@ -97,11 +112,12 @@ rate $B$ (plus $B^s$ in log-spread). Larger $B$ buys faster tracking of a device
 proportionally less time to compromise (Corollary~\ref{cor:ttc}); we measure both ends in
 Section~\ref{sec:eval}.
 
-\subsection{No freeze state}
-\begin{proposition}[Freeze immunity]\label{prop:freeze}
-(i) Traffic that the detector alarms on does not enter FOA's update, so injecting such traffic
-(decoys) leaves the device's trajectory unchanged. (ii) No input sequence stops FOA from learning: the
-residual admits movement of $B\rho$ per cycle forever.
+\subsection{No stop state}
+\begin{proposition}[No stop state]\label{prop:freeze}
+(i) Samples that the detector alarms on do not enter FOA's update, so injecting such samples
+(decoys) leaves the device's trajectory unchanged. (ii) No gate stops FOA from learning: nothing in the
+rule switches updates off because of the alarm rate or any other suspicion statistic, and the residual
+admits movement of $B\rho$ per cycle forever.
 \end{proposition}
 \begin{proof}
 (i) The local proposal uses only accepted points (score $\le\tau$), and the common part depends only on
@@ -113,3 +129,13 @@ Gated defences have exactly the state that Proposition~\ref{prop:freeze} rules o
 traffic statistic under which they stop learning. An attacker who can make that condition true by
 sending loud traffic can freeze them, and honest drift then turns the freeze into a lasting flood of
 false alarms (Section~\ref{sec:eval}).
+
+\textbf{What the proposition does not cover.} Two things. First, starvation: FOA learns only from
+accepted samples, so if all of a device's traffic lands outside its alarm radius, for example after a
+sudden change larger than the radius, there is nothing to learn from and the device cannot move, like
+any rule that learns only from accepted traffic. Our boards showed exactly this after an abrupt doubling
+of the traffic rate (Section~\ref{sec:hw27}). Second, part (i) treats decoys as separate samples, as our
+simulations do. Our board firmware instead summarises all incoming packets together, so a decoy flood
+shifts every sample; if it pushes them all outside the radius, the device starves for as long as the
+flood lasts. Recovering from such a step needs side information that the device's accepted traffic does
+not contain, for example a quorum of peers that stall at the same time.

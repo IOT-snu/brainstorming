@@ -1,13 +1,14 @@
 \section{Conclusion}
 A detector that learns on the device needs a second witness, and an IoT fleet provides one. FOA lets
 each device take freely whatever drift its vulnerability-diverse peers also see, and rations only what
-is specific to it. It never stops learning, so it cannot be frozen; it bounds what an attacker on one
+is specific to it. It has no gate that stops learning, so a freeze attack has nothing to trip; it bounds what an attacker on one
 device can do and how fast; and it costs one 92-byte frame per cycle and about 22\,KB of flash on an
 ESP32. Three real boards then showed what simulation had missed: identical, repetitive devices can shrink
 their detectors together until almost everything alarms. A coverage floor removes that failure in
-simulation, and in doing so shows that FOA's real advantage is not fewer false alarms than a single
-device but resistance to poisoning hidden inside drift. The next steps are the floored rule and attacks on
-the boards. What FOA cannot do, and what no rule can, is tell a device's own honest change from an attack
+simulation and on the boards, and in doing so shows that FOA's real advantage is not fewer false alarms than a single
+device but resistance to poisoning hidden inside drift. The boards also showed that a change larger than the alarm radius
+leaves nothing to learn from. The next steps are attacks on the boards and a safe way to recover from
+such a step. What FOA cannot do, and what no rule can, is tell a device's own honest change from an attack
 on that device.
 
 \section*{Artifacts}

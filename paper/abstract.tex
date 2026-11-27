@@ -5,18 +5,19 @@ From a single device's stream, honest drift and slow poisoning cannot be told ap
 devices rarely live alone: most honest drift is shared by a device's neighbours, while a poisoning
 campaign reaches only the devices its exploit reaches. Fleet-Orthogonal Adaptation (FOA) gives each
 device a robust consensus of vulnerability-diverse peers, exchanged as 92-byte authenticated ESP-NOW
-frames: the part of a device's update its peers back is applied in full, and the device-specific rest
-passes through a budget that never closes. We prove that an attacker on one device gains at most
-$B_0+Bt$ alarm radii of movement, that key-holding Byzantine peers add a bounded bias per cycle, that
-FOA has no freeze state, and that device-only drift and poisoning are indistinguishable for any rule.
-On all nine N-BaIoT devices with real Mirai and BASHLITE traffic, under strong shared drift, FOA keeps
-fleet false alarms at \FOAFleetFPR\ (single-device adaptation \AutoFleetFPR, gated defences
-\GateFleetFPR) while cutting attack-attributable compromise from \AutoComp\ to \FOAComp; it is never
+frames: the part of a device's update its peers back is applied as far as the device's own traffic agrees,
+and the device-specific rest passes through a budget that never closes. We prove that an attacker on one device gains at most
+$B_0+Bt$ alarm radii of movement, that fewer than half key-holding Byzantine peers add a bounded bias per
+cycle, that FOA has no gate an attacker can trip to stop it learning, and that device-only drift and poisoning are indistinguishable for any rule.
+On all nine N-BaIoT devices with real Mirai and BASHLITE traffic, under strong injected shared drift,
+FOA cuts attack-attributable compromise from \AutoComp\ (single-device adaptation) to \FOAComp; it is never
 compromised by the classic boundary poisoner, resists a monoculture botnet that defeats same-model
 consensus, and is unaffected by a freeze attack that locks an alarm-rate switch-off at
-\KLFrozenFPR\ false alarms. On 40 weeks of real CESNET traffic it is never compromised. On three real
-ESP8266 boards FOA gossips reliably at about 15\,ms of computing per cycle, but identical boards shrank
-their detectors together until false alarms reached 90\%. A coverage floor removes this in simulation
-(strong-drift false alarms \FlFOAFStrongFPR) and revises our claim: with the floor a single device raises
-no more false alarms than FOA, but is compromised in \FlAutoFCompStrong\ of attacked runs under drift
-against FOA's \FlFOAFCompStrong.
+\KLFrozenFPR\ false alarms. On 40 weeks of real CESNET traffic it is never compromised, although
+there a static detector raises fewer false alarms than any adaptive rule. Three ESP8266 boards showed
+two failures that simulation missed: identical boards shrank their detectors together until false
+alarms reached 90\%, which a coverage floor removes in simulation and on the boards, and an abrupt
+doubling of the traffic rate left no accepted traffic to learn from. The floor also revises our claim:
+with it a single device raises fewer false alarms than FOA (FOA's earlier advantage, \FOAFleetFPR\
+against \AutoFleetFPR, came from the same shrinking), but is compromised in \FlAutoFCompStrong\ of
+attacked runs under drift against FOA's \FlFOAFCompStrong. No attack has yet been run on the boards.

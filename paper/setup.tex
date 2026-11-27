@@ -39,7 +39,7 @@ proposal over all accepted traffic. \emph{Single-device} applies our signature-f
 \emph{Frozen reserve} learns only from points a frozen copy of the calibrated detector accepts
 (WARDEN-style screening~\cite{warden}). \emph{Alarm-rate switch-off} skips updates while the batch alarm
 rate exceeds five times the clean rate (Kloft and Laskov~\cite{kloft}). \emph{Outlier-ratio gate} skips
-updates while the alarm rate exceeds three times its own moving average (DriftXpert style~\cite{driftxpert}).
+updates while the alarm rate exceeds three times its own moving average (the statistic of DriftXpert~\cite{driftxpert}, which uses it to trigger retraining, not to pause it).
 \emph{TOA} is our earlier rule that rations movement toward an \emph{oracle} attack signature.
 \emph{Same-model consensus} applies the element-wise median of same-model devices' proposals and discards
 the rest (CIoTA style~\cite{ciota}). The gates are our re-implementations of the gating idea in each

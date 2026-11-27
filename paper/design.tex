@@ -5,7 +5,7 @@ A single device cannot tell honest drift from slow contamination; with one label
 two can be made identical~\cite{warden}. A fleet adds a second, independent stream: the device's peers.
 Common-mode drift shows up in most peers' proposals, while a campaign that rides one exploit reaches only
 the peers that share it. FOA therefore splits every proposal into the part the peers back, which is
-applied in full, and the remainder, which is device-specific and is admitted only through a cumulative
+applied as far as the device's own traffic agrees, and the remainder, which is device-specific and is admitted only through a cumulative
 budget. Nothing is ever discarded and nothing ever switches learning off, so there is no state for a
 freeze attack to trip.
 

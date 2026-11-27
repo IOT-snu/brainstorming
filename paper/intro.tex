@@ -24,30 +24,33 @@ that a single device does not have.
 \textbf{Fleet-Orthogonal Adaptation (FOA)} turns that observation into an update rule
 (Figure~\ref{fig:system}). Every device keeps its own detector and, each cycle, broadcasts its proposed
 update as a 92-byte authenticated ESP-NOW frame. On each device the part of its proposal that a robust
-consensus of vulnerability-diverse peers backs is applied in full; the device-specific remainder,
+consensus of vulnerability-diverse peers backs is applied, scaled by how far the device's own traffic
+agrees; the device-specific remainder,
 where a single-device campaign lives, passes through a cumulative budget that grows forever. Nothing is
-discarded and learning never stops, so there is no state for a freeze attack to reach.
+discarded and no gate ever switches learning off, so a freeze attack has no stop condition to trip.
 
 \textbf{Contributions.}
 \begin{itemize}
-\item \textbf{FOA}, a never-freezing, label-free update rule that splits each on-device update into a
+\item \textbf{FOA}, a gate-free, label-free update rule that splits each on-device update into a
   peer-backed common part and a budgeted residual, with agreement measured robustly so that an attacker
   holding less than half a device's traffic can neither cancel nor fake it (Section~\ref{sec:design}).
 \item \textbf{Guarantees}: the attacker's extra movement is bounded by $B_0+Bt$ alarm radii, giving a
   minimum time to compromise; $f<K/2$ key-holding Byzantine peers add only a bounded bias per cycle (and
 alone never compromised a device in our runs); no
-  input stops learning; and a proof that device-only drift and poisoning cannot be separated by any
+  gate stops learning; and a proof that device-only drift and poisoning cannot be separated by any
   rule, so FOA's single rate $B$ is the honest place to put the trade-off (Section~\ref{sec:theory}).
 \item \textbf{Evaluation on all nine N-BaIoT devices} with real Mirai and BASHLITE traffic, physically
-  modelled drift, eight baselines and held-out seeds. Under strong shared drift FOA keeps fleet false
-  alarms at \FOAFleetFPR\ (single-device adaptation \AutoFleetFPR, gated defences \GateFleetFPR), and
-  cuts attack-attributable compromise from \AutoComp\ to \FOAComp\ (Section~\ref{sec:eval}).
+  modelled drift, eight baselines and held-out seeds. Under strong shared drift FOA cuts
+  attack-attributable compromise from \AutoComp\ to \FOAComp\ (Section~\ref{sec:eval}); its lower false
+  alarms there (\FOAFleetFPR\ against \AutoFleetFPR) do not survive the coverage floor of
+  Section~\ref{sec:floor}.
 \item \textbf{The freeze attack} on stop-learning gates: decoys leave FOA's trajectory bit-for-bit
   unchanged while they lock an alarm-rate switch-off at \KLFrozenFPR\ false alarms.
-\item \textbf{Real drift} on 40 weeks of CESNET traffic~\cite{cesnet}, and \textbf{an ESP32
-  implementation} that matches the reference on every recorded cycle, rejects all tampered frames and
+\item \textbf{Real drift} on 40 weeks of CESNET traffic~\cite{cesnet}, and \textbf{a C
+  implementation} (compiled for the ESP32, run on three ESP8266 boards) that matches the reference on every recorded cycle, rejects all tampered frames and
   adds about 22\,KB of flash.
-\item \textbf{Hardware lesson and a correction}: a three-board testbed exposed a spread collapse; a
-  coverage floor fixes it in simulation and shows that FOA's lasting advantage is safety under drift
+\item \textbf{Hardware lesson and a correction}: a three-board testbed exposed a spread collapse, a
+  calibration aliasing bug and a stall after an abrupt change; a coverage floor fixes the collapse in
+  simulation and on the boards and shows that FOA's lasting advantage is safety under drift
   rather than false alarms (Section~\ref{sec:hw}).
 \end{itemize}

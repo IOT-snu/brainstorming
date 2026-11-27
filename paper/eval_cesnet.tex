@@ -15,7 +15,10 @@ loses. Every adaptive rule pays something for adapting to daily variation (singl
 alarm-rate switch-off \CesKLFPR); FOA pays least among the protected rules (\CesFOAFPR). Under attack,
 naive learning was compromised in \CesNaiveComp\ of runs, single-device adaptation and the alarm-rate
 switch-off in \CesAutoComp\ and \CesKLComp, the frozen reserve in \CesFrozenComp, and FOA in
-\CesFOAComp\ (Figure~\ref{fig:cesnet}).
+\CesFOAComp\ (Figure~\ref{fig:cesnet}). Read plainly, adapting was not needed on this real drift: the
+static detector, which cannot be poisoned, raises fewer false alarms than every adaptive rule. The
+experiment shows that FOA stays safe on drift nobody designed, not that it beats a static detector
+there.
 
 \begin{figure*}[t]
 \centering
