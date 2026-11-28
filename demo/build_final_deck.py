@@ -200,24 +200,32 @@ for i, (t, b) in enumerate((("Bounded", "One attacked device moves only a set am
     s.text(0.9, y + 0.33, 3.6, 0.5, t, 21, BLUE, True)
     s.text(4.8, y + 0.34, 7.5, 0.75, b, 18, INK)
 
-# 5b ---------------------------------------------------------------- safer across conditions (grouped bars)
-s = Slide("This chart puts FOA next to a device learning on its own, both with the floor, across five conditions. With no network change, FOA halves the compromise rate. Under a strong network change it falls from forty-three percent to about nine. The classic slow poisoner, which beats a lone device three times out of four, never beat FOA. An attacker hiding inside the clean core is cut from thirty-seven percent to twelve. And when a botnet takes over devices of one model, a lone device is always compromised and FOA never is.")
-s.head("Safer across attacks and conditions", "Share of attacked runs compromised. Lower is better. Both rules with the floor.")
-G = (("No network\nchange", 7.6, 4.3), ("Strong network\nchange", 43.1, 9.4), ("Classic slow\npoisoner", 75.4, 0.0),
-     ("Hiding in the\nclean core", 36.8, 11.8), ("One-model\nbotnet", 100.0, 0.0))
-gx0, gw, base, top = 0.9, 11.53 / 5, 6.05, 2.95
-sc = lambda v: (base - top) * v / 100
-s.line(0.9, base, 12.43, base, LINE, 1.25)
-for i, (n, a, f) in enumerate(G):
-    cx = gx0 + gw * (i + 0.5)
-    for j, (v, col) in enumerate(((a, PALE), (f, BLUE))):
-        x = cx - 0.78 + j * 0.82
-        h = max(sc(v), 0.03)
-        s.box(x, base - h, 0.72, h, col, None, 0)
-        s.text(x - 0.25, base - h - 0.42, 1.22, 0.38, f"{v:g}%", 17, BLUE if j else GREY, True, "c")
-    s.text(cx - gw / 2 + 0.05, base + 0.12, gw - 0.1, 0.7, n, 14, INK, False, "c", spacing=1.05)
-s.box(9.0, 1.98, 0.28, 0.28, PALE, None, 0); s.text(9.38, 1.95, 1.6, 0.35, "Lone device", 14, GREY)
-s.box(10.95, 1.98, 0.28, 0.28, BLUE, None, 0); s.text(11.33, 1.95, 1.1, 0.35, "FOA", 14, BLUE, True)
+# 5b ---------------------------------------------------------------- safer than common methods (table, E3 strong drift + E11 CESNET)
+s = Slide("This table compares FOA with the common ways of keeping a detector up to date. Each number is the share of attacked runs where the attack ended up undetected, so lower is better. Learning everything is easily poisoned, ninety-one percent on real network traffic. A lone device, limiting each step, freezing a reference or stopping on many alarms all leave between twenty-seven and thirty-nine percent of runs compromised under strong network change. FOA brings that to about eleven percent, stops the classic slow poisoner completely, and was never compromised over forty weeks of real traffic. Only TOA does better, and only because it is told the attack in advance.")
+s.head("Safer than the common methods", "Share of attacked runs compromised. Lower is better.")
+cols = ("Strong network\nchange, all attacks", "Classic slow\npoisoner", "Hiding in the\nclean core", "40 weeks of\nreal traffic")
+rows = (("Learn everything", (34.5, 83.2, 17.9, 90.9)), ("Lone device", (39.2, 63.2, 36.8, 18.2)), ("Limit each step", (30.1, 14.3, 46.1, None)),
+        ("Frozen reference", (27.4, 1.4, 52.5, 0.0)), ("Stop on many alarms", (29.9, 36.1, 36.1, 18.2)), ("TOA, told the attack", (5.5, 0.0, 10.0, None)),
+        ("FOA", (10.8, 0.0, 14.6, 0.0)))
+cx0, cw, y0, rh = 4.35, 2.02, 2.95, 0.5
+for j, c in enumerate(cols):
+    s.text(cx0 + j * cw, 2.05, cw - 0.1, 0.8, c, 14, GREY, True, "c", "b", spacing=1.05)
+def shade(v):
+    k = min(v, 100) / 100
+    return "%02X%02X%02X" % (255 - int(k * (255 - 0xF2)), 255 - int(k * (255 - 0xB8)), 255 - int(k * (255 - 0xBD)))
+for i, (n, vals) in enumerate(rows):
+    y = y0 + i * rh; foa = n == "FOA"
+    if foa:
+        s.box(0.9, y + 0.03, 11.53, rh - 0.06, "E8F1FC", None, 0.08)
+    s.text(1.05, y, 3.2, rh, n, 16 if foa else 15, BLUE if foa else (GREY if n.startswith("TOA") else INK), True, "l", "m")
+    for j, v in enumerate(vals):
+        x = cx0 + j * cw
+        if v is None:
+            s.text(x, y, cw - 0.1, rh, "–", 15, PALE, False, "c", "m"); continue
+        if not foa:
+            s.box(x + 0.25, y + 0.07, cw - 0.6, rh - 0.14, shade(v), None, 0.06)
+        s.text(x, y, cw - 0.1, rh, f"{v:g}%", 17 if foa else 15, BLUE if foa else INK, foa, "c", "m")
+    s.line(0.9, y + rh, 12.43, y + rh, "EDEDF0", 0.75)
 
 # 6 ---------------------------------------------------------------- novelty
 s = Slide("The closest earlier system is CIoTA. It uses devices of the same model as peers and discards what they do not agree on. We use devices from other vendors, we admit the rest within a budget instead of discarding it, and we prove a bound on how far an attacker can move the detector. When a botnet infects most devices of one model, same-model voting is fully compromised and ours is not. We found no prior work that combines these.")
