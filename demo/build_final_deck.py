@@ -179,31 +179,14 @@ s.text(8.8, 4.65, 3.5, 0.4, "Only I see it", 17, INK, True)
 s.text(8.8, 5.05, 3.5, 0.75, "Only the infusion pump starts sending unusual traffic.", 14, GREY)
 s.text(8.8, 5.85, 3.5, 0.4, "Allow it slowly, within a budget", 14, INK, True)
 
-# 4 ---------------------------------------------------------------- one cycle (flowchart)
-s = Slide("Here is one learning cycle. Each traffic sample gets a score. Samples that raise an alarm are never learned from. From the most normal samples, the device proposes an update, signs it and shares it with its neighbours. It combines its neighbours' updates, keeps the part they agree on, rations the part only it sees, and updates its idea of normal. Then the next cycle starts. Nothing in this loop switches learning off.")
+# 4 ---------------------------------------------------------------- one cycle (Mermaid flowchart, source: demo/flowchart.mmd)
+s = Slide("Here is one learning cycle. Each traffic sample gets a score. If it raises an alarm, it is not learned from. If not, the device proposes an update from the most normal samples, signs it, shares it, and combines it with its neighbours' updates. If the neighbours agree, it learns that change. If they do not, it allows it only slowly, within a budget. Then it updates its idea of normal and the next cycle starts. Nothing in this loop switches learning off.")
 s.head("One learning cycle", "The same loop runs on every device.")
-BW, BH, r1, r2 = 2.3, 1.0, 2.45, 4.85
-def node(x, y, t):
-    s.box(x, y, BW, BH, SOFT); s.text(x + 0.12, y, BW - 0.24, BH, t, 16, INK, True, "c", "m")
-X1 = (0.9, 3.55, 7.3, 10.13)
-for x, t in zip(X1, ("Traffic", "Score it", "Propose an update", "Sign and share")):
-    node(x, r1, t)
-s.line(X1[0] + BW + 0.04, r1 + BH / 2, X1[1] - 0.06, r1 + BH / 2, GREY, 1.5, True)
-s.line(X1[1] + BW + 0.04, r1 + BH / 2, X1[2] - 0.06, r1 + BH / 2, GREY, 1.5, True)
-s.text(X1[1] + BW + 0.05, r1 - 0.2, X1[2] - X1[1] - BW - 0.1, 0.55, "most normal samples", 13, GREY, False, "c", "b")
-s.line(X1[2] + BW + 0.04, r1 + BH / 2, X1[3] - 0.06, r1 + BH / 2, GREY, 1.5, True)
-s.line(X1[1] + BW / 2, r1 + BH + 0.04, X1[1] + BW / 2, r1 + BH + 0.5, GREY, 1.5, True)
-s.text(X1[1] - 0.3, r1 + BH + 0.55, BW + 0.6, 0.35, "alarms are never learned", 13, GREY, False, "c")
-X2 = (10.13, 5.5, 0.9)
-for x, t in zip(X2, ("Combine with neighbours", "Keep what they agree on", "Update normal")):
-    node(x, r2, t)
-s.line(X1[3] + BW / 2, r1 + BH + 0.04, X1[3] + BW / 2, r2 - 0.06, GREY, 1.5, True)
-s.line(X2[0] - 0.04, r2 + BH / 2, X2[1] + BW + 0.06, r2 + BH / 2, GREY, 1.5, True)
-s.line(X2[1] - 0.04, r2 + BH / 2, X2[2] + BW + 0.06, r2 + BH / 2, GREY, 1.5, True)
-s.line(X2[2] + BW / 2, r2 - 0.04, X2[2] + BW / 2, r1 + BH + 0.06, GREY, 1.5, True)
-s.text(X2[2] + BW / 2 + 0.12, r1 + BH + 0.55, 1.4, 0.35, "next cycle", 13, GREY)
-s.line(X2[0] + BW / 2, 6.55, X2[0] + BW / 2, r2 + BH + 0.06, GREY, 1.5, True)
-s.text(X2[0] - 0.3, 6.6, BW + 0.6, 0.35, "updates from neighbours", 13, GREY, False, "c")
+fc = os.path.join(HERE, "flowchart.png")
+fw, fh = Image.open(fc).size
+w_in = 11.9; h_in = w_in * fh / fw; y_in = 2.1 + (4.9 - h_in) / 2
+s.s.shapes.add_picture(fc, Inches((13.333 - w_in) / 2), Inches(y_in), Inches(w_in), Inches(h_in))
+s.im.paste(Image.open(fc).convert("RGB").resize((int(w_in * PX), int(h_in * PX)), Image.LANCZOS), (int((13.333 - w_in) / 2 * PX), int(y_in * PX)))
 
 # 5 ---------------------------------------------------------------- guarantees
 s = Slide("We guarantee four things. First, an attacker on one device can only move its detector by a fixed amount plus a slow rate beyond what the neighbours back, so poisoning needs a guaranteed minimum time. Second, fewer than half malicious neighbours can only add a limited push each cycle. Third, there is no switch an attacker can trip to stop learning, and alarmed decoys never enter the update. Fourth, every message is signed, so a device without the key cannot pretend to be a neighbour.")

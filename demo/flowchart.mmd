@@ -1,0 +1,11 @@
+flowchart LR
+    A[Traffic] --> B[Score it] --> C{Alarm?}
+    C -- Yes --> D[Not<br/>learned]
+    C -- No --> E[Propose an<br/>update from the<br/>most normal<br/>samples]
+    E --> F[Share and<br/>combine with<br/>neighbours]
+    F --> H{Neighbours<br/>agree?}
+    H -- Yes --> I[Learn it]
+    H -- No --> J[Allow slowly,<br/>within a<br/>budget]
+    I --> K[Update<br/>normal]
+    J --> K
+    K -- next cycle --> A
