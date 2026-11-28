@@ -1,3 +1,7 @@
+> **Superseded (28 Nov 2026).** Use `CODEX_ROBUSTNESS_TRIALS.md` instead. This brief's run 2b treats
+> `-DNO_PEERS` as single-device adaptation, which is wrong: with no peers the firmware still budgets
+> the residual, so it is the budget-only ablation. The new brief adds a real `RULE_SINGLE` baseline.
+
 # Task for Codex: run the FOA hardware experiments
 
 You are helping run experiments on a 3-board ESP8266 (NodeMCU) testbed for the FOA project
