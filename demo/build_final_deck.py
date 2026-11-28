@@ -399,8 +399,8 @@ s.box(0.9, 6.05, 11.53, 0.75, SOFT)
 s.text(1.2, 6.05, 11.0, 0.75, "Result: a detector that keeps learning, needs no attack signatures, and limits what one compromised device can do.", 16, INK, True, anchor="m")
 
 # 16 ---------------------------------------------------------------- recent research
-s = Slide("These are six recent papers behind our work. From DriftXpert we took its outlier-ratio statistic, which our baseline uses to pause learning. RTTAD adapts only on samples it is confident about and reports that unguarded adaptation hurts. WARDEN argues that one stream cannot tell drift from poisoning, which is exactly why we add neighbours. Su and others, and Rapid Poison, show that systems which adapt can be poisoned, which shapes our threat model. The TinyML survey reviews about seventy on-device learning works and does not discuss security, which is the gap we work in.")
-s.head("Recent research we build on", "Six recent papers, and what each gave us.")
+s = Slide("These are five recent papers behind our work. From DriftXpert we took its outlier-ratio statistic, which our baseline uses to pause learning. RTTAD adapts only on samples it is confident about and reports that unguarded adaptation hurts. WARDEN argues that one stream cannot tell drift from poisoning, which is exactly why we add neighbours. Su and others, and Rapid Poison, show that systems which adapt can be poisoned, which shapes our threat model.")
+s.head("Recent research we build on", "Five recent papers, and what each gave us.")
 s.text(0.9, 2.1, 5.6, 0.35, "Paper", 13, GREY, True); s.text(7.0, 2.1, 5.4, 0.35, "What we took from it", 13, BLUE, True)
 for i, (t, v, b) in enumerate((
         ("DriftXpert: drift adaptation for intrusion detection", "arXiv preprint",
@@ -412,9 +412,7 @@ for i, (t, v, b) in enumerate((
         ("Su et al.: poisoning test-time adaptation", "ICLR",
          "A realistic attacker with limited knowledge, for our threat model."),
         ("Rapid Poison: attacks on a rapid response framework", "ICML",
-         "Evidence that adaptation itself is an attack surface."),
-        ("Survey: on-device learning in TinyML", "arXiv preprint",
-         "About 70 on-device learning works, and no discussion of security."))):
+         "Evidence that adaptation itself is an attack surface."))):
     y = 2.5 + i * 0.75
     s.line(0.9, y, 12.43, y)
     s.text(0.9, y + 0.1, 5.8, 0.3, t, 15, INK, True); s.text(0.9, y + 0.42, 5.8, 0.28, v, 12, GREY)
