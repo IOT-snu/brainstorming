@@ -115,19 +115,11 @@ Q = [
    ("Why n/a for never learn?", "A detector that never learns cannot be poisoned, so compromise does not apply."),
    ("Are those baselines the published systems?", "No, they are our re-implementations of each gating idea around the same detector, so differences come from the update rule."),
    ("Why is never learn at 0% compromised?", "It cannot be poisoned because it never learns, but it raises 78% false alarms after a network change, so it is unusable.")]),
- ("Three attacks that break other defences: one-model botnet, freeze, and 40 weeks of real change.",
-  [("Are these numbers good or bad?", "0% is compromise of our method, so good. The red 100% is the false alarm rate of the alarm-rate switch-off defence, so bad for that defence."),
-   ("What does 'run without the floor' mean?", "These tests used the original rule, before we added the minimum limit on the spread. We have not re-run them with it."),
-   ("Explain the botnet test.", "Three cameras of one model are infected and poisoned together. Same-model peers agree with the poison. Other-vendor peers do not."),
-   ("Which defence did the freeze attack beat?", "An alarm-rate switch-off: 100% false alarms with decoys at 5% share, 26% without the attacker. The outlier-ratio gate we tested recovered, so not every gate freezes."),
-   ("What is CESNET?", "40 weeks of traffic statistics from a national research network. Drift is real; the attack there is modelled."),
-   ("Was FOA the best on CESNET?", "Not on false alarms: a detector that never learns had 5.9% against FOA's 9.1%, and it cannot be poisoned. That drift was mild, so adapting was not needed. CESNET shows FOA is safe on real drift, not that it is needed there.")]),
- ("A photo of the real setup.",
+ ("Our testbed, running FOA: the photo of the three ESP8266 boards and the INA226, with the measured time and power.",
   [("Point to each part.", "The ESP8266 boards, the INA226 sensor and its wiring, the USB hub and cables, and the recording laptop. Practise pointing at them on the photo before the talk."),
    ("Which board is measured?", "Node 1: its 5 V line runs through the INA226. Node 0 reads the sensor over two I2C wires."),
-   ("Is the sensor wired in series or parallel?", "In series: only the red 5 V wire of Node 1's cable goes through the 0.1 ohm shunt.")]),
- ("It runs on a tiny board: timing, communication and power measured on ESP8266.",
-  [("Which boards?", "Three ESP8266 NodeMCU boards (single core, about 80 KB RAM; our firmware uses about 51 KB). We also compiled for ESP32."),
+   ("Is the sensor wired in series or parallel?", "In series: only the red 5 V wire of Node 1's cable goes through the 0.1 ohm shunt."),
+   ("Which boards?", "Three ESP8266 NodeMCU boards (single core, about 80 KB RAM; our firmware uses about 51 KB). We also compiled for ESP32."),
    ("Why ESP-NOW?", "Direct short broadcasts between boards without a broker, up to 250 bytes; our message is 92 bytes."),
    ("How did you measure power?", "INA226 across a 0.1 ohm shunt in one board's 5 V line: about 72 mA, 365 mW in the first session and 382 to 391 mW in the later runs. Almost all of it is the radio and the board's normal draw."),
    ("How much energy does FOA cost?", "We could not detect extra energy at the sensor's 40 ms resolution. Computing takes about 14 ms per cycle in the first runs and about 25 ms in the later ones; at full board power that is at most about 5 to 10 mJ per cycle, an upper bound, not a measurement."),
@@ -229,28 +221,27 @@ FORM = {
  9: [COMP, ("Compromise percentage", "compromised % = compromised attacked runs / all attacked runs × 100", "Runs cover victims, attacker shares, poisoning styles and random seeds.")],
  10: [FPR, COMP, ("Alarm-rate switch-off", "skip learning if alarm rate &gt; 5 × clean rate", "clean rate: alarm rate on calibration traffic."),
      ("Outlier-ratio gate", "skip learning if alarm rate &gt; 3 × its own moving average", "The moving average rises with the alarms, so this gate can reopen.")],
- 11: [("Freeze condition", "alarm rate &gt; limit  ⇒  learning stops", "Decoys raise the alarm rate. FOA has no such condition, and alarmed samples never enter its update."), FPR, COMP],
- 13: [("Current through the shunt", "I = V<sub>shunt</sub> / R<sub>shunt</sub>", "V<sub>shunt</sub>: voltage across the shunt. R<sub>shunt</sub> = 0.1 ohm. I: board current."),
+ 11: [("Current through the shunt", "I = V<sub>shunt</sub> / R<sub>shunt</sub>", "V<sub>shunt</sub>: voltage across the shunt. R<sub>shunt</sub> = 0.1 ohm. I: board current."),
       ("Power and energy", "P = V × I<br/>E = ∫ P dt (summed by the trapezoid rule)", "V: supply voltage (5.04 V). P: power (365.4 mW). E: energy. Over one 7.77 s cycle E is about 2.84 J, almost all of it the board's normal draw.")],
- 14: [FLOOR, ("Normal region left", "ratio = s(t) / s<super>0</super> × 100%", "Under 2% after 20 minutes on identical boards, before the floor; 1.0 with the floor."),
+ 12: [FLOOR, ("Normal region left", "ratio = s(t) / s<super>0</super> × 100%", "Under 2% after 20 minutes on identical boards, before the floor; 1.0 with the floor."),
       ("Why shrinking raises alarms", "alarm if ||x − μ|| &gt; τ·s", "If s shrinks, the radius τ·s shrinks, so ordinary traffic falls outside it."),
       ("Floor in log form", "C<sub>s</sub> + R<sub>s</sub> ≥ 0", "The excess shrinking is removed from this cycle's residual first, then from the common part, so budgets still hold."),
       ("Calibration spacing", "old: keep every 10th sample (one per 500 ms)<br/>new: gaps of 9, 9, 9 and 13 samples",
        "Samples are 50 ms apart and the telemetry repeats every 200 ms, so a fixed 500 ms spacing sees only two of its four phases; the uneven gaps see all four.")],
- 15: [("Combine cost", "geometric median of K updates: 10 Weiszfeld iterations", "K: neighbours heard. 1.2 to 1.9 ms on an ESP8266 with K = 2."), RES],
- 21: [("Starvation", "accepted = samples with score ≤ τ<br/>if fewer than 5 core samples: d = 0",
+ 13: [("Combine cost", "geometric median of K updates: 10 Weiszfeld iterations", "K: neighbours heard. 1.2 to 1.9 ms on an ESP8266 with K = 2."), RES],
+ 19: [("Starvation", "accepted = samples with score ≤ τ<br/>if fewer than 5 core samples: d = 0",
        "After a sudden jump every sample scores above τ, so nothing is accepted and the detector cannot move.")],
  6: [COMP],
 }
 
 # new slide -> (old slide in the 20-slide deck, speaker). Old odd slides were Rishit's, even were Farhan's.
 OWN = {1: (1, "Rishit"), 2: (2, "Farhan"), 3: (3, "Rishit"), 4: (4, "Farhan"), 5: (5, "Rishit"), 6: (None, "New"),
-       7: (6, "Farhan"), 8: (7, "Rishit"), 9: (8, "Farhan"), 10: (9, "Rishit"), 11: (10, "Farhan"), 12: (11, "Rishit"),
-       13: (12, "Farhan"), 14: ("13 to 16", "Mixed"), 15: (None, "New"), 16: (18, "Farhan"), 17: (None, "New"),
-       18: (20, "Farhan"), 19: (19, "Rishit"), 20: (None, "New"), 21: (17, "Rishit")}
+       7: (6, "Farhan"), 8: (7, "Rishit"), 9: (8, "Farhan"), 10: (9, "Rishit"), 11: ("11 and 12", "Mixed"),
+       12: ("13 to 16", "Mixed"), 13: (None, "New"), 14: (18, "Farhan"), 15: (None, "New"),
+       16: (20, "Farhan"), 17: (19, "Rishit"), 18: (None, "New"), 19: (17, "Rishit")}
 NOTE = {3: "same idea, new hospital example", 4: "same content, now a flowchart", 5: "rows reworded",
-        10: "same numbers, now a chart", 14: "merges old 13 and 15 (Rishit) with 14 and 16 (Farhan)",
-        16: "rewritten as positive use cases", 21: "trimmed"}
+        10: "same numbers, now a chart", 11: "photo was Rishit's slide 11, numbers were Farhan's slide 12",
+        12: "merges old 13 and 15 (Rishit) with 14 and 16 (Farhan)", 14: "rewritten as positive use cases", 19: "trimmed"}
 
 
 def owner_line(i):
@@ -270,7 +261,7 @@ S = [P("Presentation and viva preparation", title), P("Fleet-Orthogonal Adaptati
      P("Each slide has: a picture, formulas with labelled variables where they apply, what it means, what to say, and likely questions. Read it once fully, then practise aloud with only the slides. "
        "Aim for about 12 to 14 minutes. Each slide is labelled with who prepared it in the earlier 20-slide deck (odd slides Rishit, even slides Farhan). NEW slides still need a speaker.", p),
      P("Who presents which slide", h1),
-     table([["Slide now", "Was slide", "Speaker"]] + [[str(k), str(v[0]) if v[0] else "none", v[1] if v[1] != "Mixed" else "Mixed: Rishit 13, 15 and Farhan 14, 16"] for k, v in OWN.items()], [3 * cm, 3 * cm, W - 6 * cm]),
+     table([["Slide now", "Was slide", "Speaker"]] + [[str(k), str(v[0]) if v[0] else "none", v[1] if v[1] != "Mixed" else "Mixed: " + NOTE[k]] for k, v in OWN.items()], [3 * cm, 3 * cm, W - 6 * cm]),
      P("The 30-second answer", h1),
      P("IoT detectors must keep learning because normal traffic changes, but learning can be poisoned and pausing can be exploited. Our method lets a device "
        "learn more freely what neighbours from other vendors also see, and rations what only it sees. In simulation on real IoT traffic it resisted poisoning "

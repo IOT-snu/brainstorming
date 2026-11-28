@@ -316,36 +316,24 @@ s.text(9.9, 3.15, 2.6, 0.4, "9.0% false alarms", 17, INK, True)
 s.text(9.9, 3.6, 2.6, 0.4, "10.8% compromised", 17, INK, True)
 s.text(9.9, 4.25, 2.55, 1.6, "Closest to the corner, and the only rule near it that does not need the attack known in advance.", 15, GREY, spacing=1.18)
 
-# 10 ---------------------------------------------------------------- other attacks
-s = Slide("Three more tests that break other defences. When a botnet infects most cameras of one model, same-model voting fails completely, while neighbours from other vendors hold. Five percent decoy traffic permanently locks a stop-learning defence, and FOA is unaffected. Over forty weeks of real network change, FOA was never compromised, against eighteen percent for a single device.")
-s.head("Three attacks that break other defences")
-for x, big, t, b in ((0.9, "0%", "One-model botnet", "FOA compromised. Same-model voting: 100% once two of three cameras are infected."),
-                     (5.0, "100%", "Freeze attack", "False alarms for a stop-learning defence after 5% decoys. FOA is unaffected."),
-                     (9.1, "0%", "40 weeks of real change", "FOA compromised on real national-network traffic. Single device: 18%.")):
-    s.text(x, 2.1, 3.7, 1.4, big, 72, BLUE if big == "0%" else RED, True, anchor="b")
-    s.line(x, 3.85, x + 3.35, 3.85)
-    s.text(x, 4.12, 3.35, 0.5, t, 20, bold=True)
-    s.text(x, 4.75, 3.2, 1.6, b, 16, GREY, spacing=1.2)
-
-# 11 ---------------------------------------------------------------- testbed photo
-s = Slide("This is our testbed. Three ESP8266 boards and an INA226 power sensor in the supply line of one of them, connected over USB to the laptop that records their output. The boards talk to each other directly over ESP-NOW.")
-s.head("Our testbed", "Three ESP8266 boards, an INA226 power sensor, and a laptop recording every board.")
+# 11 ---------------------------------------------------------------- testbed and hardware results (combined)
+s = Slide("This is our testbed: three ESP8266 boards talking directly to each other over ESP-NOW, an INA226 power sensor in the supply line of one board, and a laptop recording every board. FOA runs on these boards in real time. Computing an update takes tens of milliseconds, combining neighbours under two milliseconds, and signing a message under a millisecond. The board draws under 400 milliwatts, almost all of it the radio, and the extra energy for learning was too small for our sensor to detect.")
+s.head("Our testbed, running FOA", "Three ESP8266 boards talking over ESP-NOW, an INA226 power sensor, a recording laptop.")
 photo = os.path.join(ROOT, "research.jpeg")
 if not os.path.exists(photo) or "--blurred" in sys.argv:
     photo = os.path.join(HERE, "testbed_photo.jpg")
 pw, ph = Image.open(photo).size
-w_in = 5.2 * pw / ph
-s.s.shapes.add_picture(photo, Inches((13.333 - w_in) / 2), Inches(2.05), Inches(w_in), Inches(5.2))
-s.im.paste(Image.open(photo).resize((int(w_in * PX), int(5.2 * PX))), (int((13.333 - w_in) / 2 * PX), int(2.05 * PX)))
-
-# 12 ---------------------------------------------------------------- hardware
-s = Slide("And it runs on real boards. Three ESP8266 boards talk directly over ESP-NOW and hear both neighbours in nearly every cycle. Computing an update takes tens of milliseconds, combining neighbours under two milliseconds, and signing a message under a millisecond. The board draws under 400 milliwatts, almost all of it the radio, and the extra energy for learning was too small for our sensor to detect.")
-s.head("It runs on a tiny board", "Three ESP8266 boards talking directly over ESP-NOW, one INA226 power sensor.")
-for i, (k, v) in enumerate((("Cycles hearing both neighbours", "88 to 100%"), ("Compute an update", "11 to 24 ms"), ("Combine with neighbours", "1.2 to 1.9 ms"),
-                            ("Sign one message, check two", "0.6 ms and about 1 ms"), ("Board power", "365 to 391 mW"), ("Extra energy for learning", "Too small to detect"))):
-    y = 2.35 + i * 0.7
-    s.text(0.9, y + 0.15, 6, 0.4, k, 18, GREY); s.text(6.9, y + 0.15, 5.5, 0.4, v, 20, INK, True, "r")
-    s.line(0.9, y + 0.68, 12.43, y + 0.68)
+p_h = 3.95; p_w = p_h * pw / ph; p_y = 2.35
+s.s.shapes.add_picture(photo, Inches(0.9), Inches(p_y), Inches(p_w), Inches(p_h))
+s.im.paste(Image.open(photo).resize((int(p_w * PX), int(p_h * PX))), (int(0.9 * PX), int(p_y * PX)))
+tx0 = 0.9 + p_w + 0.45; tw = 12.43 - tx0
+for i, (k, v) in enumerate((("Compute an update", "11 to 24 ms"), ("Combine with neighbours", "1.2 to 1.9 ms"),
+                            ("Sign one message, check two", "0.6 ms and about 1 ms"), ("Board power", "365 to 391 mW"),
+                            ("Extra energy for learning", "Too small to detect"))):
+    y = p_y + i * 0.79
+    s.text(tx0, y + 0.02, tw, 0.3, k, 14, GREY)
+    s.text(tx0, y + 0.3, tw, 0.4, v, 19, INK, True)
+    s.line(tx0, y + 0.77, 12.43, y + 0.77)
 
 # 13 ---------------------------------------------------------------- found and fixed on hardware
 s = Slide("Real hardware showed us something no simulation had. Identical boards sending repetitive traffic agreed with each other on shrinking their idea of normal, until it was under two percent of its starting size. We traced the cause, reproduced it, and fixed it with one rule: normal never shrinks below its calibrated size. On the boards the normal region then held its full size in every run. We also found and fixed a calibration timing bug, and false alarms on the boards came down to about one and a half percent.")
