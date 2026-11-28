@@ -259,11 +259,38 @@ for x, big, small in ((0.9, "9", "real IoT devices with real Mirai and BASHLITE 
     s.text(x, 4.2, 3.2, 1.2, small, 17, GREY)
 s.text(0.9, 6.3, 11.4, 0.4, "Every reported result comes from test runs that played no part in any design decision.", 16, INK, True)
 
-# 8 ---------------------------------------------------------------- main result
-s = Slide("This is the main result. During a strong network change, an attacker hides poisoning inside it. A detector learning on its own is compromised in about forty percent of runs. FOA brings that to about ten percent, about four times fewer. Against the classic slow poisoner, FOA was never compromised.")
-s.head("About 4× fewer compromised devices", "Poisoning hidden inside a strong network change. Share of attacked runs where the attack went undetected.")
-s.bars(1.4, 2.1, 10.5, 4.4, ["Single device", "Single device\n+ floor", "FOA", "FOA\n+ floor"], [39.2, 43.1, 10.8, 9.4], {2, 3})
-s.text(0.9, 6.7, 11.5, 0.4, "Against the classic slow poisoner: 0% for FOA, 63% for a single device.", 17, INK, True)
+# 8 ---------------------------------------------------------------- main result (native Excel chart vs best existing methods)
+s = Slide("This is the main result. During a strong network change, an attacker hides poisoning inside it. The three best existing approaches, a frozen reference, stopping on many alarms and limiting each step, still leave between twenty-seven and thirty percent of runs compromised, and they pay for it with forty-five to fifty-nine percent false alarms. A device learning on its own is compromised in thirty-nine percent of runs. FOA is compromised in about eleven percent, two and a half times fewer than the best existing method, with only nine percent false alarms. Against the classic slow poisoner, FOA was never compromised.")
+s.head("Safer than the best existing methods", "Strong network change with poisoning hidden inside it. Lower is better.")
+cats9 = ["Frozen reference", "Stop on many alarms", "Limit each step", "Lone device", "FOA (ours)"]
+C9 = [27.4, 29.9, 30.1, 39.2, 10.8]; F9 = [59.3, 45.0, 55.9, 24.6, 9.0]
+cd = CategoryChartData(number_format='0.0"%"'); cd.categories = cats9
+cd.add_series("Compromised", C9); cd.add_series("False alarms", F9)
+CX, CY, CWD, CHT = 0.6, 1.95, 12.13, 4.75
+ch = s.s.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(CX), Inches(CY), Inches(CWD), Inches(CHT), cd).chart
+ch.font.name = "Calibri"; ch.font.size = Pt(12); ch.font.color.rgb = rgb("595959")
+ch.has_legend = True; ch.legend.position = XL_LEGEND_POSITION.BOTTOM; ch.legend.include_in_layout = False; ch.legend.font.size = Pt(12)
+pl = ch.plots[0]; pl.gap_width = 90; pl.overlap = -10; pl.has_data_labels = True
+dl = pl.data_labels; dl.number_format = '0.0"%"'; dl.number_format_is_linked = False; dl.position = XL_LABEL_POSITION.OUTSIDE_END; dl.font.size = Pt(11)
+for se, col in zip(pl.series, ("4472C4", "ED7D31")):
+    se.format.fill.solid(); se.format.fill.fore_color.rgb = rgb(col)
+va = ch.value_axis; va.minimum_scale, va.maximum_scale, va.major_unit = 0, 70, 10; va.has_major_gridlines = True
+va.major_gridlines.format.line.color.rgb = rgb("D9D9D9"); va.format.line.fill.background()
+va.tick_labels.number_format = '0"%"'; va.tick_labels.number_format_is_linked = False
+ca = ch.category_axis; ca.format.line.color.rgb = rgb("D9D9D9"); ca.tick_labels.font.size = Pt(12)
+import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt, io, numpy as np
+fig, ax = plt.subplots(figsize=(CWD, CHT), dpi=PX); xs = np.arange(len(cats9)); bw = 0.36
+for k, (vals, col, lab) in enumerate(((C9, "#4472C4", "Compromised"), (F9, "#ED7D31", "False alarms"))):
+    bars = ax.bar(xs + (k - 0.5) * bw, vals, bw * 0.95, color=col, label=lab, zorder=3)
+    for b_, v in zip(bars, vals):
+        ax.text(b_.get_x() + b_.get_width() / 2, v + 1, f"{v:.1f}%", ha="center", va="bottom", fontsize=10, color="#404040")
+ax.set_ylim(0, 70); ax.set_yticks(range(0, 71, 10)); ax.set_yticklabels([f"{t}%" for t in range(0, 71, 10)], color="#595959")
+ax.set_xticks(xs); ax.set_xticklabels(cats9, color="#595959", fontsize=11)
+ax.yaxis.grid(True, color="#D9D9D9", zorder=0); [sp.set_visible(False) for sp in ax.spines.values()]; ax.spines["bottom"].set_visible(True); ax.spines["bottom"].set_color("#D9D9D9")
+ax.tick_params(length=0); ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=11)
+fig.tight_layout(); buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=PX); plt.close(fig)
+s.im.paste(Image.open(buf).convert("RGB").resize((int(CWD * PX), int(CHT * PX))), (int(CX * PX), int(CY * PX)))
+s.text(0.9, 6.8, 11.5, 0.4, "About 2.5× fewer compromises than the best existing method, with far fewer false alarms.", 16, INK, True)
 
 # 9 ---------------------------------------------------------------- all rules (trade-off chart)
 s = Slide("Here every rule is one dot, under strong network change. Left is fewer false alarms, down is fewer compromised devices, so the bottom-left corner is best. Rules that stop or restrict learning sit to the right: safer, but noisy. Learning everything is quiet but easy to poison. TOA is safe only because it is told the attack in advance. FOA sits closest to the corner without knowing the attack: nine percent false alarms and about eleven percent compromised.")
