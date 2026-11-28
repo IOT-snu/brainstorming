@@ -167,6 +167,12 @@ Q = [
   [("Which paper influenced you most?", "Kloft and Laskov (2012): the same centroid detector, and the result that the attacker's share of traffic bounds poisoning."),
    ("Why no years in the citations on the slide?", "Only for a clean slide; full references with years are in the report."),
    ("Who did what?", "Answer truthfully for your own team. Agree on this before you walk in.")]),
+ ("Our research question and three hypotheses, each with the result that supports it.",
+  [("Say the research question.", "Can a fleet of self-learning detectors keep following honest change while limiting how fast an attacker on one device can poison its detector, without a stop switch an attacker could trip?"),
+   ("Why is H2 supported if FOA has more false alarms than a lone device?", "H2 asks whether FOA follows change closely, not whether it beats a lone device on false alarms: 2.5% against 0.8% is within 2 points, while FOA is far safer (9.4% vs 43.1% compromised with the floor)."),
+   ("Which gated defences are the 27 to 30%?", "Frozen reference 27%, limit each step 30%, stop on many alarms 30%, all under strong shared change."),
+   ("Is H3 about energy too?", "Yes: the extra energy for learning was too small for our INA226 to detect; the board drew 365 to 391 mW, mostly the radio."),
+   ("Were the hypotheses set before the results?", "Answer truthfully: they state what the method was designed to achieve; the numbers come from held-out runs not used in design.")]),
  ("Open limits and next steps.",
   [("Biggest weakness?", "A device with a large change of its own is learned slowly, and a sudden jump outside the normal region leaves nothing to learn from."),
    ("Why does a sudden jump stall learning?", "FOA learns only from accepted traffic. If all traffic jumps outside the alarm radius at once, nothing is accepted. On the boards this happened when every board doubled its traffic rate together. A safe recovery rule is next."),
@@ -224,7 +230,7 @@ FORM = {
       ("Calibration spacing", "old: keep every 10th sample (one per 500 ms)<br/>new: gaps of 9, 9, 9 and 13 samples",
        "Samples are 50 ms apart and the telemetry repeats every 200 ms, so a fixed 500 ms spacing sees only two of its four phases; the uneven gaps see all four.")],
  15: [("Combine cost", "geometric median of K updates: 10 Weiszfeld iterations", "K: neighbours heard. 1.2 to 1.9 ms on an ESP8266 with K = 2."), RES],
- 20: [("Starvation", "accepted = samples with score ≤ τ<br/>if fewer than 5 core samples: d = 0",
+ 21: [("Starvation", "accepted = samples with score ≤ τ<br/>if fewer than 5 core samples: d = 0",
        "After a sudden jump every sample scores above τ, so nothing is accepted and the detector cannot move.")],
  6: [("Time to compromise", "t* ≈ (M − 1 − B<sub>0</sub> − B<sub>0</sub><super>s</super>) / (B + B<super>s</super>)",
       "M: attack distance in alarm radii. B<sub>0</sub> = 0.1, B = 0.005: centre budget start and growth. B<sub>0</sub><super>s</super> = 0.1, B<super>s</super> = 0.001: spread budget. M = 2 gives about 133 cycles."),
@@ -238,7 +244,7 @@ assert len(slides) == len(Q), (len(slides), len(Q))
 S = [P("Presentation and viva preparation", title), P("Fleet-Orthogonal Adaptation  ·  Group G-04  ·  Rishit Kamboj and Farhan Naik", small), Spacer(1, 8),
      P("How to use this", h1),
      P("Each slide has: a picture, formulas with labelled variables where they apply, what it means, what to say, and likely questions. Read it once fully, then practise aloud with only the slides. "
-       "Aim for about 10 to 12 minutes. A natural split: one person takes slides 1 to 10, the other 11 to 20, and both answer questions.", p),
+       "Aim for about 10 to 12 minutes. A natural split: one person takes slides 1 to 10, the other 11 to 21, and both answer questions.", p),
      P("The 30-second answer", h1),
      P("IoT detectors must keep learning because normal traffic changes, but learning can be poisoned and pausing can be exploited. Our method lets a device "
        "learn more freely what neighbours from other vendors also see, and rations what only it sees. In simulation on real IoT traffic it resisted poisoning "
