@@ -200,32 +200,42 @@ for i, (t, b) in enumerate((("Bounded", "One attacked device moves only a set am
     s.text(0.9, y + 0.33, 3.6, 0.5, t, 21, BLUE, True)
     s.text(4.8, y + 0.34, 7.5, 0.75, b, 18, INK)
 
-# 5b ---------------------------------------------------------------- safer than common methods (table, E3 strong drift + E11 CESNET)
-s = Slide("This table compares FOA with the common ways of keeping a detector up to date. Each number is the share of attacked runs where the attack ended up undetected, so lower is better. Learning everything is easily poisoned, ninety-one percent on real network traffic. A lone device, limiting each step, freezing a reference or stopping on many alarms all leave between twenty-seven and thirty-nine percent of runs compromised under strong network change. FOA brings that to about eleven percent, stops the classic slow poisoner completely, and was never compromised over forty weeks of real traffic. Only TOA does better, and only because it is told the attack in advance.")
-s.head("Safer than the common methods", "Share of attacked runs compromised. Lower is better.")
-cols = ("Strong network\nchange, all attacks", "Classic slow\npoisoner", "Hiding in the\nclean core", "40 weeks of\nreal traffic")
-rows = (("Learn everything", (34.5, 83.2, 17.9, 90.9)), ("Lone device", (39.2, 63.2, 36.8, 18.2)), ("Limit each step", (30.1, 14.3, 46.1, None)),
-        ("Frozen reference", (27.4, 1.4, 52.5, 0.0)), ("Stop on many alarms", (29.9, 36.1, 36.1, 18.2)), ("TOA, told the attack", (5.5, 0.0, 10.0, None)),
-        ("FOA", (10.8, 0.0, 14.6, 0.0)))
-cx0, cw, y0, rh = 4.35, 2.02, 2.95, 0.5
-for j, c in enumerate(cols):
-    s.text(cx0 + j * cw, 2.05, cw - 0.1, 0.8, c, 14, GREY, True, "c", "b", spacing=1.05)
-def shade(v):
-    k = min(v, 100) / 100
-    return "%02X%02X%02X" % (255 - int(k * (255 - 0xF2)), 255 - int(k * (255 - 0xB8)), 255 - int(k * (255 - 0xBD)))
-for i, (n, vals) in enumerate(rows):
-    y = y0 + i * rh; foa = n == "FOA"
-    if foa:
-        s.box(0.9, y + 0.03, 11.53, rh - 0.06, "E8F1FC", None, 0.08)
-    s.text(1.05, y, 3.2, rh, n, 16 if foa else 15, BLUE if foa else (GREY if n.startswith("TOA") else INK), True, "l", "m")
-    for j, v in enumerate(vals):
-        x = cx0 + j * cw
-        if v is None:
-            s.text(x, y, cw - 0.1, rh, "–", 15, PALE, False, "c", "m"); continue
-        if not foa:
-            s.box(x + 0.25, y + 0.07, cw - 0.6, rh - 0.14, shade(v), None, 0.06)
-        s.text(x, y, cw - 0.1, rh, f"{v:g}%", 17 if foa else 15, BLUE if foa else INK, foa, "c", "m")
-    s.line(0.9, y + rh, 12.43, y + rh, "EDEDF0", 0.75)
+# 5b ---------------------------------------------------------------- comparison with common and similar methods (native Excel chart)
+s = Slide("This chart compares FOA with the common ways of keeping a detector up to date, and with CIoTA, the closest earlier system, where devices of the same model vote on updates. The blue bars are strong network change with an attacker hiding poisoning inside it: the common methods leave between twenty-seven and thirty-nine percent of runs compromised, FOA about eleven. The orange bars are a botnet that has taken over two of three cameras of one model: a lone device and same-model voting are both compromised every time, FOA never.")
+s.head("FOA against common and similar methods", "Share of attacked runs compromised. Lower is better.")
+cats = ["Learn everything", "Lone device", "Limit each step", "Frozen reference", "Stop on many alarms", "CIoTA (same-model voting)", "FOA (ours)"]
+A = [34.5, 39.2, 30.1, 27.4, 29.9, None, 10.8]
+Bv = [None, 100.0, None, None, None, 100.0, 0.0]
+cd = CategoryChartData(number_format='0.0"%"'); cd.categories = cats
+cd.add_series("Strong network change", A); cd.add_series("One-model botnet (2 of 3 infected)", Bv)
+CX, CY, CWD, CHT = 0.6, 1.95, 12.13, 5.3
+ch = s.s.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(CX), Inches(CY), Inches(CWD), Inches(CHT), cd).chart
+ch.font.name = "Calibri"; ch.font.size = Pt(12); ch.font.color.rgb = rgb("595959")
+ch.has_legend = True; ch.legend.position = XL_LEGEND_POSITION.BOTTOM; ch.legend.include_in_layout = False; ch.legend.font.size = Pt(12)
+pl = ch.plots[0]; pl.gap_width = 80; pl.overlap = -10; pl.has_data_labels = True
+dl = pl.data_labels; dl.number_format = '0.0"%"'; dl.number_format_is_linked = False; dl.position = XL_LABEL_POSITION.OUTSIDE_END; dl.font.size = Pt(11)
+for se, col in zip(pl.series, ("4472C4", "ED7D31")):
+    se.format.fill.solid(); se.format.fill.fore_color.rgb = rgb(col)
+va = ch.value_axis; va.minimum_scale, va.maximum_scale, va.major_unit = 0, 100, 20; va.has_major_gridlines = True
+va.major_gridlines.format.line.color.rgb = rgb("D9D9D9"); va.format.line.fill.background()
+va.tick_labels.number_format = '0"%"'; va.tick_labels.number_format_is_linked = False
+ca = ch.category_axis; ca.format.line.color.rgb = rgb("D9D9D9"); ca.tick_labels.font.size = Pt(12)
+# preview (approximation; the PDF is exported from PowerPoint)
+import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt, io
+fig, ax = plt.subplots(figsize=(CWD, CHT), dpi=PX)
+import numpy as np
+xs = np.arange(len(cats)); bw = 0.38
+for k, (vals, col, lab) in enumerate(((A, "#4472C4", "Strong network change"), (Bv, "#ED7D31", "One-model botnet (2 of 3 infected)"))):
+    xx = [x + (k - 0.5) * bw for x, v in zip(xs, vals) if v is not None]; vv = [v for v in vals if v is not None]
+    bars = ax.bar(xx, vv, bw * 0.95, color=col, label=lab, zorder=3)
+    for b_, v in zip(bars, vv):
+        ax.text(b_.get_x() + b_.get_width() / 2, v + 1.5, f"{v:.1f}%", ha="center", va="bottom", fontsize=10, color="#404040")
+ax.set_ylim(0, 100); ax.set_yticks(range(0, 101, 20)); ax.set_yticklabels([f"{t}%" for t in range(0, 101, 20)], color="#595959")
+ax.set_xticks(xs); ax.set_xticklabels(cats, color="#595959", fontsize=10)
+ax.yaxis.grid(True, color="#D9D9D9", zorder=0); [sp.set_visible(False) for sp in ax.spines.values()]; ax.spines["bottom"].set_visible(True); ax.spines["bottom"].set_color("#D9D9D9")
+ax.tick_params(length=0); ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=11)
+fig.tight_layout(); buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=PX); plt.close(fig)
+s.im.paste(Image.open(buf).convert("RGB").resize((int(CWD * PX), int(CHT * PX))), (int(CX * PX), int(CY * PX)))
 
 # 6 ---------------------------------------------------------------- novelty
 s = Slide("The closest earlier system is CIoTA. It uses devices of the same model as peers and discards what they do not agree on. We use devices from other vendors, we admit the rest within a budget instead of discarding it, and we prove a bound on how far an attacker can move the detector. When a botnet infects most devices of one model, same-model voting is fully compromised and ours is not. We found no prior work that combines these.")
@@ -234,11 +244,10 @@ s.text(4.6, 2.2, 3.6, 0.4, "CIoTA", 18, GREY, True); s.text(8.5, 2.2, 3.9, 0.4, 
 for i, (k, a, b) in enumerate((("Who are the peers", "Same device model", "Other vendors"),
                                ("What neighbours do not back", "Discarded", "Admitted slowly, within a budget"),
                                ("Limit on an attacker", "Agreement of the group", "Proven bound on movement"),
-                               ("Can it be frozen", "Not analysed", "No stop switch to trip"),
                                ("One-model botnet in our test", "100% compromised", "0% compromised"))):
-    y = 2.75 + i * 0.8
+    y = 2.75 + i * 0.9
     s.line(0.9, y, 12.43, y)
-    s.text(0.9, y + 0.22, 3.6, 0.5, k, 16, INK, True); s.text(4.6, y + 0.22, 3.7, 0.5, a, 16, GREY); s.text(8.5, y + 0.22, 3.9, 0.5, b, 16, INK, i == 4)
+    s.text(0.9, y + 0.22, 3.6, 0.5, k, 16, INK, True); s.text(4.6, y + 0.22, 3.7, 0.5, a, 16, GREY); s.text(8.5, y + 0.22, 3.9, 0.5, b, 16, INK, i == 3)
 
 # 7 ---------------------------------------------------------------- evaluation setup
 s = Slide("We tested on real traffic from nine IoT devices with real Mirai and BASHLITE attacks, and on forty weeks of real traffic from a national research network. Across more than twenty-six thousand fleet runs we compared FOA with eight other update rules. Every design choice was made on separate runs from the ones we report.")
