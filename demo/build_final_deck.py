@@ -398,25 +398,36 @@ for i, (t, b) in enumerate(steps):
 s.box(0.9, 6.05, 11.53, 0.75, SOFT)
 s.text(1.2, 6.05, 11.0, 0.75, "Result: a detector that keeps learning, needs no attack signatures, and limits what one compromised device can do.", 16, INK, True, anchor="m")
 
-# 16 ---------------------------------------------------------------- recent research
-s = Slide("These are five recent papers behind our work. From DriftXpert we took its outlier-ratio statistic, which our baseline uses to pause learning. RTTAD adapts only on samples it is confident about and reports that unguarded adaptation hurts. WARDEN argues that one stream cannot tell drift from poisoning, which is exactly why we add neighbours. Su and others, and Rapid Poison, show that systems which adapt can be poisoned, which shapes our threat model.")
-s.head("Recent research we build on", "Five recent papers, and what each gave us.")
-s.text(0.9, 2.1, 5.6, 0.35, "Paper", 13, GREY, True); s.text(7.0, 2.1, 5.4, 0.35, "What we took from it", 13, BLUE, True)
-for i, (t, v, b) in enumerate((
-        ("DriftXpert: drift adaptation for intrusion detection", "arXiv preprint",
-         "Its outlier-ratio statistic, used in our baseline as a stop gate."),
-        ("RTTAD: risk-aware test-time adaptation", "arXiv preprint",
-         "Adapt only on samples you are confident about. Unguarded adaptation hurts."),
-        ("WARDEN: self-poisoning in adaptive detection", "arXiv preprint",
-         "One stream cannot separate drift from poisoning, so we add neighbours."),
-        ("Su et al.: poisoning test-time adaptation", "ICLR",
-         "A realistic attacker with limited knowledge, for our threat model."),
-        ("Rapid Poison: attacks on a rapid response framework", "ICML",
-         "Evidence that adaptation itself is an attack surface."))):
-    y = 2.5 + i * 0.75
-    s.line(0.9, y, 12.43, y)
-    s.text(0.9, y + 0.1, 5.8, 0.3, t, 15, INK, True); s.text(0.9, y + 0.42, 5.8, 0.28, v, 12, GREY)
-    s.text(7.0, y + 0.1, 5.4, 0.62, b, 14, INK, anchor="m")
+# 16 ---------------------------------------------------------------- recent research, with concept dots
+s = Slide("These are five recent papers behind our work, and the dots show which idea each one brings. DriftXpert adapts detectors to drift and gave us its outlier-ratio statistic for spotting change. RTTAD adapts only on samples it is confident about, so it guards what it learns. WARDEN guards learning too, and argues that one stream cannot tell drift from poisoning, which is why we add neighbours. Su and others, and Rapid Poison, show that systems which adapt can be poisoned, which shapes our threat model. FOA brings all of these together, and adds two things none of them has: neighbours as witnesses, and running on real IoT boards.")
+s.head("Recent research we build on", "Five recent papers, what each gave us, and the ideas FOA combines.")
+CON = ("Adapts\nwhile live", "Detects\nchange", "Guards\nlearning", "Models\npoisoning", "Uses\npeers", "Runs on\nIoT\nboards")
+P16 = (("DriftXpert: drift adaptation for IDS", "arXiv preprint", "Its outlier-ratio statistic, used in our baseline as a stop gate.", (1, 1, 0, 0, 0, 0)),
+       ("RTTAD: risk-aware test-time adaptation", "arXiv preprint", "Adapt only on samples you are confident about.", (1, 0, 1, 0, 0, 0)),
+       ("WARDEN: self-poisoning in adaptive detection", "arXiv preprint", "One stream cannot separate drift from poisoning, so we add neighbours.", (1, 0, 1, 1, 0, 0)),
+       ("Su et al.: poisoning test-time adaptation", "ICLR", "A realistic attacker with limited knowledge, for our threat model.", (1, 0, 0, 1, 0, 0)),
+       ("Rapid Poison: attacking rapid response", "ICML", "Evidence that adaptation itself is an attack surface.", (1, 0, 0, 1, 0, 0)),
+       ("FOA (ours)", "", "All of the above, plus neighbours and real boards.", (1, 1, 1, 1, 1, 1)))
+DX0, DW = 8.55, 0.65
+s.text(0.9, 2.05, 4.0, 0.3, "Paper", 12, GREY, True); s.text(5.05, 2.05, 3.2, 0.3, "What we took from it", 12, BLUE, True)
+for k, c in enumerate(CON):
+    s.text(DX0 + k * DW - 0.05, 1.82, DW + 0.1, 0.62, c, 9.5, GREY, True, "c", "b", spacing=0.98)
+for i, (t, v, b, dots) in enumerate(P16):
+    y = 2.55 + i * 0.7; foa = t.startswith("FOA")
+    if foa:
+        s.box(0.9, y + 0.04, 11.53, 0.62, "E8F1FC", None, 0.08)
+    else:
+        s.line(0.9, y, 12.43, y)
+    s.text(1.0 if foa else 0.9, y + (0.17 if foa else 0.08), 4.1, 0.3, t, 15 if foa else 13, BLUE if foa else INK, True)
+    if v:
+        s.text(0.9, y + 0.38, 4.0, 0.25, v, 10.5, GREY)
+    s.text(5.05, y + 0.04, 3.3, 0.62, b, 11.5, BLUE if foa else INK, foa, anchor="m", spacing=1.05)
+    for k, d in enumerate(dots):
+        cx = DX0 + k * DW + DW / 2
+        if d:
+            s.dot(cx, y + 0.35, 0.11, BLUE if foa else INK)
+        else:
+            s.dot(cx, y + 0.35, 0.11, WHITE, "D2D2D7")
 
 # 17 ---------------------------------------------------------------- close
 s = Slide("To sum up: learn freely what the neighbours also see, ration what only you see. We tested this on real IoT traffic, real botnet attacks, forty weeks of real network change, and real boards. These are the foundations we build on.")
