@@ -422,20 +422,24 @@ for i, r in enumerate(("Rubinstein et al., ANTIDOTE: poisoning of anomaly detect
                        "Koumar et al., CESNET-TimeSeries24, Scientific Data")):
     s.text(0.9, 4.45 + i * 0.4, 11.5, 0.35, r, 15, GREY)
 
-# 17b ---------------------------------------------------------------- research question and answers
-s = Slide("Our research question: can a fleet of self-learning detectors keep following honest change, while limiting how fast an attacker on one device can poison its detector, without a stop switch an attacker could trip? We tested three hypotheses. Safety: under shared change FOA was compromised in about eleven percent of runs, against thirty-nine for a single device and twenty-seven to thirty for gated defences. Tracking: with the floor, FOA's false alarms stayed within two points of a single device. Cost: it runs on an ESP8266, combining neighbours in under two milliseconds with 92-byte messages. All three are supported.")
-s.head("Our research question")
-s.box(0.9, 1.75, 11.53, 1.35, BLUE)
-s.text(1.25, 1.75, 10.9, 1.35, "Can a fleet of self-learning detectors keep following honest change, while limiting how fast an attacker on one device can poison its detector, without a stop switch an attacker could trip?", 19, WHITE, True, anchor="m", spacing=1.15)
-for i, (h, t, r) in enumerate((("H1  Safety", "Under shared change, FOA is compromised less often than a lone device and gated defences.", "10.8% vs 39.2% (lone) and 27 to 30% (gated)"),
-                               ("H2  Tracking", "FOA follows shared change with false alarms close to a lone device.", "2.5% vs 0.8%, both with the floor"),
-                               ("H3  Cost", "FOA fits a few-dollar microcontroller.", "1.2 to 1.9 ms to combine, 92-byte messages, ESP8266"))):
-    y = 3.45 + i * 1.12
+# 17b ---------------------------------------------------------------- research questions and answers
+s = Slide("We asked two research questions. First: can a fleet of self-learning detectors keep following honest change, while limiting how fast an attacker on one device can poison its detector, without a stop switch an attacker could trip? Second: does this hold up against the attacks that defeat existing defences, a botnet that takes over most devices of one model, and a freeze attack? Our four hypotheses are all supported. Safety: about eleven percent compromised against thirty-nine for a single device. Tracking: false alarms within two points of a single device. Cost: under two milliseconds to combine on an ESP8266. Robustness: zero percent compromised under a one-model botnet, and unaffected by decoys.")
+s.head("Our research questions")
+for x, k, q in ((0.9, "RQ1", "Can a fleet of self-learning detectors keep following honest change, while limiting how fast an attacker on one device can poison its detector, without a stop switch an attacker could trip?"),
+                (6.79, "RQ2", "Does it hold up against the attacks that defeat existing defences: a botnet that takes over most devices of one model, and a freeze attack?")):
+    s.box(x, 1.7, 5.64, 1.75, BLUE)
+    s.text(x + 0.3, 1.85, 1.0, 0.4, k, 16, WHITE, True)
+    s.text(x + 0.3, 2.25, 5.05, 1.15, q, 14, WHITE, True, spacing=1.12)
+for i, (h, t, r) in enumerate((("H1  Safety", "RQ1. Under shared change, FOA is compromised less often than a lone device and gated defences.", "10.8% vs 39.2% (lone) and 27 to 30% (gated)"),
+                               ("H2  Tracking", "RQ1. FOA follows shared change with false alarms close to a lone device.", "2.5% vs 0.8%, both with the floor"),
+                               ("H3  Cost", "RQ1. FOA fits a few-dollar microcontroller.", "1.2 to 1.9 ms to combine, 92-byte messages"),
+                               ("H4  Robustness", "RQ2. FOA resists a one-model botnet and is not frozen by decoys.", "0% vs 100% for same-model voting; decoys have no effect"))):
+    y = 3.75 + i * 0.9
     s.line(0.9, y, 12.43, y)
-    s.text(0.9, y + 0.2, 2.2, 0.45, h, 18, BLUE, True)
-    s.text(3.2, y + 0.2, 5.0, 0.8, t, 15, INK)
-    s.text(8.45, y + 0.2, 2.75, 0.8, r, 14, GREY)
-    s.text(11.25, y + 0.18, 1.18, 0.45, "Supported", 14, BLUE, True, "r")
+    s.text(0.9, y + 0.17, 2.2, 0.4, h, 16, BLUE, True)
+    s.text(3.1, y + 0.17, 5.1, 0.7, t, 14, INK)
+    s.text(8.4, y + 0.17, 2.85, 0.7, r, 13, GREY)
+    s.text(11.25, y + 0.17, 1.18, 0.4, "Supported", 13, BLUE, True, "r")
 
 # 18 ---------------------------------------------------------------- limits and next (last)
 s = Slide("Finally, what is still open and what we do next. A large change on one device alone is learned slowly, because no neighbour backs it. Malicious neighbours combined with a poisoner can beat devices whose attack is close to normal. A sudden jump outside the normal region leaves nothing to learn from. And three boards is still a small fleet. Thank you, we are happy to take questions.")
