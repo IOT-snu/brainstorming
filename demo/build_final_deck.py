@@ -200,40 +200,43 @@ for i, (t, b) in enumerate((("Bounded", "One attacked device moves only a set am
     s.text(0.9, y + 0.33, 3.6, 0.5, t, 21, BLUE, True)
     s.text(4.8, y + 0.34, 7.5, 0.75, b, 18, INK)
 
-# 5b ---------------------------------------------------------------- comparison with common and similar methods (native Excel chart)
-s = Slide("This chart compares FOA with the common ways of keeping a detector up to date, and with CIoTA, the closest earlier system, where devices of the same model vote on updates. The blue bars are strong network change with an attacker hiding poisoning inside it: the common methods leave between twenty-seven and thirty-nine percent of runs compromised, FOA about eleven. The orange bars are a botnet that has taken over two of three cameras of one model: a lone device and same-model voting are both compromised every time, FOA never.")
-s.head("FOA against common and similar methods", "Share of attacked runs compromised. Lower is better.")
-cats = ["Learn everything", "Lone device", "Limit each step", "Frozen reference", "Stop on many alarms", "CIoTA (same-model voting)", "FOA (ours)"]
-A = [34.5, 39.2, 30.1, 27.4, 29.9, None, 10.8]
-Bv = [None, 100.0, None, None, None, 100.0, 0.0]
-cd = CategoryChartData(number_format='0.0"%"'); cd.categories = cats
-cd.add_series("Strong network change", A); cd.add_series("One-model botnet (2 of 3 infected)", Bv)
-CX, CY, CWD, CHT = 0.6, 1.95, 12.13, 5.3
+# 5b ---------------------------------------------------------------- safer across attacks and conditions (native Excel chart; E3 strong drift, E4 botnet)
+s = Slide("This chart compares FOA with a lone device and with the ideas behind recent defences: a DriftXpert-style gate that pauses learning when outliers spike, WARDEN-style screening against a frozen copy of the detector, the Kloft and Laskov alarm switch-off, and CIoTA's same-model voting. Under a strong network change, FOA has the fewest compromised runs overall. The classic slow poisoner never beat FOA. Poison hidden in the clean core is cut to about fifteen percent, the lowest of all. And when a botnet takes over devices of one model, a lone device and same-model voting are compromised every time, while FOA never is.")
+s.head("Safer across attacks and conditions", "Share of attacked runs compromised. Lower is better.")
+cats6 = ["Strong network change,\nall attacks", "Classic slow poisoner", "Hiding in the clean core", "One-model botnet\n(2 of 3 infected)"]
+SER = (("Lone device", [39.2, 63.2, 36.8, 100.0], "A5A5A5"),
+       ("DriftXpert-style gate", [39.4, 63.9, 36.8, None], "ED7D31"),
+       ("WARDEN-style screening", [27.4, 1.4, 52.5, None], "FFC000"),
+       ("Kloft & Laskov switch-off", [29.9, 36.1, 36.1, None], "5B9BD5"),
+       ("CIoTA (same-model voting)", [None, None, None, 100.0], "70AD47"),
+       ("FOA (ours)", [10.8, 0.0, 14.6, 0.0], "264478"))
+cd = CategoryChartData(number_format='0"%"'); cd.categories = cats6
+for n, v, c in SER:
+    cd.add_series(n, v)
+CX, CY, CWD, CHT = 0.6, 1.95, 12.13, 5.35
 ch = s.s.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(CX), Inches(CY), Inches(CWD), Inches(CHT), cd).chart
 ch.font.name = "Calibri"; ch.font.size = Pt(12); ch.font.color.rgb = rgb("595959")
-ch.has_legend = True; ch.legend.position = XL_LEGEND_POSITION.BOTTOM; ch.legend.include_in_layout = False; ch.legend.font.size = Pt(12)
-pl = ch.plots[0]; pl.gap_width = 80; pl.overlap = -10; pl.has_data_labels = True
-dl = pl.data_labels; dl.number_format = '0.0"%"'; dl.number_format_is_linked = False; dl.position = XL_LABEL_POSITION.OUTSIDE_END; dl.font.size = Pt(11)
-for se, col in zip(pl.series, ("4472C4", "ED7D31")):
+ch.has_legend = True; ch.legend.position = XL_LEGEND_POSITION.BOTTOM; ch.legend.include_in_layout = False; ch.legend.font.size = Pt(11)
+pl = ch.plots[0]; pl.gap_width = 60; pl.overlap = 0; pl.has_data_labels = True
+dl = pl.data_labels; dl.number_format = '0"%"'; dl.number_format_is_linked = False; dl.position = XL_LABEL_POSITION.OUTSIDE_END; dl.font.size = Pt(10)
+for se, (_, _, col) in zip(pl.series, SER):
     se.format.fill.solid(); se.format.fill.fore_color.rgb = rgb(col)
 va = ch.value_axis; va.minimum_scale, va.maximum_scale, va.major_unit = 0, 100, 20; va.has_major_gridlines = True
 va.major_gridlines.format.line.color.rgb = rgb("D9D9D9"); va.format.line.fill.background()
 va.tick_labels.number_format = '0"%"'; va.tick_labels.number_format_is_linked = False
 ca = ch.category_axis; ca.format.line.color.rgb = rgb("D9D9D9"); ca.tick_labels.font.size = Pt(12)
-# preview (approximation; the PDF is exported from PowerPoint)
-import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt, io
-fig, ax = plt.subplots(figsize=(CWD, CHT), dpi=PX)
-import numpy as np
-xs = np.arange(len(cats)); bw = 0.38
-for k, (vals, col, lab) in enumerate(((A, "#4472C4", "Strong network change"), (Bv, "#ED7D31", "One-model botnet (2 of 3 infected)"))):
-    xx = [x + (k - 0.5) * bw for x, v in zip(xs, vals) if v is not None]; vv = [v for v in vals if v is not None]
-    bars = ax.bar(xx, vv, bw * 0.95, color=col, label=lab, zorder=3)
+import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt, io, numpy as np
+fig, ax = plt.subplots(figsize=(CWD, CHT), dpi=PX); xs = np.arange(len(cats6)); bw = 0.8 / len(SER)
+for k, (n, vals, col) in enumerate(SER):
+    off = (k - (len(SER) - 1) / 2) * bw
+    xx = [x + off for x, v in zip(xs, vals) if v is not None]; vv = [v for v in vals if v is not None]
+    bars = ax.bar(xx, vv, bw * 0.92, color="#" + col, label=n, zorder=3)
     for b_, v in zip(bars, vv):
-        ax.text(b_.get_x() + b_.get_width() / 2, v + 1.5, f"{v:.1f}%", ha="center", va="bottom", fontsize=10, color="#404040")
-ax.set_ylim(0, 100); ax.set_yticks(range(0, 101, 20)); ax.set_yticklabels([f"{t}%" for t in range(0, 101, 20)], color="#595959")
-ax.set_xticks(xs); ax.set_xticklabels(cats, color="#595959", fontsize=10)
+        ax.text(b_.get_x() + b_.get_width() / 2, v + 1.2, f"{v:.0f}%", ha="center", va="bottom", fontsize=8.5, color="#404040")
+ax.set_ylim(0, 105); ax.set_yticks(range(0, 101, 20)); ax.set_yticklabels([f"{t}%" for t in range(0, 101, 20)], color="#595959")
+ax.set_xticks(xs); ax.set_xticklabels(cats6, color="#595959", fontsize=11)
 ax.yaxis.grid(True, color="#D9D9D9", zorder=0); [sp.set_visible(False) for sp in ax.spines.values()]; ax.spines["bottom"].set_visible(True); ax.spines["bottom"].set_color("#D9D9D9")
-ax.tick_params(length=0); ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=11)
+ax.tick_params(length=0); ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=6, frameon=False, fontsize=9.5)
 fig.tight_layout(); buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=PX); plt.close(fig)
 s.im.paste(Image.open(buf).convert("RGB").resize((int(CWD * PX), int(CHT * PX))), (int(CX * PX), int(CY * PX)))
 
