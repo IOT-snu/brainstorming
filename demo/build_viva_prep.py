@@ -80,12 +80,13 @@ Q = [
    ("So FOA never stops learning?", "No gate stops it. But it learns only from accepted traffic, so if all traffic suddenly lands outside the alarm radius there is nothing to learn from. The boards showed this when their traffic rate doubled at once."),
    ("What does unforgeable mean exactly?", "Each frame carries a 16-byte HMAC-SHA256 tag. A device without the key cannot forge a neighbour's update, and stale frames are rejected. In simulation, without authentication a keyless forger compromised the victim in every run."),
    ("Is there anything no rule can do?", "If only one device changes, the same observations could come from honest drift or from poisoning, so no rule can separate them.")]),
- ("An attacker needs time: the budget for device-only movement grows slowly, so hiding an attack takes at least about 133 cycles.",
-  [("Where does 133 come from?", "t* ≈ (M − 1 − B0 − B0s) / (B + Bs) = (2 − 1 − 0.1 − 0.1) / (0.005 + 0.001) ≈ 133 cycles, for an attack M = 2 alarm radii away."),
-   ("Why M − 1?", "An attack M radii from the centre is hidden once the detector's edge reaches it; the edge is already 1 radius out, so the centre must move M − 1."),
-   ("How do cycles become minutes?", "Multiply by the cycle length: 133 × 7.8 s ≈ 17 minutes on our boards; at one cycle per hour about 5.5 days. Longer cycles give proportionally more time."),
-   ("Can the attacker use the shared part to go faster?", "Only if the neighbours' middle moves too, which one compromised device cannot cause; the shared part also has its own cap."),
-   ("Is it a hard wall?", "No, it is a guaranteed minimum time, a delay. A patient attacker on one device alone could get there eventually; no rule can tell that from honest change on one device.")]),
+ ("Safer across attacks and conditions: FOA against a device learning alone, both with the floor, in five settings.",
+  [("What does each bar mean?", "The share of attacked runs where the target attack went undetected (compromised). Grey: a device learning alone. Blue: FOA. Lower is better."),
+   ("What is the classic slow poisoner?", "An attacker who places poison just inside the edge of the normal zone and pushes it outward a little each cycle (the boiling frog). FOA's budget stopped it every time."),
+   ("What is hiding in the clean core?", "An attacker who places poison inside the central part of normal traffic, so it is used for learning. Harder to stop; FOA still cuts it from 36.8% to 11.8%."),
+   ("Why 100% vs 0% for the botnet?", "Most devices of one model are infected and push the same way. A lone device learns the poison; FOA's neighbours come from other vendors and do not back it."),
+   ("Is there any attack where FOA is not better?", "An attacker who imitates the shared network change: about 16% for both. Not on this slide; say it plainly if asked."),
+   ("Where do the numbers come from?", "Simulation on real N-BaIoT traffic and attacks, held-out seeds 2 to 11, 7,310 runs (experiment E12).")]),
  ("How we differ from the closest earlier work.",
   [("Isn't this just CIoTA?", "CIoTA uses peers of the same model and discards what they do not agree on. We use other vendors, admit the rest within a budget, and bound attacker movement. Under a one-model botnet, our version of same-model consensus failed and ours held."),
    ("Are you the first?", "We do not claim first. We found no prior work combining these, and several related 2026 works are preprints."),
@@ -235,10 +236,7 @@ FORM = {
  15: [("Combine cost", "geometric median of K updates: 10 Weiszfeld iterations", "K: neighbours heard. 1.2 to 1.9 ms on an ESP8266 with K = 2."), RES],
  21: [("Starvation", "accepted = samples with score ≤ τ<br/>if fewer than 5 core samples: d = 0",
        "After a sudden jump every sample scores above τ, so nothing is accepted and the detector cannot move.")],
- 6: [("Time to compromise", "t* ≈ (M − 1 − B<sub>0</sub> − B<sub>0</sub><super>s</super>) / (B + B<super>s</super>)",
-      "M: attack distance in alarm radii. B<sub>0</sub> = 0.1, B = 0.005: centre budget start and growth. B<sub>0</sub><super>s</super> = 0.1, B<super>s</super> = 0.001: spread budget. M = 2 gives about 133 cycles."),
-     ("Cycles to time", "time = t* × cycle length", "7.8 s per cycle on the boards: about 17 minutes. One cycle per hour: about 5.5 days.")],
-
+ 6: [COMP],
 }
 
 # new slide -> (old slide in the 20-slide deck, speaker). Old odd slides were Rishit's, even were Farhan's.

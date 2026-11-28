@@ -216,32 +216,24 @@ for i, (t, b) in enumerate((("Bounded", "One attacked device moves only a set am
     s.text(0.9, y + 0.33, 3.6, 0.5, t, 21, BLUE, True)
     s.text(4.8, y + 0.34, 7.5, 0.75, b, 18, INK)
 
-# 5b ---------------------------------------------------------------- time to compromise (graph)
-s = Slide("This graph shows what the bound means in time. The blue line is how far one attacked device is allowed to move on its own, growing slowly every cycle. To hide an attack two alarm radii away, the detector must move about one alarm radius. The lines cross at about 133 learning cycles: about 17 minutes at our boards' cycle, or about five and a half days at one cycle per hour. Attacks further away need proportionally longer, and the neighbours' shared part cannot be used to speed this up, because the attacker controls only one device.")
-s.head("An attacker needs time", "How far one attacked device may move on its own, cycle by cycle.")
-gx0, gx1, gy0, gy1 = 1.7, 9.0, 6.3, 2.3          # plot box: x 0..200 cycles, y 0..1.5 alarm radii
-tx = lambda t: gx0 + (gx1 - gx0) * t / 200
-ty = lambda v: gy0 - (gy0 - gy1) * v / 1.5
-s.line(gx0, gy0, gx1, gy0, INK, 1.25); s.line(gx0, gy0, gx0, gy1, INK, 1.25)
-for t in (0, 50, 100, 150, 200):
-    s.text(tx(t) - 0.4, gy0 + 0.08, 0.8, 0.3, str(t), 12, GREY, align="c")
-for v in (0.5, 1.0, 1.5):
-    s.line(gx0, ty(v), gx1, ty(v), "E8E8ED", 0.75); s.text(gx0 - 0.6, ty(v) - 0.15, 0.5, 0.3, f"{v:g}", 12, GREY, align="r")
-s.text(gx0, gy0 + 0.4, gx1 - gx0, 0.3, "learning cycles", 13, GREY, align="c")
-s.text(0.9, gy1 - 0.45, 4.5, 0.3, "alarm radii", 13, GREY)
-s.line(gx0, ty(1.0), gx1, ty(1.0), RED, 2.25)
-s.text(tx(4), ty(1.0) - 0.42, 4.5, 0.35, "needed to hide an attack 2 radii away", 13, RED, True)
-s.line(tx(0), ty(0.2), tx(200), ty(1.4), BLUE, 3)
-s.text(tx(118), ty(1.4) - 0.05, 2.6, 0.35, "allowed on its own", 13, BLUE, True)
-s.line(tx(133), ty(1.0), tx(133), gy0, GREY, 1.0)
-s.dot(tx(133), ty(1.0), 0.09, INK)
-s.text(9.6, 2.45, 3.0, 0.9, "133", 60, INK, True)
-s.text(9.6, 3.45, 2.9, 0.4, "learning cycles at least", 16, GREY)
-s.line(9.6, 4.15, 12.43, 4.15)
-s.text(9.6, 4.35, 2.9, 0.4, "≈ 17 minutes", 22, BLUE, True)
-s.text(9.6, 4.8, 2.9, 0.4, "at our boards' 7.8 s cycle", 14, GREY)
-s.text(9.6, 5.4, 2.9, 0.4, "≈ 5.5 days", 22, BLUE, True)
-s.text(9.6, 5.85, 2.9, 0.4, "at one cycle per hour", 14, GREY)
+# 5b ---------------------------------------------------------------- safer across conditions (grouped bars)
+s = Slide("This chart puts FOA next to a device learning on its own, both with the floor, across five conditions. With no network change, FOA halves the compromise rate. Under a strong network change it falls from forty-three percent to about nine. The classic slow poisoner, which beats a lone device three times out of four, never beat FOA. An attacker hiding inside the clean core is cut from thirty-seven percent to twelve. And when a botnet takes over devices of one model, a lone device is always compromised and FOA never is.")
+s.head("Safer across attacks and conditions", "Share of attacked runs compromised. Lower is better. Both rules with the floor.")
+G = (("No network\nchange", 7.6, 4.3), ("Strong network\nchange", 43.1, 9.4), ("Classic slow\npoisoner", 75.4, 0.0),
+     ("Hiding in the\nclean core", 36.8, 11.8), ("One-model\nbotnet", 100.0, 0.0))
+gx0, gw, base, top = 0.9, 11.53 / 5, 6.05, 2.95
+sc = lambda v: (base - top) * v / 100
+s.line(0.9, base, 12.43, base, LINE, 1.25)
+for i, (n, a, f) in enumerate(G):
+    cx = gx0 + gw * (i + 0.5)
+    for j, (v, col) in enumerate(((a, PALE), (f, BLUE))):
+        x = cx - 0.78 + j * 0.82
+        h = max(sc(v), 0.03)
+        s.box(x, base - h, 0.72, h, col, None, 0)
+        s.text(x - 0.25, base - h - 0.42, 1.22, 0.38, f"{v:g}%", 17, BLUE if j else GREY, True, "c")
+    s.text(cx - gw / 2 + 0.05, base + 0.12, gw - 0.1, 0.7, n, 14, INK, False, "c", spacing=1.05)
+s.box(9.0, 1.98, 0.28, 0.28, PALE, None, 0); s.text(9.38, 1.95, 1.6, 0.35, "Lone device", 14, GREY)
+s.box(10.95, 1.98, 0.28, 0.28, BLUE, None, 0); s.text(11.33, 1.95, 1.1, 0.35, "FOA", 14, BLUE, True)
 
 # 6 ---------------------------------------------------------------- novelty
 s = Slide("The closest earlier system is CIoTA. It uses devices of the same model as peers and discards what they do not agree on. We use devices from other vendors, we admit the rest within a budget instead of discarding it, and we prove a bound on how far an attacker can move the detector. When a botnet infects most devices of one model, same-model voting is fully compromised and ours is not. We found no prior work that combines these.")
