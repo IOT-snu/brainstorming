@@ -355,7 +355,7 @@ s = Slide("What makes FOA practical. It needs no labels or attack signatures. Ea
 s.head("Built for real deployments", "What makes FOA practical on small IoT devices.")
 for i, (t, b) in enumerate((("No labels", "Learns from its own traffic. Needs no attack signatures or labelled data."),
                             ("Tiny messages", "One signed 92-byte broadcast per cycle. No server, no cloud."),
-                            ("Fast", "1.2 to 1.9 ms to combine neighbours on an ESP8266."),
+                            ("Fast", "Merging the neighbours' updates and deciding what to learn takes 1.2 to 1.9 ms on an ESP8266."),
                             ("Cross-vendor", "Neighbours from different makers, so one exploit cannot easily fake agreement."),
                             ("Cannot be frozen", "No switch an attacker can trip to stop learning."),
                             ("Proven limits", "A guaranteed bound on how far one compromised device can be moved."))):
