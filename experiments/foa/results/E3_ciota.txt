@@ -1,0 +1,10 @@
+E3 rerun with CIoTA (same-model voting) and the lone device (auto), held-out seeds 2-11, 840 runs each. Compromised %.
+Run: cd experiments/foa && python3 run_ciota_e3.py results/E3_ciota.pkl
+
+mode    boundary  core  mimicry   All
+policy                               
+auto        63.2  36.8     17.5  39.2
+ciota       63.2  36.8     17.5  39.2
+All         63.2  36.8     17.5  39.2
+fpr strong drift tail {'auto': 10.2, 'ciota': 10.2}
+

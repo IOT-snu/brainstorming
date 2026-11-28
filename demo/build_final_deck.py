@@ -201,14 +201,14 @@ for i, (t, b) in enumerate((("Bounded", "One attacked device moves only a set am
     s.text(4.8, y + 0.34, 7.5, 0.75, b, 18, INK)
 
 # 5b ---------------------------------------------------------------- safer across attacks and conditions (native Excel chart; E3 strong drift, E4 botnet)
-s = Slide("This chart compares FOA with a lone device and with the ideas behind recent defences: a DriftXpert-style gate that pauses learning when outliers spike, WARDEN-style screening against a frozen copy of the detector, the Kloft and Laskov alarm switch-off, and CIoTA's same-model voting. Under a strong network change, FOA has the fewest compromised runs overall. The classic slow poisoner never beat FOA. Poison hidden in the clean core is cut to about fifteen percent, the lowest of all. And when a botnet takes over devices of one model, a lone device and same-model voting are compromised every time, while FOA never is.")
+s = Slide("This chart compares FOA with a lone device and with the ideas behind recent defences: a DriftXpert-style gate that pauses learning when outliers spike, WARDEN-style screening against a frozen copy of the detector, the Kloft and Laskov alarm switch-off, and CIoTA's same-model voting. When devices come from different makers, CIoTA has no same-model devices to vote with, so it behaves exactly like a lone device. Under a strong network change, FOA has the fewest compromised runs overall. The classic slow poisoner never beat FOA. Poison hidden in the clean core is cut to about fifteen percent, the lowest of all. And when a botnet takes over devices of one model, a lone device and same-model voting are compromised every time, while FOA never is.")
 s.head("Safer across attacks and conditions", "Share of attacked runs compromised. Lower is better.")
 cats6 = ["Strong network change,\nall attacks", "Classic slow poisoner", "Hiding in the clean core", "One-model botnet\n(2 of 3 infected)"]
 SER = (("Lone device", [39.2, 63.2, 36.8, 100.0], "A5A5A5"),
        ("DriftXpert-style gate", [39.4, 63.9, 36.8, None], "ED7D31"),
        ("WARDEN-style screening", [27.4, 1.4, 52.5, None], "FFC000"),
        ("Kloft & Laskov switch-off", [29.9, 36.1, 36.1, None], "5B9BD5"),
-       ("CIoTA (same-model voting)", [None, None, None, 100.0], "70AD47"),
+       ("CIoTA (same-model voting)", [39.2, 63.2, 36.8, 100.0], "70AD47"),
        ("FOA (ours)", [10.8, 0.0, 14.6, 0.0], "264478"))
 cd = CategoryChartData(number_format='0"%"'); cd.categories = cats6
 for n, v, c in SER:
