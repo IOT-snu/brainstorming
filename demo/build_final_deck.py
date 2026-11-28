@@ -180,29 +180,30 @@ s.text(8.8, 5.05, 3.5, 0.75, "Only the infusion pump starts sending unusual traf
 s.text(8.8, 5.85, 3.5, 0.4, "Allow it slowly, within a budget", 14, INK, True)
 
 # 4 ---------------------------------------------------------------- one cycle (flowchart)
-s = Slide("Here is one learning cycle as a flowchart. Each traffic sample is scored. Anything that raises an alarm is flagged and never learned from. From the clearly normal core, the device proposes an update, signs it and shares it. It takes the robust middle of its neighbours' updates, checks that their change is real and that its own traffic agrees, and splits its update into a shared part and its own part. Budgets cap both, and the normal region moves. Then the next cycle starts. Nothing in this loop switches learning off.")
-s.head("One learning cycle", "The same loop runs on every device. No step can switch learning off.")
-BW, BH = 2.05, 0.95
-r1, r2 = 2.25, 4.55
-X = (0.9, 3.35, 5.8, 8.25, 10.7)
-def node(x, y, t, fill=SOFT, line=None, col=INK):
-    s.box(x, y, BW, BH, fill, line); s.text(x + 0.1, y, BW - 0.2, BH, t, 14, col, True, "c", "m")
-for x, t in zip(X, ("Traffic sample", "Score it", "Alarm?", "Clean core of the batch", "Propose an update")):
-    node(x, r1, t, WHITE if t == "Alarm?" else SOFT, RED if t == "Alarm?" else None, RED if t == "Alarm?" else INK)
-for i in range(4):
-    s.line(X[i] + BW + 0.03, r1 + BH / 2, X[i + 1] - 0.05, r1 + BH / 2, GREY, 1.5, True)
-s.text(X[2] + BW + 0.05, r1 + 0.05, 0.4, 0.3, "no", 12, GREY)
-s.line(X[2] + BW / 2, r1 + BH + 0.03, X[2] + BW / 2, r1 + BH + 0.38, RED, 1.5, True)
-s.text(X[2] - 0.2, r1 + BH + 0.42, BW + 0.4, 0.6, "yes: flagged, never learned from", 13, RED, True, "c")
-for x, t, hi in zip(X[::-1], ("Sign and share 92 bytes", "Middle of the neighbours' updates", "Real? (w)  Do I see it? (λ)", "Split: shared a, mine r", "Budgets cap both, normal moves"), (0, 1, 1, 1, 0)):
-    node(x, r2, t, BLUE if hi else SOFT, None, WHITE if hi else INK)
-s.line(X[4] + BW / 2, r1 + BH + 0.03, X[4] + BW / 2, r2 - 0.05, GREY, 1.5, True)
-for i in range(4, 0, -1):
-    s.line(X[i] - 0.03, r2 + BH / 2, X[i - 1] + BW + 0.05, r2 + BH / 2, GREY, 1.5, True)
-s.line(X[0] + BW / 2, r2 - 0.03, X[0] + BW / 2, r1 + BH + 0.05, GREY, 1.5, True)
-s.text(X[0] + BW / 2 + 0.1, r1 + BH + 0.45, 1.6, 0.35, "next cycle", 12, GREY)
-s.box(X[3], 6.15, BW, 0.75, WHITE, LINE); s.text(X[3] + 0.1, 6.15, BW - 0.2, 0.75, "Signed updates from neighbours", 13, GREY, True, "c", "m")
-s.line(X[3] + BW / 2, 6.12, X[3] + BW / 2, r2 + BH + 0.05, GREY, 1.5, True)
+s = Slide("Here is one learning cycle. Each traffic sample gets a score. Samples that raise an alarm are never learned from. From the most normal samples, the device proposes an update, signs it and shares it with its neighbours. It combines its neighbours' updates, keeps the part they agree on, rations the part only it sees, and updates its idea of normal. Then the next cycle starts. Nothing in this loop switches learning off.")
+s.head("One learning cycle", "The same loop runs on every device.")
+BW, BH, r1, r2 = 2.3, 1.0, 2.45, 4.85
+def node(x, y, t):
+    s.box(x, y, BW, BH, SOFT); s.text(x + 0.12, y, BW - 0.24, BH, t, 16, INK, True, "c", "m")
+X1 = (0.9, 3.55, 7.3, 10.13)
+for x, t in zip(X1, ("Traffic", "Score it", "Propose an update", "Sign and share")):
+    node(x, r1, t)
+s.line(X1[0] + BW + 0.04, r1 + BH / 2, X1[1] - 0.06, r1 + BH / 2, GREY, 1.5, True)
+s.line(X1[1] + BW + 0.04, r1 + BH / 2, X1[2] - 0.06, r1 + BH / 2, GREY, 1.5, True)
+s.text(X1[1] + BW + 0.05, r1 - 0.2, X1[2] - X1[1] - BW - 0.1, 0.55, "most normal samples", 13, GREY, False, "c", "b")
+s.line(X1[2] + BW + 0.04, r1 + BH / 2, X1[3] - 0.06, r1 + BH / 2, GREY, 1.5, True)
+s.line(X1[1] + BW / 2, r1 + BH + 0.04, X1[1] + BW / 2, r1 + BH + 0.5, GREY, 1.5, True)
+s.text(X1[1] - 0.3, r1 + BH + 0.55, BW + 0.6, 0.35, "alarms are never learned", 13, GREY, False, "c")
+X2 = (10.13, 5.5, 0.9)
+for x, t in zip(X2, ("Combine with neighbours", "Keep what they agree on", "Update normal")):
+    node(x, r2, t)
+s.line(X1[3] + BW / 2, r1 + BH + 0.04, X1[3] + BW / 2, r2 - 0.06, GREY, 1.5, True)
+s.line(X2[0] - 0.04, r2 + BH / 2, X2[1] + BW + 0.06, r2 + BH / 2, GREY, 1.5, True)
+s.line(X2[1] - 0.04, r2 + BH / 2, X2[2] + BW + 0.06, r2 + BH / 2, GREY, 1.5, True)
+s.line(X2[2] + BW / 2, r2 - 0.04, X2[2] + BW / 2, r1 + BH + 0.06, GREY, 1.5, True)
+s.text(X2[2] + BW / 2 + 0.12, r1 + BH + 0.55, 1.4, 0.35, "next cycle", 13, GREY)
+s.line(X2[0] + BW / 2, 6.55, X2[0] + BW / 2, r2 + BH + 0.06, GREY, 1.5, True)
+s.text(X2[0] - 0.3, 6.6, BW + 0.6, 0.35, "updates from neighbours", 13, GREY, False, "c")
 
 # 5 ---------------------------------------------------------------- guarantees
 s = Slide("We guarantee four things. First, an attacker on one device can only move its detector by a fixed amount plus a slow rate beyond what the neighbours back, so poisoning needs a guaranteed minimum time. Second, fewer than half malicious neighbours can only add a limited push each cycle. Third, there is no switch an attacker can trip to stop learning, and alarmed decoys never enter the update. Fourth, every message is signed, so a device without the key cannot pretend to be a neighbour.")
