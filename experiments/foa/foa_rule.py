@@ -1,8 +1,8 @@
 """
 Fleet-Orthogonal Adaptation: the per-device update rule (Algorithm 1 in the paper), as a pure
-function of the device's own proposal, its verified peer frames and its FOA state. The ESP32 C
-implementation (firmware/esp32_foa/foa_core.c) mirrors this function line by line and is tested
-against it.
+function of the device's own proposal, its verified peer frames and its FOA state. The C
+implementation (firmware/esp8266_foa/foa_core.c; the ESP32 copy is identical) mirrors this function
+line by line and is tested against it.
 
 Given own proposal (d, e) = (centre shift, log-spread change) and peer proposals {(d_j, e_j)}:
   m   = geometric median of peer shifts              (honest-majority robust)
@@ -10,14 +10,17 @@ Given own proposal (d, e) = (centre shift, log-spread change) and peer proposals
   lam = agreement of the device's own traffic with it, measured robustly: the median projection of
         its own core points on the consensus direction (an attacker holding under half the batch can
         neither cancel nor fake it), smoothed, divided by the consensus size, clipped to [0, 1]
-  a   = w * lam * m_smoothed                          common part, applied in full
-        projected so that ||C + a|| <= (B0c + Bc t) rho  (common-channel budget)
-  r   = d - a                                         residual, device-specific, for centre and log spread
-        one joint budget: ||R||/rho + |R_s| <= B0 + B t   (the residual can enlarge the acceptance
-        region by at most B0 + B t alarm radii, through the centre and the spread together)
+  a   = w * lam * m_smoothed                          common part, with its own budget:
+        ||C + a|| <= (B0c + Bc t) rho and |Cs + a_s| <= B0cs + Bcs t
+  r   = d - a                                         residual, device-specific. Default: separate budgets,
+        ||R|| <= (B0 + B t) rho for the centre and |Rs| <= B0s + Bs t for the log spread.
+        pol.joint=True (ablation) uses one joint budget ||R||/rho + |Rs| <= B0 + B t instead.
+  floor (pol.s_floor > 0): cancel this cycle's shrinking, residual first, so s >= s_floor * s0.
+        It only moves increments toward zero, so every budget still holds. Off by default in
+        fleet.py; 1.0 in the floor runs (E12) and in the firmware (S_FLOOR).
   mu += a + r_applied ; log s += a_s + r_s_applied.
-Invariant (Theorem 1): mu(t) = mu0 + C(t) + R(t), log s(t)/s0 = Cs(t) + Rs(t),
-                       ||R(t)||/rho + |Rs(t)| <= B0 + B t.
+Invariant (Theorem 1): mu(t) = mu0 + C(t) + R(t), log(s(t)/s0) = Cs(t) + Rs(t),
+                       ||R(t)|| <= (B0 + B t) rho, |Rs(t)| <= B0s + Bs t.
 Budgets are in units of the device's calibrated alarm radius rho = tau * s0, so the same B means
 the same fraction of the detector's acceptance region on every device, whatever its traffic shape.
 """

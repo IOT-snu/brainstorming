@@ -39,7 +39,7 @@ def project_ball(v, radius):
 
 
 def minsker_constant(alpha):
-    """C_alpha from Minsker (2015, Lemma 2.1): if more than (1 - alpha) of the points lie within r
+    """C_alpha from Minsker (2015, Lemma 2.1): if at least (1 - alpha) of the points lie within r
     of z, the geometric median lies within C_alpha * r of z. Valid for alpha < 1/2."""
     if alpha >= 0.5:
         return np.inf
