@@ -153,15 +153,22 @@ for x, t, b in ((0.9, "Trust yourself", "An attacker feeds slightly unusual traf
     s.text(x, 3.55, 3.3, 2.4, b, 17, GREY, spacing=1.2)
 
 # 3 ---------------------------------------------------------------- idea
-s = Slide("Our idea is to use neighbouring devices as a second witness. A router change reaches everyone. An exploit usually reaches one device. So the part of an update that neighbours also see is learned, as far as this device's own traffic agrees, and the part only this device sees goes through a small budget that grows slowly. Each device sends one signed 92-byte message per cycle. We call this Fleet-Orthogonal Adaptation, FOA.")
-s.head("Ask the neighbours", "Honest change reaches everyone. An attack usually reaches one.")
-for y, n in ((2.55, "Doorbell"), (3.75, "Thermostat"), (4.95, "Baby monitor")):
-    s.box(0.9, y, 2.4, 0.85); s.text(0.9, y, 2.4, 0.85, n, 16, align="c", anchor="m")
-    s.line(3.35, y + 0.42, 4.55, 4.17, GREY, 1.25, True)
-s.box(4.6, 3.55, 2.5, 1.25, WHITE, BLUE); s.text(4.7, 3.55, 2.3, 1.25, "Robust middle of the neighbours' updates", 15, BLUE, True, "c", "m")
-s.line(7.15, 3.9, 8.5, 3.15, GREY, 1.25, True); s.line(7.15, 4.45, 8.5, 5.2, GREY, 1.25, True)
-s.box(8.55, 2.55, 3.9, 1.3, BLUE); s.text(8.8, 2.55, 3.5, 1.3, "Neighbours see it too\nLearn it, as far as my traffic agrees", 17, WHITE, True, anchor="m")
-s.box(8.55, 4.65, 3.9, 1.3); s.text(8.8, 4.65, 3.5, 1.3, "Only I see it\nAllow it slowly, within a budget", 17, INK, True, anchor="m")
+s = Slide("Our idea is to use neighbouring devices as a second witness. Picture a hospital ward: an infusion pump, a patient monitor and a smart bed, each from a different maker. When the hospital moves to a new network gateway, every device's traffic changes together, so the neighbours back that change and it is learned, as far as each device's own traffic agrees. If only the infusion pump starts behaving differently, no neighbour backs it, so it is allowed only slowly, within a small budget. Each device sends one signed 92-byte message per cycle. We call this Fleet-Orthogonal Adaptation, FOA.")
+s.head("Ask the neighbours", "A hospital ward: three devices from three different makers.")
+for y, n, v in ((2.45, "Infusion pump", "Maker A"), (3.75, "Patient monitor", "Maker B"), (5.05, "Smart hospital bed", "Maker C")):
+    s.box(0.9, y, 2.6, 1.0)
+    s.text(1.1, y + 0.17, 2.3, 0.4, n, 16, INK, True); s.text(1.1, y + 0.55, 2.3, 0.35, v, 13, GREY)
+    s.line(3.55, y + 0.5, 4.55, 4.25, GREY, 1.25, True)
+s.box(4.6, 3.6, 2.5, 1.3, WHITE, BLUE); s.text(4.7, 3.6, 2.3, 1.3, "Robust middle of the neighbours' updates", 15, BLUE, True, "c", "m")
+s.line(7.15, 3.95, 8.5, 3.2, GREY, 1.25, True); s.line(7.15, 4.55, 8.5, 5.3, GREY, 1.25, True)
+s.box(8.55, 2.3, 3.9, 1.85, BLUE)
+s.text(8.8, 2.45, 3.5, 0.4, "Neighbours see it too", 17, WHITE, True)
+s.text(8.8, 2.85, 3.5, 0.75, "The hospital switches to a new network gateway. Every device changes.", 14, WHITE)
+s.text(8.8, 3.65, 3.5, 0.4, "Learn it, as far as my traffic agrees", 14, WHITE, True)
+s.box(8.55, 4.5, 3.9, 1.85)
+s.text(8.8, 4.65, 3.5, 0.4, "Only I see it", 17, INK, True)
+s.text(8.8, 5.05, 3.5, 0.75, "Only the infusion pump starts sending unusual traffic.", 14, GREY)
+s.text(8.8, 5.85, 3.5, 0.4, "Allow it slowly, within a budget", 14, INK, True)
 
 # 4 ---------------------------------------------------------------- one cycle
 s = Slide("Here is one learning cycle. The device looks at a batch of its own traffic, proposes an update from the part that looks clearly normal, signs it and broadcasts it, takes the robust middle of its neighbours' updates, and splits its own update into the shared part and its own part. Nothing in this loop switches learning off.")
