@@ -27,6 +27,7 @@ lab = S_("l", fontName="AB", fontSize=8.5, textColor=BLUE, spaceBefore=4, spaceA
 p = S_("p"); small = S_("s", fontSize=8.8, textColor=GREY)
 eq = S_("eq", fontName="AB", fontSize=10.2, leading=15, spaceAfter=2)
 say = S_("say", backColor=SOFT, borderPadding=7, leftIndent=7, rightIndent=7, spaceBefore=4, spaceAfter=10)
+spk = S_("spk", fontName="AB", fontSize=10, textColor=colors.HexColor("#D70015"), spaceAfter=6)
 cell = S_("c", fontSize=8.8, leading=11.8, spaceAfter=0); cellb = S_("cb", fontName="AB", fontSize=8.8, leading=11.8, spaceAfter=0)
 P = Paragraph
 W = A4[0] - 4 * cm
@@ -240,13 +241,34 @@ FORM = {
 
 }
 
+# new slide -> (old slide in the 20-slide deck, speaker). Old odd slides were Rishit's, even were Farhan's.
+OWN = {1: (1, "Rishit"), 2: (2, "Farhan"), 3: (3, "Rishit"), 4: (4, "Farhan"), 5: (5, "Rishit"), 6: (None, "New"),
+       7: (6, "Farhan"), 8: (7, "Rishit"), 9: (8, "Farhan"), 10: (9, "Rishit"), 11: (10, "Farhan"), 12: (11, "Rishit"),
+       13: (12, "Farhan"), 14: ("13 to 16", "Mixed"), 15: (None, "New"), 16: (18, "Farhan"), 17: (None, "New"),
+       18: (20, "Farhan"), 19: (19, "Rishit"), 20: (None, "New"), 21: (17, "Rishit")}
+NOTE = {3: "same idea, new hospital example", 4: "same content, now a flowchart", 5: "rows reworded",
+        10: "same numbers, now a chart", 14: "merges old 13 and 15 (Rishit) with 14 and 16 (Farhan)",
+        16: "rewritten as positive use cases", 21: "trimmed"}
+
+
+def owner_line(i):
+    old, who = OWN[i]
+    if who == "New":
+        return "SPEAKER: NEW SLIDE, decide who presents it"
+    if who == "Mixed":
+        return f"SPEAKER: MIXED, was slides {old} ({NOTE[i]})"
+    return f"SPEAKER: {who.upper()}, was slide {old}" + (f" ({NOTE[i]})" if i in NOTE else "")
+
+
 prs = Presentation(os.path.join(ROOT, "G04_FOA_Final.pptx"))
 slides = list(prs.slides)
 assert len(slides) == len(Q), (len(slides), len(Q))
 S = [P("Presentation and viva preparation", title), P("Fleet-Orthogonal Adaptation  ·  Group G-04  ·  Rishit Kamboj and Farhan Naik", small), Spacer(1, 8),
      P("How to use this", h1),
      P("Each slide has: a picture, formulas with labelled variables where they apply, what it means, what to say, and likely questions. Read it once fully, then practise aloud with only the slides. "
-       "Aim for about 10 to 12 minutes. A natural split: one person takes slides 1 to 10, the other 11 to 21, and both answer questions.", p),
+       "Aim for about 12 to 14 minutes. Each slide is labelled with who prepared it in the earlier 20-slide deck (odd slides Rishit, even slides Farhan). NEW slides still need a speaker.", p),
+     P("Who presents which slide", h1),
+     table([["Slide now", "Was slide", "Speaker"]] + [[str(k), str(v[0]) if v[0] else "none", v[1] if v[1] != "Mixed" else "Mixed: Rishit 13, 15 and Farhan 14, 16"] for k, v in OWN.items()], [3 * cm, 3 * cm, W - 6 * cm]),
      P("The 30-second answer", h1),
      P("IoT detectors must keep learning because normal traffic changes, but learning can be poisoned and pausing can be exploited. Our method lets a device "
        "learn more freely what neighbours from other vendors also see, and rations what only it sees. In simulation on real IoT traffic it resisted poisoning "
@@ -265,7 +287,7 @@ for i, (sl, (meaning, qa)) in enumerate(zip(slides, Q), 1):
     if pic:
         pic = [Table([pic], style=[("BOX", (0, 0), (-1, -1), 0.5, LINE), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
                                    ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)], hAlign="LEFT")]
-    S += ([PageBreak()] if i > 1 else []) + [P(f"Slide {i}.  {texts[0].replace(chr(10), ' ')}", h1)] + pic + [P("IN SIMPLE WORDS", lab), P(meaning, p),
+    S += ([PageBreak()] if i > 1 else []) + [P(f"Slide {i}.  {texts[0].replace(chr(10), ' ')}", h1), P(owner_line(i), spk)] + pic + [P("IN SIMPLE WORDS", lab), P(meaning, p),
           P("SAY THIS", lab), P(said, say)] + formulas(i) + [ P("QUESTIONS YOU MAY GET", lab),
           table([[q, a] for q, a in qa], [5.2 * cm, W - 5.2 * cm], head=False)]
 S += [PageBreak(), P("The maths, if asked", h1),
