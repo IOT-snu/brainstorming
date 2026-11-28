@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\caption{Notation. Budgets are in alarm radii $\rho$; spread quantities are in log units}\label{tab:notation}
+\centering\footnotesize
+\begin{tabular}{@{}ll@{\hspace{1.5em}}ll@{}}
+\toprule
+Symbol & Meaning & Symbol & Meaning \\
+\midrule
+$x$ & one traffic sample (16 numbers) & $t$ & learning cycle (time) \\
+$\mu$, $\mu^0$ & learned and calibrated centre of normal & $s$, $s^0$ & learned and calibrated spread (size of normal) \\
+$\mathrm{score}(x)$ & $\norm{x-\mu}/s$, distance in units of spread & $\tau$ & alarm threshold, 99th percentile of clean scores \\
+$\rho=\tau s^0$ & alarm radius, the unit of every budget & $c$ & 80th-percentile clean score; core samples score $\le c$ \\
+$\eta=0.5$ & step size of a proposal & $d$, $e$ & proposed centre shift and log-spread change \\
+$K$ & number of verified neighbours heard & $d_j$ & neighbour $j$'s proposed shift \\
+$m$ & geometric median of $\{d_j\}$ & $m_{avg}$ & $m$ smoothed over cycles, $\alpha=0.2$ \\
+$\sigma$, $\sigma_{avg}$ & neighbours' disagreement (noise), smoothed & $z$ & signal-to-noise of the shared change \\
+$w$ & significance weight, $0$ for $z\le2$, $1$ for $z\ge4$ & $u$ & direction of $m_{avg}$ \\
+$g$, $g_{avg}$ & how far my core traffic moved along $u$ & $\lambda$ & agreement, $\mathrm{clip}(g_{avg}/\norm{m_{avg}},0,1)$ \\
+$a$, $a_s$ & common (peer-backed) part applied this cycle & $r$, $r_s$ & residual (device-only) part \\
+$C$, $C_s$ & total common movement so far & $R$, $R_s$ & total residual movement so far \\
+$B_0=0.1$, $B=0.005$ & residual centre budget, start and slope & $B_0^s=0.1$, $B^s=0.001$ & residual spread budget, start and slope \\
+$B_0^c=0.75$, $B^c=0.06$ & common centre budget & $B_0^{cs}=0.7$, $B^{cs}=0.02$ & common spread budget \\
+$M$ & distance of the target attack, in alarm radii & $t^\ast$ & earliest cycle the target can be hidden \\
+$f$ & Byzantine neighbours among $K$ & $C_\beta$ & Minsker constant for bad fraction $\beta=f/K$ \\
+\bottomrule
+\end{tabular}
+\end{table*}

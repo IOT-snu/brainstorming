@@ -1,0 +1,17 @@
+\section{Research Questions and Hypotheses}\label{sec:rq}
+
+\textbf{RQ1.} Can a fleet of self-learning detectors keep following honest change, while limiting how fast
+an attacker on one device can poison its detector, without a stop switch an attacker could trip?
+
+\textbf{RQ2.} Does it hold up against the attacks that defeat existing defences: a botnet that takes
+over most devices of one model, and a freeze attack?
+
+\textbf{Hypotheses.} H1--H3 address RQ1 and H4 addresses RQ2.
+\begin{itemize}
+\item \textbf{H1 (safety)}: under shared drift, FOA is compromised less often than a lone device and than
+  gated defences.
+\item \textbf{H2 (tracking)}: FOA follows shared drift with false alarms close to those of a lone device.
+\item \textbf{H3 (cost)}: FOA fits the memory, time and energy budget of a few-dollar microcontroller.
+\item \textbf{H4 (robustness)}: FOA resists a one-model botnet and is not frozen by decoys.
+\end{itemize}
+Table~\ref{tab:hyp} in Section~\ref{sec:compare} reports the outcome of each.

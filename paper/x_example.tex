@@ -1,0 +1,50 @@
+\section{A Worked Example: Slow Poisoning in a Hospital Ward}\label{sec:example}
+
+This illustrative scenario (not an experiment) makes the problem concrete. A ward network carries an
+infusion pump, a patient monitor and a smart bed from three different makers. Each runs an anomaly
+detector that keeps learning from its own traffic. An attacker has taken control of the pump through a
+firmware vulnerability. The goal is to send patient data to the attacker's server, or receive commands
+from it, without an alarm.
+
+\textbf{The slow poisoning.} Table~\ref{tab:frog} shows the campaign. Each step is small enough not to
+alarm, so each step is learned, and the detector's idea of normal creeps toward the exfiltration traffic.
+When the large transfer finally happens it is inside the learned normal region. The pump's detector is
+\emph{compromised}: it now misses an attack it would have caught before.
+
+\begin{table}[t]
+\caption{A slow poisoning campaign against a hospital infusion pump (illustrative)}\label{tab:frog}
+\centering\footnotesize
+\begin{tabular}{@{}p{1.2cm}p{3.6cm}p{3.0cm}@{}}
+\toprule
+Time & Pump traffic & Lone detector \\
+\midrule
+Week 1 & A few bytes per hour to a new server & Below threshold, learned \\
+Week 2 & Slightly larger, slightly more often & Below the moved threshold, learned \\
+Weeks 3--6 & Steadily larger transfers & Each step learned \\
+Attack & Bulk transfer of patient records & Inside learned normal: \emph{no alarm} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Why the lone detector cannot tell.} A real firmware update could produce the same slow change.
+From the pump's traffic alone, the honest story and the attack story are indistinguishable.
+
+\textbf{What FOA does.} Each cycle the pump asks its neighbours, in effect, ``do you see this change
+too?'' The monitor and the bed do not: their traffic is unchanged, so the consensus shows no shared
+change (low significance $w$) and the pump's own core traffic does not move along any shared direction
+(low agreement $\lambda$). The change is therefore device-only and passes through the residual budget
+$\norm{R(t)}\le(B_0+Bt)\rho$, which starts at a tenth of an alarm radius and grows by 0.005 per cycle.
+By Corollary~\ref{cor:ttc}, an exfiltration target two alarm radii away cannot be hidden before about
+133 cycles, about five and a half days at one learning cycle per hour, and targets further away take
+proportionally longer. Throughout that time the pump keeps alarming on the attacker's larger transfers,
+which gives staff time to notice.
+
+\textbf{The honest contrast.} When the hospital moves the ward to a new network gateway, all three
+devices' traffic changes together. The neighbours back the change, $w$ and $\lambda$ rise, and FOA
+learns it through the larger common budget, without the flood of false alarms a frozen detector would
+raise.
+
+\textbf{The same effect in our data.} Figure~\ref{fig:frog} shows the classic boundary poisoner in
+simulation on real N-BaIoT traffic during strong shared drift. A lone device and the DriftXpert-style
+gate are walked down to about 16\% detection of the target attack; FOA keeps detecting it, with victim
+false alarms near 3\%.

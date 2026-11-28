@@ -1,0 +1,112 @@
+\section{Background: Attacks on IoT Devices}\label{sec:background}
+
+This section sets out the starting point for readers new to IoT security: what an attack is, why anyone
+attacks a thermostat or an infusion pump, what they gain, and which attacks matter for a detector that
+learns on the device.
+
+\subsection{What is an attack?}
+An \emph{attack} is a deliberate action that makes a system behave against the wishes of its owner. Security
+is usually stated as three properties, and every attack breaks at least one of them:
+\begin{itemize}
+\item \textbf{Confidentiality}: only authorised parties can read data (broken by data theft or eavesdropping).
+\item \textbf{Integrity}: data and behaviour change only in authorised ways (broken by tampering, forged
+  messages, or poisoning a model).
+\item \textbf{Availability}: the system works when needed (broken by denial of service, or by a detector
+  that drowns its operators in false alarms).
+\end{itemize}
+An attack needs a \emph{vulnerability} (a weakness such as a default password or a firmware bug) and an
+\emph{exploit} (the method that uses it). The attacker's \emph{capabilities} (what they can see and
+control) and \emph{goal} together form a \emph{threat model}; ours is stated in Section~\ref{sec:threat}.
+
+\subsection{Why IoT devices are attacked}
+IoT devices are attractive targets for five reasons. They are \emph{numerous}, so even a rare weakness
+yields many victims. They are \emph{weakly protected}: default credentials, rarely patched firmware and
+little memory for security software. They are \emph{always on and always connected}, which makes them
+useful as relays. They \emph{sit inside trusted networks}, so a compromised camera is a foothold next to
+laptops and servers. And some of them \emph{act on the physical world}: locks, pumps, beds and industrial
+controllers. The Mirai botnet showed the scale: by scanning for default passwords it recruited a peak of
+about 600,000 devices and used them for some of the largest denial-of-service attacks recorded at the
+time~\cite{mirai}.
+
+\subsection{What an attacker gains}
+Table~\ref{tab:gains} lists the main motives. Most of them need the attacker to stay on the device for a
+long time without being noticed, which is exactly why poisoning the device's own detector is worth the
+effort.
+
+\begin{table}[t]
+\caption{What an attacker can gain from a compromised IoT device}\label{tab:gains}
+\centering\footnotesize
+\begin{tabular}{@{}p{2.1cm}p{5.9cm}@{}}
+\toprule
+Goal & Example and gain \\
+\midrule
+Botnet recruitment & Device floods a target on command; denial of service sold for hire \\
+Data theft & Camera footage, health readings, patient identifiers; sold or used for fraud \\
+Surveillance & Live audio or video from inside a home, office or ward \\
+Extortion & Device or network locked until a ransom is paid \\
+Lateral movement & Device used as a stepping stone into the hospital or company network \\
+Sabotage & Wrong dose, unlocked door, stopped production line \\
+Resource theft & Device used for cryptocurrency mining or as an anonymising proxy \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Types of attack}
+Table~\ref{tab:attacks} groups the attacks relevant to this paper. The first group attacks the device or
+the network; it is what an intrusion detector is built to catch. Our evaluation uses real traffic of this
+group from N-BaIoT~\cite{nbaiot}: the Mirai and BASHLITE botnets scanning for victims and flooding
+targets with ACK, SYN, UDP, TCP and junk traffic. The second group attacks the \emph{detector itself}; it
+is the subject of this paper.
+
+\begin{table}[t]
+\caption{Attack types. The second group targets the learning detector}\label{tab:attacks}
+\centering\footnotesize
+\begin{tabular}{@{}p{2.1cm}p{5.9cm}@{}}
+\toprule
+Attack & What happens \\
+\midrule
+\multicolumn{2}{@{}l}{\emph{On the device and network}} \\
+Scanning & Probing addresses and ports for vulnerable devices (Mirai, BASHLITE scan) \\
+Credential guessing & Trying default or common passwords \\
+Exploitation & Using a firmware bug to run the attacker's code \\
+Command and control & Infected device contacts the attacker for instructions \\
+Flooding (DDoS) & ACK, SYN, UDP, TCP or junk floods at a target \\
+Exfiltration & Quietly sending stolen data out \\
+Spoofing, replay & Forging or re-sending messages as another device \\
+\midrule
+\multicolumn{2}{@{}l}{\emph{On the learning detector}} \\
+Evasion & Shaping attack traffic to look normal to a fixed detector \\
+Poisoning & Feeding data so that the detector \emph{learns} the attack as normal \\
+Slow poisoning & Poisoning in steps too small to alarm (the boiling frog) \\
+Freeze & Tripping a stop-learning rule so honest drift is never learned \\
+Forged peer updates & Sending false updates in the name of a neighbour \\
+Byzantine peers & Real neighbours with valid keys sending biased updates \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Detecting intrusions on the device}
+A \emph{signature} detector matches traffic against known attacks; it cannot see new ones and needs
+constant updates. An \emph{anomaly} detector learns what normal traffic looks like and flags what differs,
+so it can catch attacks it has never seen and needs no labelled attack data. That suits IoT, where every
+device model has its own normal behaviour. We use the online centroid detector studied by Kloft and
+Laskov~\cite{kloft}: a sample is scored by its distance from a learned centre, in units of a learned
+spread, and raises an alarm above a calibrated threshold (Section~\ref{sec:model}).
+
+\subsection{Why a detector must keep learning}
+Normal traffic drifts. A new gateway, a VPN tunnel, a changed polling rate or a firmware update shifts
+every packet statistic. A detector fixed at deployment then flags normal traffic: in our strongest
+drift, 78\% of normal traffic alarms on a detector that never learns. So the detector must learn
+after deployment, and on a device there is no human to label the data. It must label its own traffic:
+whatever does not raise an alarm is learned as normal.
+
+\subsection{Poisoning, slow poisoning and the freeze attack}
+Self-labelled learning is exactly what a poisoner exploits. The \emph{slow poisoner} sends traffic just
+inside the alarm boundary. It does not alarm, so it is learned; the boundary moves toward it; the next
+step can sit a little further out. Repeated, this walks the detector until the real attack is inside
+the normal region, the boiling-frog attack studied since ANTIDOTE~\cite{antidote} and Kloft and
+Laskov~\cite{kloft}. The natural defence is to stop learning when traffic looks suspicious. That creates
+the \emph{freeze attack}: the attacker sends a burst of loud traffic, the defence stops learning, the
+attacker leaves, and honest drift continues unlearned, so false alarms climb and stay high. The core
+difficulty is that from one device's own stream, slow honest drift and slow poisoning look the same
+(Proposition~\ref{prop:frontier} and~\cite{warden}). The rest of this paper is about breaking that tie.

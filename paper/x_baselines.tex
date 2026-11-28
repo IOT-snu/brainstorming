@@ -1,0 +1,36 @@
+\section{Baselines and What FOA Borrows}\label{sec:baselines}
+
+FOA is assembled from ideas that each earlier work introduced; what is new is their combination and the
+budgeted split. Table~\ref{tab:borrow} lists, for each source, the idea it contributes, how we use it, and
+where FOA goes further. All baselines are our re-implementations of each published idea around the same
+detector, features and attacker, so differences come from the update rule alone; they are not the
+authors' full systems.
+
+\begin{table*}[t]
+\caption{What FOA borrows, and the baselines built from each idea. Preprints are marked}\label{tab:borrow}
+\centering\footnotesize
+\begin{tabular}{@{}p{3.0cm}p{4.2cm}p{4.4cm}p{4.9cm}@{}}
+\toprule
+Source & Idea & Use in this paper & Where FOA goes further \\
+\midrule
+Kloft and Laskov~\cite{kloft} & Online centroid detector; poisoning bounded by the attacker's traffic share; stop learning on high alarm rates & Our detector; the \emph{alarm switch-off} baseline (stop while alarms exceed $5\times$ the clean rate) & No stop switch, so no freeze attack (Section~\ref{sec:theory}) \\
+ANTIDOTE~\cite{antidote} & Boiling-frog poisoning of anomaly detectors & Our boundary poisoner & Bounded movement with a time to compromise \\
+DriftXpert~\cite{driftxpert} (preprint) & Outlier-ratio statistic to detect drift & \emph{Outlier-ratio gate}: pause while alarms exceed $3\times$ their moving average & Slow poisoning never spikes, so the gate never closes; FOA bounds it instead \\
+WARDEN~\cite{warden} (preprint) & One stream cannot separate drift from poisoning; screen with a frozen reference & \emph{Frozen reserve}: learn only what the calibrated detector accepts & Neighbours supply the second witness one stream lacks \\
+RTTAD~\cite{rttad} (preprint) & Adapt only on confident samples & Learning from the clean core ($\mathrm{score}\le c$) & Plus peer backing and budgets for what remains \\
+Su et al.~\cite{su2025tta} & Realistic test-time poisoning with limited attacker knowledge & Threat model: attacker controls part of one device's traffic & Defence with a proof, not only an attack \\
+Rapid Poison~\cite{rapidpoison} & Fast-updating defences are an attack surface & Motivation: every update must be guarded & Every update is split and budgeted \\
+CIoTA~\cite{ciota} & Collaborative anomaly detection among same-model devices & \emph{CIoTA-style} baseline: median of same-model proposals, residual discarded & Cross-vendor peers; residual admitted within a budget \\
+Minsker~\cite{minsker} & Geometric-median robustness bound & Theorem~\ref{thm:byz} for Byzantine peers & Applied to peer updates with a common budget \\
+Kitsune~\cite{kitsune}, N-BaIoT~\cite{nbaiot}, CESNET~\cite{cesnet} & Damped traffic statistics; real IoT botnet traffic; real long-term drift & Features and datasets & n/a \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\textbf{The rules compared.} \emph{Static} never learns. \emph{Naive} learns everything it does not alarm
+on. \emph{Single device} (lone device) learns from its own clean core. \emph{Clipping} caps each update
+without memory. \emph{Frozen reserve}, \emph{alarm switch-off} and \emph{outlier-ratio gate} are as in
+Table~\ref{tab:borrow}. \emph{CIoTA-style} takes the element-wise median of same-model devices' proposals
+when at least three are present and otherwise applies its own. \emph{TOA}, our earlier design, refuses
+movement toward a known attack signature; it is an oracle, since a real device does not know the attack
+in advance. \emph{FOA} is Algorithm~\ref{alg:foa}.

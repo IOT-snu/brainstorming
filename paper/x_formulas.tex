@@ -1,0 +1,71 @@
+\section{Formula Reference}\label{app:formulas}
+All quantities are defined in Table~\ref{tab:notation}. Each formula is followed by what it means.
+
+\noindent\textbf{Detector.}
+\begin{align}
+\mathrm{score}(x)&=\norm{x-\mu}/s, \quad \text{alarm if } \mathrm{score}(x)>\tau \label{f:score}\\
+\rho&=\tau\,s^0 \label{f:rho}
+\end{align}
+(\ref{f:score}) is how far a sample is from normal in units of normal's size; (\ref{f:rho}) is the alarm
+radius, the unit of every budget.
+
+\noindent\textbf{Proposal from the clean core.}
+\begin{equation}
+d=\eta\,\big(\mathrm{mean}(\{x:\mathrm{score}(x)\le c\})-\mu\big)\cdot \mathrm{support},\qquad \eta=0.5 \label{f:prop}
+\end{equation}
+The device's suggested move toward its most normal traffic; support (0 to 1) is how far the outer ring of
+accepted traffic moves with the core. No proposal is made from fewer than five core samples.
+
+\noindent\textbf{Robust consensus of neighbours.}
+\begin{align}
+m&=\arg\min_y \textstyle\sum_{j=1}^{K}\norm{y-d_j} \label{f:gm}\\
+m_{avg}&\leftarrow(1-\alpha)\,m_{avg}+\alpha\,m,\qquad \alpha=0.2 \label{f:ema}
+\end{align}
+(\ref{f:gm}) is the geometric median, computed with ten Weiszfeld iterations
+$y\leftarrow\sum_j \frac{d_j}{\norm{y-d_j}}\big/\sum_j\frac{1}{\norm{y-d_j}}$ from the coordinate-wise median;
+fewer than half bad inputs cannot drag it far. (\ref{f:ema}) smooths it so noise cancels and real change remains.
+
+\noindent\textbf{Is the shared change real? Do I see it?}
+\begin{align}
+\sigma&=\mathrm{median}_j\norm{d_j-m}/\sqrt{K} \label{f:sigma}\\
+z&=\norm{m_{avg}}\big/\big(\sigma_{avg}\sqrt{\alpha/(2-\alpha)}\big),\quad w=\mathrm{clip}\big((z-2)/2,0,1\big) \label{f:w}\\
+g&=\eta\,\mathrm{median}_{x\in\mathrm{core}}(x-\mu)\cdot u,\quad u=m_{avg}/\norm{m_{avg}} \label{f:g}\\
+\lambda&=\mathrm{clip}\big(g_{avg}/\norm{m_{avg}},0,1\big) \label{f:lam}
+\end{align}
+(\ref{f:sigma}) is the neighbours' disagreement; (\ref{f:w}) is signal over noise, turned into trust: zero
+below $z=2$, full above $z=4$. The factor $\sqrt{\alpha/(2-\alpha)}$ is the noise left after smoothing.
+(\ref{f:g}) and (\ref{f:lam}) measure how far the device's own core traffic moved the same way, using a
+median so that less than half the batch can neither fake nor cancel it.
+
+\noindent\textbf{Split and budgets.}
+\begin{align}
+a&=w\,\lambda\,m_{avg},\qquad r=d-a,\qquad \mu\leftarrow\mu+a+r \label{f:split}\\
+\norm{C(t)}&\le(B_0^c+B^c t)\rho,\qquad |C_s(t)|\le B_0^{cs}+B^{cs}t \label{f:cb}\\
+\norm{R(t)}&\le(B_0+Bt)\rho,\qquad |R_s(t)|\le B_0^s+B^s t \label{f:rb}\\
+s(t)&\ge s^0 \label{f:floor}
+\end{align}
+(\ref{f:split}) learns the peer-backed part as far as it is real and seen, and the device-only rest; each
+is projected onto its budget, (\ref{f:cb}) and (\ref{f:rb}). With fewer than two neighbours, $a=0$.
+(\ref{f:floor}) is the coverage floor: normal never shrinks below its calibrated size.
+
+\noindent\textbf{Guarantees.}
+\begin{align}
+\mu(t)&=\mu^0+C(t)+R(t),\quad \log\big(s(t)/s^0\big)=C_s(t)+R_s(t) \label{f:inv}\\
+t^\ast&\approx\frac{M-1-B_0-B_0^s}{B+B^s} \label{f:ttc}\\
+\norm{m-m^H}&\le C_{f/K}\,r_H,\qquad C_\beta=(1-\beta)\sqrt{1/(1-2\beta)},\ \beta<\tfrac12 \label{f:byz}
+\end{align}
+(\ref{f:inv}) is the invariant behind Theorem~\ref{thm:contain}. (\ref{f:ttc}) is the earliest cycle an
+attack $M$ alarm radii away can be hidden without peer backing: about 133 cycles for $M=2$, about 17
+minutes at the boards' 7.8\,s cycle or 5.5 days at one cycle per hour. (\ref{f:byz}) is Minsker's bound
+used in Theorem~\ref{thm:byz}: with honest updates within $r_H$ of their median $m^H$, $f<K/2$ bad
+neighbours move the consensus at most $C_{f/K}r_H$ per cycle.
+
+\noindent\textbf{Messages and metrics.}
+\begin{align}
+\mathrm{tag}&=\mathrm{HMAC}_{256}(\mathrm{key},\,\mathrm{hdr}\,\|\,d\,\|\,e)_{[0:16]} \label{f:hmac}\\
+\mathrm{FPR}&=\frac{\#\text{benign samples alarmed}}{\#\text{benign samples}} \label{f:fpr}\\
+\mathrm{comp.}&\iff \mathrm{det}<0.5\ \wedge\ \mathrm{det}_{\mathrm{twin}}\ge0.5 \label{f:comp}
+\end{align}
+(\ref{f:hmac}) signs each 92-byte frame (8-byte header, 64-byte $d$, 4-byte $e$, 16-byte tag).
+(\ref{f:comp}) counts a run as compromised only when the poisoning caused the missed attack: det is
+the share of held-out target attack packets flagged, and det$_{\mathrm{twin}}$ the same in the attacker-free twin run.

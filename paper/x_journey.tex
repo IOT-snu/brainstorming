@@ -1,0 +1,43 @@
+\section{The Research Journey}\label{sec:journey}
+
+FOA was not our first design. Figure~\ref{fig:journey} traces how each idea answered the weakness of the
+one before, and what each step taught us.
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[node distance=0.32cm,
+  st/.style={draw=black!45, rounded corners=2pt, fill=black!4, text width=2.0cm, minimum height=1.55cm, align=center, font=\scriptsize, inner sep=3pt},
+  hi/.style={st, draw=blue!70!black, fill=blue!6},
+  ar/.style={-{Stealth[length=2mm]}, black!55, thick}]
+\node[st] (a) {\textbf{1. Lone device}\\ learns its own clean traffic\\[2pt] \textit{poisoned in 39\% of runs}};
+\node[st, right=of a] (b) {\textbf{2. Stop when suspicious}\\ gates and switch-offs\\[2pt] \textit{frozen by decoys: 100\% false alarms}};
+\node[st, right=of b] (c) {\textbf{3. TOA}\\ refuse moves toward the attack\\[2pt] \textit{5.5\%, but needs the attack in advance}};
+\node[hi, right=of c] (d) {\textbf{4. FOA}\\ neighbours as witnesses, budgeted rest\\[2pt] \textit{10.8\%, no attack knowledge}};
+\node[st, right=of d] (e) {\textbf{5. Real boards}\\ normal region collapsed\\[2pt] \textit{under 2\% of its size, 90\% alarms}};
+\node[hi, right=of e] (f) {\textbf{6. Coverage floor}\\ normal never shrinks below calibration\\[2pt] \textit{held at 1.0 on every board}};
+\node[hi, right=of f] (g) {\textbf{7. Calibration fix}\\ uneven sampling gaps\\[2pt] \textit{board false alarms 25\% to 1.6\%}};
+\foreach \x/\y in {a/b,b/c,c/d,d/e,e/f,f/g} \draw[ar] (\x) -- (\y);
+\end{tikzpicture}
+\caption{How the design evolved. Each step fixed the weakness the previous one exposed.}\label{fig:journey}
+\end{figure*}
+
+\textbf{From a lone device to gates.} Self-labelled learning on one device is the natural starting point,
+and it is exactly what the boiling frog exploits. Stopping learning on suspicion protects against it but
+introduces the freeze attack (Section~\ref{sec:eval}): five percent decoys locked the alarm switch-off at
+\KLFrozenFPR\ false alarms.
+
+\textbf{From TOA to FOA.} Our first method, Threat-Orthogonal Adaptation, refused movement toward the
+known attack direction. It is very safe (5.5\% compromised) but needs the attack's signature in advance,
+which a deployed device never has, and it raised 38\% false alarms. FOA replaces that oracle knowledge
+with a witness a device does have: its neighbours.
+
+\textbf{From simulation to boards.} On three ESP8266 boards the detectors shrank their normal regions in
+agreement until almost everything alarmed (Section~\ref{sec:hw}). The cause, a guard on growth with none
+on shrinking, was reproduced in simulation with no attacker. The coverage floor fixed it, held on every
+board, and corrected our own claim: FOA's lasting advantage is safety under drift. A second fault,
+calibration sampling in step with the 200\,ms telemetry, explained the remaining false alarms; uneven
+sampling gaps brought them to 1.5\% to 1.7\%.
+
+\textbf{Lessons.} (i) A defence that can stop learning can be made to stop. (ii) A second witness beats
+a stronger single witness. (iii) Guard both directions of change, not only the one an attacker uses.
+(iv) Test on hardware early: the boards found two faults that thousands of simulated runs did not.
